@@ -1,0 +1,929 @@
+<!-- MumbAIR — interactive prototype v2 -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --ink:#1E2A32;
+    --ink-soft:#3B454C;
+    --haze:#E3E1D8;
+    --haze-deep:#D6D3C6;
+    --card:#F4F2EB;
+    --line: rgba(30,42,50,0.13);
+    --accent:#E8963C;
+    --accent-deep:#C97821;
+    --good:#5B8C6E;
+    --moderate:#C9A227;
+    --sensitive:#D97A3D;
+    --unhealthy:#B8483F;
+    --severe:#6E2A3A;
+  }
+  *{box-sizing:border-box;}
+  .mb-outer{
+    font-family:'IBM Plex Sans', sans-serif;
+    display:flex; justify-content:center;
+    padding:24px 10px;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 18% 8%, rgba(232,150,60,0.16), transparent 42%),
+      radial-gradient(circle at 82% 92%, rgba(91,140,110,0.14), transparent 45%),
+      radial-gradient(rgba(30,42,50,0.07) 1px, transparent 1px) 0 0/14px 14px,
+      var(--haze);
+  }
+  .mb-brand-badge{
+    width:56px; height:56px; border-radius:16px; margin:0 auto 16px auto;
+    background:linear-gradient(135deg, var(--accent), var(--severe));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Archivo',sans-serif; font-weight:800; font-size:24px; color:#fff;
+    box-shadow:0 8px 20px rgba(232,150,60,0.35);
+  }
+  .mb-phone{
+    width:100%; max-width:400px; height:800px;
+    background:var(--haze);
+    border-radius:30px;
+    box-shadow:0 20px 50px rgba(30,42,50,0.28), 0 0 0 8px #14181c;
+    overflow:hidden;
+    position:relative;
+    display:flex; flex-direction:column;
+  }
+  .mb-notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:120px; height:20px; background:#14181c; border-radius:0 0 14px 14px; z-index:30;
+  }
+  .mb-screen{flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0;}
+  .mb-hidden{display:none !important;}
+
+  /* ---------- auth screens ---------- */
+  .mb-auth{
+    flex:1; display:flex; flex-direction:column; justify-content:center;
+    padding:40px 28px; text-align:center;
+  }
+  .mb-auth-word{
+    font-family:'Archivo',sans-serif; font-weight:800; font-size:26px; margin-bottom:6px;
+  }
+  .mb-auth-word span{color:var(--accent-deep);}
+  .mb-auth-tag{font-size:13px; color:var(--ink-soft); margin-bottom:34px;}
+  .mb-field-label{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px;
+  }
+  .mb-phone-input-row{
+    display:flex; gap:8px; margin-bottom:16px;
+  }
+  .mb-cc{
+    background:var(--card); border:1px solid var(--line); border-radius:7px; padding:12px 10px;
+    font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; color:var(--ink-soft);
+  }
+  .mb-input{
+    flex:1; background:#fff; border:1px solid var(--line); border-radius:7px; padding:12px 12px;
+    font-family:'IBM Plex Mono',monospace; font-size:15px; letter-spacing:0.02em; color:var(--ink);
+    outline:none;
+  }
+  .mb-input:focus{border-color:var(--accent);}
+  .mb-otp-boxes{display:flex; gap:8px; justify-content:center; margin-bottom:10px;}
+  .mb-otp-box{
+    width:42px; height:50px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:20px;
+    background:#fff; border:1px solid var(--line); border-radius:7px; outline:none;
+  }
+  .mb-otp-box:focus{border-color:var(--accent);}
+  .mb-hint{font-size:11px; color:var(--ink-soft); margin-bottom:20px;}
+  .mb-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:14px;
+    background:var(--ink); color:var(--haze); border:none; padding:13px 16px; border-radius:8px;
+    cursor:pointer; width:100%;
+  }
+  .mb-btn:hover{background:var(--ink-soft);}
+  .mb-btn.secondary{background:transparent; color:var(--ink-soft); border:1px solid var(--line); margin-top:10px;}
+  .mb-btn.accent{background:var(--accent); color:#2b1c0a;}
+  .mb-error{color:var(--unhealthy); font-size:11px; margin-top:8px; min-height:14px; font-family:'IBM Plex Mono',monospace;}
+  .mb-guest-divider{
+    display:flex; align-items:center; gap:10px; margin:20px 0 16px 0; font-size:11px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .mb-guest-divider::before, .mb-guest-divider::after{content:''; flex:1; height:1px; background:var(--line);}
+  .mb-guest-note{font-size:10.5px; color:var(--ink-soft); margin-top:10px; line-height:1.4;}
+  .mb-guest-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:8.5px; font-weight:600; letter-spacing:0.05em;
+    text-transform:uppercase; color:var(--severe); background:rgba(110,42,58,0.1);
+    border:1px solid rgba(110,42,58,0.25); padding:2px 6px; border-radius:3px; margin-left:6px; vertical-align:2px;
+  }
+
+  /* location screen */
+  .mb-loc-icon{font-size:36px; margin-bottom:10px;}
+  .mb-detect-status{
+    font-size:12px; color:var(--ink-soft); margin:10px 0 18px 0; font-family:'IBM Plex Mono',monospace; min-height:16px;
+  }
+  .mb-divider-or{
+    display:flex; align-items:center; gap:10px; margin:18px 0; font-size:11px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .mb-divider-or::before, .mb-divider-or::after{content:''; flex:1; height:1px; background:var(--line);}
+  .mb-select{
+    width:100%; background:#fff; border:1px solid var(--line); border-radius:7px; padding:12px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; color:var(--ink); margin-bottom:16px;
+  }
+
+  /* ---------- app chrome ---------- */
+  .mb-nav{
+    background:var(--ink); color:var(--haze); padding:22px 16px 12px 16px;
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  }
+  .mb-wordmark{font-family:'Archivo', sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:6px;}
+  .mb-wordmark span{color:var(--accent);}
+  .mb-nav-right{display:flex; align-items:center; gap:8px;}
+  .mb-grap{
+    font-family:'IBM Plex Mono', monospace; font-size:9.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase;
+    background:rgba(232,150,60,0.18); color:var(--accent); border:1px solid rgba(232,150,60,0.4);
+    padding:4px 8px; border-radius:3px; white-space:nowrap;
+  }
+  .mb-ward-chip{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:600; color:var(--haze);
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18);
+    padding:4px 9px; border-radius:20px; cursor:pointer; white-space:nowrap;
+  }
+  .mb-logout-btn{
+    width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.18); color:var(--haze); display:flex; align-items:center;
+    justify-content:center; cursor:pointer; font-size:12px; flex-shrink:0;
+  }
+  .mb-logout-btn:hover{background:rgba(255,255,255,0.2);}
+
+  /* push notification banner */
+  .mb-push-banner{
+    position:absolute; top:26px; left:12px; right:12px; z-index:60;
+    background:var(--ink); color:#fff; border-radius:12px; padding:13px 14px;
+    display:flex; gap:10px; align-items:flex-start; box-shadow:0 10px 28px rgba(0,0,0,0.4);
+    transform:translateY(-160%); transition:transform .35s cubic-bezier(.2,.8,.3,1); cursor:pointer;
+  }
+  .mb-push-banner.show{transform:translateY(0);}
+  .mb-push-icon{
+    width:30px; height:30px; border-radius:8px; background:var(--severe); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .mb-push-title{font-family:'Archivo',sans-serif; font-weight:700; font-size:12.5px; display:flex; justify-content:space-between; gap:8px;}
+  .mb-push-body{font-size:11.5px; color:var(--haze); opacity:0.9; margin-top:3px; line-height:1.4;}
+  .mb-push-close{background:none; border:none; color:rgba(255,255,255,0.6); font-size:14px; cursor:pointer; line-height:1; padding:0;}
+
+  .mb-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .mb-panel{padding:16px; padding-bottom:30px;}
+
+  /* hero card */
+  .mb-hero{
+    border-radius:12px; padding:18px; margin-bottom:16px; color:#fff;
+    box-shadow:0 4px 14px rgba(30,42,50,0.18);
+  }
+  .mb-hero-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .mb-hero-label{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; opacity:0.85; display:flex; align-items:center; gap:6px;}
+  .mb-livedot{width:6px; height:6px; border-radius:50%; background:#fff; animation:mbPulse 1.8s ease-in-out infinite;}
+  @keyframes mbPulse{0%,100%{opacity:0.4;} 50%{opacity:1;}}
+  .mb-hero-ward{font-family:'Archivo',sans-serif; font-weight:700; font-size:16px; margin-top:2px;}
+  .mb-hero-aqi{font-family:'IBM Plex Mono',monospace; font-size:44px; font-weight:600; line-height:1; text-align:right;}
+  .mb-hero-band{font-size:12px; opacity:0.9; text-align:right; margin-top:2px;}
+  .mb-hero-mask{
+    margin-top:14px; background:rgba(0,0,0,0.18); border-radius:8px; padding:10px 12px;
+    display:flex; gap:9px; align-items:center; font-size:12.5px; font-weight:500;
+  }
+  .mb-hero-mask .ic{font-size:18px;}
+
+  /* wind ribbon - fixed marquee */
+  .mb-ribbon-wrap{
+    position:relative; height:32px; margin-bottom:14px; overflow:hidden; border-radius:6px;
+    background:var(--card); border:1px solid var(--line);
+  }
+  .mb-ribbon-label{
+    position:absolute; left:10px; top:0; bottom:0; display:flex; align-items:center; z-index:3;
+    font-family:'IBM Plex Mono', monospace; font-size:9.5px; font-weight:600; letter-spacing:0.05em;
+    text-transform:uppercase; color:var(--ink-soft); background:var(--card); padding-right:8px;
+  }
+  .mb-ribbon-clip{position:absolute; inset:0; left:96px; overflow:hidden;}
+  .mb-ribbon-strip{
+    display:flex; gap:34px; white-space:nowrap; height:100%; align-items:center;
+    animation: mbScroll 5s linear infinite;
+    color:var(--good); font-size:14px; opacity:0.7;
+  }
+  @keyframes mbScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .mb-ribbon-wrap.stalled .mb-ribbon-strip{animation-play-state:paused; color:var(--unhealthy); opacity:0.4;}
+  .mb-stall-tag{
+    position:absolute; right:8px; top:0; bottom:0; display:none; align-items:center; z-index:3;
+    font-family:'IBM Plex Mono', monospace; font-size:9px; font-weight:600; color:var(--unhealthy);
+    background:var(--card); padding-left:8px;
+  }
+  .mb-ribbon-wrap.stalled .mb-stall-tag{display:flex;}
+
+  /* ward grid map */
+  .mb-map-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
+  .mb-map{display:flex; flex-direction:column; gap:5px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px;}
+  .mb-row{display:flex; gap:5px; justify-content:center;}
+  .mb-ward{
+    flex:1; max-width:80px; min-width:48px; aspect-ratio:1/1; border-radius:6px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+    color:#fff; font-family:'IBM Plex Mono', monospace; transition:transform .12s; position:relative;
+    border:1px solid rgba(0,0,0,0.08);
+  }
+  .mb-ward.mine{box-shadow:0 0 0 2px var(--ink), 0 0 0 4px var(--accent);}
+  .mb-ward:hover{transform:translateY(-2px);}
+  .mb-ward .code{font-size:11px; font-weight:600;}
+  .mb-ward .val{font-size:14px; font-weight:600; margin-top:1px;}
+  .mb-ward .flag{position:absolute; top:3px; right:3px; width:6px; height:6px; border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,0.15);}
+
+  .mb-legend{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .mb-legend-item{display:flex; align-items:center; gap:5px; font-size:9.5px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);}
+  .mb-legend-swatch{width:9px; height:9px; border-radius:2px;}
+
+  .mb-sheet{margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; animation: slideUp .18s ease-out;}
+  @keyframes slideUp{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+  .mb-sheet-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .mb-sheet-title{font-family:'Archivo', sans-serif; font-weight:700; font-size:15.5px;}
+  .mb-sheet-sub{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .mb-aqi-big{font-family:'IBM Plex Mono', monospace; font-size:26px; font-weight:600;}
+  .mb-chip{display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; font-weight:500; padding:4px 9px; border-radius:20px; margin:8px 6px 0 0; border:1px solid var(--line); background:#fff;}
+
+  .mb-section-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin:18px 0 8px 0;}
+
+  /* tickets */
+  .mb-ticket-card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:13px; margin-bottom:9px; cursor:pointer;}
+  .mb-ticket-row{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .mb-ticket-ward{font-family:'Archivo',sans-serif; font-weight:700; font-size:13px;}
+  .mb-status-pill{font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.03em; padding:4px 8px; border-radius:20px; text-transform:uppercase; white-space:nowrap;}
+  .st-TICKET_RAISED{background:#EFE0C4; color:#7A5A12;}
+  .st-SENT_TO_WARD_DESK{background:#E0DDF0; color:#4A3E8C;}
+  .st-IN_PROGRESS{background:#D6E6DF; color:#2C5C46;}
+  .st-ACTION_TAKEN{background:#CDE6D0; color:#25602C;}
+  .st-CLOSED_SAFE{background:#DDE8D6; color:#3B5C2C;}
+
+  .mb-timeline{margin-top:14px;}
+  .mb-tl-node{display:flex; gap:12px; padding-bottom:18px; position:relative;}
+  .mb-tl-node::before{content:''; position:absolute; left:7px; top:20px; bottom:-2px; width:2px; background:var(--line);}
+  .mb-tl-node:last-child::before{display:none;}
+  .mb-tl-dot{width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:2px; background:var(--ink); border:3px solid var(--card); box-shadow:0 0 0 1px var(--line);}
+  .mb-tl-node.pending .mb-tl-dot{background:#fff; box-shadow:0 0 0 1px var(--line);}
+  .mb-tl-title{font-weight:600; font-size:12.5px;}
+  .mb-tl-node.pending .mb-tl-title{color:var(--ink-soft); font-weight:500;}
+  .mb-tl-meta{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-top:2px;}
+  .mb-tl-note{font-size:11.5px; margin-top:4px; color:var(--ink-soft);}
+  .mb-photo-proof{margin-top:6px; width:100%; max-width:220px; height:70px; border-radius:6px; background:repeating-linear-gradient(45deg, var(--haze-deep), var(--haze-deep) 8px, var(--haze) 8px, var(--haze) 16px); display:flex; align-items:center; justify-content:center; font-size:9.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border:1px solid var(--line);}
+
+  /* report */
+  .mb-cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px;}
+  .mb-cat-card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 8px; text-align:center; cursor:pointer;}
+  .mb-cat-card:hover{border-color:var(--accent);}
+  .mb-cat-icon{font-size:24px; margin-bottom:6px;}
+  .mb-cat-label{font-size:11.5px; font-weight:600;}
+  .mb-step-track{display:flex; gap:4px; margin-bottom:16px;}
+  .mb-step-track div{flex:1; height:3px; background:var(--haze-deep); border-radius:2px;}
+  .mb-step-track div.done{background:var(--accent);}
+  .mb-capture-box{background:var(--ink); color:var(--haze); border-radius:10px; height:170px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;}
+  .mb-verify-row{display:flex; gap:14px; font-family:'IBM Plex Mono',monospace; font-size:10.5px;}
+  .mb-verify-row .ok{color:#8FD3A8; opacity:0; transition:opacity .3s;}
+  .mb-verify-row .ok.show{opacity:1;}
+  .mb-confirm-thumb{width:100%; height:110px; border-radius:8px; margin-top:10px; background:repeating-linear-gradient(45deg, var(--haze-deep), var(--haze-deep) 8px, var(--haze) 8px, var(--haze) 16px); display:flex; align-items:center; justify-content:center; font-size:10.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border:1px solid var(--line);}
+
+  .mb-empty{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:26px 10px;}
+
+  .mb-toast{position:absolute; bottom:78px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--haze); padding:11px 18px; border-radius:7px; font-size:12.5px; font-weight:500; z-index:50; opacity:0; transition:opacity .25s; font-family:'IBM Plex Sans',sans-serif; white-space:nowrap; max-width:88%; text-overflow:ellipsis; overflow:hidden;}
+  .mb-toast.show{opacity:1;}
+
+  /* bottom nav */
+  .mb-bottomnav{
+    display:flex; flex-shrink:0; border-top:1px solid var(--line); background:var(--card);
+  }
+  .mb-navitem{flex:1; text-align:center; padding:9px 4px 11px 4px; cursor:pointer; color:var(--ink-soft);}
+  .mb-navitem.active{color:var(--ink);}
+  .mb-navitem .ic{font-size:18px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:26px; border-radius:14px; margin-bottom:3px;}
+  .mb-navitem.active .ic{background:rgba(232,150,60,0.22);}
+  .mb-navitem .lb{font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; display:block;}
+  .mb-navitem.active .lb{color:var(--accent-deep);}
+</style>
+
+<div class="mb-outer">
+<div class="mb-phone">
+  <div class="mb-notch"></div>
+
+  <!-- LOGIN -->
+  <div class="mb-screen" id="screen-login">
+    <div class="mb-auth">
+      <div class="mb-brand-badge">M</div>
+      <div class="mb-auth-word">Mumb<span>AIR</span></div>
+      <div class="mb-auth-tag">Air quality tracking &amp; civic action for Greater Mumbai</div>
+      <div class="mb-field-label">Mobile number</div>
+      <div class="mb-phone-input-row">
+        <div class="mb-cc">+91</div>
+        <input class="mb-input" id="mobileInput" maxlength="10" placeholder="98XXXXXXXX" inputmode="numeric">
+      </div>
+      <div class="mb-error" id="loginError"></div>
+      <button class="mb-btn accent" id="sendOtpBtn">Send OTP</button>
+      <div class="mb-guest-divider">or</div>
+      <button class="mb-btn secondary" id="guestBtn" style="margin-top:0;">Continue as Guest</button>
+      <div class="mb-guest-note">Guest mode lets you browse live AQI and BMC ticket data. Sign in with your number to file citizen reports and get alerts for your ward.</div>
+    </div>
+  </div>
+
+  <!-- OTP -->
+  <div class="mb-screen mb-hidden" id="screen-otp">
+    <div class="mb-auth">
+      <div class="mb-auth-word">Verify it's you</div>
+      <div class="mb-auth-tag" id="otpSentTo">Enter the 6-digit code sent to +91 —</div>
+      <div class="mb-otp-boxes" id="otpBoxes"></div>
+      <div class="mb-hint">Demo mode — enter any 6 digits to continue</div>
+      <div class="mb-error" id="otpError"></div>
+      <button class="mb-btn accent" id="verifyBtn">Verify &amp; continue</button>
+      <button class="mb-btn secondary" id="backToLoginBtn">Change number</button>
+    </div>
+  </div>
+
+  <!-- LOCATION -->
+  <div class="mb-screen mb-hidden" id="screen-location">
+    <div class="mb-auth">
+      <div class="mb-brand-badge">&#128205;</div>
+      <div class="mb-auth-word" style="font-size:20px;">Set your location</div>
+      <div class="mb-auth-tag">So we can show you AQI for your ward first</div>
+      <button class="mb-btn" id="detectBtn">Detect my location automatically</button>
+      <div class="mb-detect-status" id="detectStatus"></div>
+      <div class="mb-divider-or">or choose manually</div>
+      <div class="mb-field-label">Ward</div>
+      <select class="mb-select" id="wardSelect"></select>
+      <button class="mb-btn accent" id="continueBtn">Continue to MumbAIR</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="mb-screen mb-hidden" id="screen-app">
+    <div class="mb-nav">
+      <div class="mb-wordmark">Mumb<span>AIR</span><span class="mb-guest-tag mb-hidden" id="guestTag">Guest</span></div>
+      <div class="mb-nav-right">
+        <div class="mb-grap" id="grapBadge">GRAP STAGE I</div>
+        <div class="mb-ward-chip" id="wardChipNav">— &#9662;</div>
+        <div class="mb-logout-btn" id="logoutBtn" title="Log out">&#9211;</div>
+      </div>
+    </div>
+
+    <div class="mb-push-banner" id="pushBanner">
+      <div class="mb-push-icon">&#9888;</div>
+      <div style="flex:1; min-width:0;">
+        <div class="mb-push-title"><span>MumbAIR Alert</span><button class="mb-push-close" id="pushClose">&#10005;</button></div>
+        <div class="mb-push-body" id="pushBody">—</div>
+      </div>
+    </div>
+
+    <div class="mb-body">
+      <!-- HEATMAP -->
+      <div class="mb-panel" id="panel-heatmap">
+        <div class="mb-hero" id="heroCard">
+          <div class="mb-hero-top">
+            <div>
+              <div class="mb-hero-label"><span class="mb-livedot"></span>Your air right now</div>
+              <div class="mb-hero-ward" id="heroWardName">—</div>
+            </div>
+            <div>
+              <div class="mb-hero-aqi" id="heroAqi">—</div>
+              <div class="mb-hero-band" id="heroBand">—</div>
+            </div>
+          </div>
+          <div class="mb-hero-mask mb-hidden" id="heroMask">
+            <div class="ic">&#128567;</div>
+            <div id="heroMaskText">Wear an N95 mask outdoors today.</div>
+          </div>
+        </div>
+
+        <div class="mb-ribbon-wrap" id="ribbon">
+          <div class="mb-ribbon-label">Sea breeze</div>
+          <div class="mb-ribbon-clip">
+            <div class="mb-ribbon-strip" id="ribbonStrip"></div>
+          </div>
+          <div class="mb-stall-tag">Stalled — dust risk, E. suburbs</div>
+        </div>
+
+        <div class="mb-map-label">All wards</div>
+        <div class="mb-map" id="mapGrid"></div>
+
+        <div class="mb-legend">
+          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--good)"></div>Good</div>
+          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--moderate)"></div>Moderate</div>
+          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--sensitive)"></div>Sensitive</div>
+          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--unhealthy)"></div>Unhealthy</div>
+          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--severe)"></div>Severe</div>
+        </div>
+
+        <div id="wardDetail"></div>
+      </div>
+
+      <!-- TICKETS -->
+      <div class="mb-panel mb-hidden" id="panel-tickets">
+        <div class="mb-section-label">Active &amp; closed tickets</div>
+        <div id="ticketList"></div>
+        <div id="ticketTimeline"></div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="mb-panel mb-hidden" id="panel-report">
+        <div class="mb-step-track"><div id="stepBar1"></div><div id="stepBar2"></div><div id="stepBar3"></div></div>
+        <div id="reportFlow"></div>
+      </div>
+    </div>
+
+    <div class="mb-toast" id="toast"></div>
+
+    <div class="mb-bottomnav">
+      <div class="mb-navitem active" data-tab="heatmap"><span class="ic">&#127758;</span><span class="lb">Home</span></div>
+      <div class="mb-navitem" data-tab="tickets"><span class="ic">&#127915;</span><span class="lb">Tickets</span></div>
+      <div class="mb-navitem" data-tab="report"><span class="ic">&#128247;</span><span class="lb">Report</span></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+
+  var AQI_BANDS = [
+    {max:100, color:'var(--good)', hex:'#5B8C6E', name:'Good'},
+    {max:150, color:'var(--moderate)', hex:'#C9A227', name:'Moderate'},
+    {max:200, color:'var(--sensitive)', hex:'#D97A3D', name:'Unhealthy (Sensitive)'},
+    {max:300, color:'var(--unhealthy)', hex:'#B8483F', name:'Unhealthy'},
+    {max:999, color:'var(--severe)', hex:'#6E2A3A', name:'Severe'}
+  ];
+  function bandFor(v){
+    for(var i=0;i<AQI_BANDS.length;i++) if(v <= AQI_BANDS[i].max) return AQI_BANDS[i];
+    return AQI_BANDS[AQI_BANDS.length-1];
+  }
+
+  var CAUSES = {
+    'M/E':'Refinery Emissions — Mahul','M/W':'Landfill Smoke — Deonar',
+    'G/S':'Construction Debris Dust','K/W':'Traffic Congestion — WEH',
+    'K/E':'Traffic Congestion — WEH', 'default':'Vehicular + Dust Mix'
+  };
+
+  var ROWS = [
+    ['R/C','R/N','R/S','S','T'],
+    ['P/N','P/S','N','L','M/W'],
+    ['K/W','K/E','H/W','H/E','M/E'],
+    ['G/S','G/N','F/S','F/N'],
+    ['D','E','C'],
+    ['B','A']
+  ];
+  var NAMES = {
+    'R/C':'Dahisar','R/N':'Borivali','R/S':'Kandivali','S':'Bhandup','T':'Mulund',
+    'P/N':'Malad','P/S':'Goregaon','N':'Ghatkopar','L':'Kurla','M/W':'Govandi',
+    'K/W':'Andheri W','K/E':'Andheri E','H/W':'Bandra W','H/E':'Bandra E','M/E':'Chembur / Mahul',
+    'G/S':'Worli / Lower Parel','G/N':'Dadar / Mahim','F/S':'Parel','F/N':'Matunga',
+    'D':'Malabar Hill','E':'Byculla','C':'Marine Lines','B':'Masjid Bunder','A':'Colaba / Fort'
+  };
+  // rough centroids for "nearest ward" demo geolocation matching
+  var COORDS = {
+    'A':[18.9067,72.8147],'B':[18.9634,72.8322],'C':[18.9440,72.8258],'D':[18.9547,72.8081],
+    'E':[18.9750,72.8327],'F/N':[19.0270,72.8554],'F/S':[19.0027,72.8407],'G/N':[19.0330,72.8397],
+    'G/S':[19.0100,72.8170],'H/E':[19.0600,72.8500],'H/W':[19.0596,72.8295],'K/E':[19.1150,72.8700],
+    'K/W':[19.1364,72.8296],'L':[19.0728,72.8826],'M/E':[19.0522,72.9005],'M/W':[19.0550,72.9150],
+    'N':[19.0863,72.9081],'P/N':[19.1860,72.8490],'P/S':[19.1663,72.8526],'R/C':[19.2540,72.8590],
+    'R/N':[19.2307,72.8567],'R/S':[19.2095,72.8526],'S':[19.1440,72.9350],'T':[19.1720,72.9560]
+  };
+
+  var wards = {};
+  Object.keys(NAMES).forEach(function(code){
+    var base = (code==='M/E') ? 205 : (code==='M/W' ? 175 : (code==='G/S'? 160 : 60 + Math.random()*90));
+    wards[code] = { code: code, name: NAMES[code], aqi: Math.round(base), stressTicks: 0, hist:[Math.round(base)] };
+  });
+  wards['M/E'].stressTicks = 2;
+
+  var windStalled = false;
+  var tickets = [];
+  var ticketSeq = 1;
+  var selectedWard = null;
+  var openTicketId = null;
+  var userWard = null;
+  var mobileNumber = '';
+  var isGuest = false;
+  var wasHarmful = false;
+  var tickInterval = null;
+
+  var reportState = {step:1, category:null, ward:null};
+
+  // ---------------- utility ----------------
+  function fmtTime(){ var d=new Date(); return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2600);
+  }
+  function showScreen(id){
+    ['screen-login','screen-otp','screen-location','screen-app'].forEach(function(s){
+      document.getElementById(s).classList.toggle('mb-hidden', s!==id);
+    });
+  }
+
+  var pushHideTimer = null;
+  function showPushAlert(msg){
+    var banner = document.getElementById('pushBanner');
+    document.getElementById('pushBody').textContent = msg;
+    banner.classList.add('show');
+    clearTimeout(pushHideTimer);
+    pushHideTimer = setTimeout(function(){ banner.classList.remove('show'); }, 7000);
+  }
+  document.getElementById('pushClose').onclick = function(e){
+    e.stopPropagation();
+    document.getElementById('pushBanner').classList.remove('show');
+    clearTimeout(pushHideTimer);
+  };
+  document.getElementById('pushBanner').onclick = function(){
+    document.getElementById('pushBanner').classList.remove('show');
+    clearTimeout(pushHideTimer);
+    switchTab('heatmap');
+    selectedWard = userWard;
+    renderWardDetail(userWard);
+  };
+
+  function logout(){
+    clearInterval(tickInterval); tickInterval = null; booted = false;
+    mobileNumber = ''; userWard = null; selectedWard = null; openTicketId = null;
+    wasHarmful = false; tickets = []; ticketSeq = 1; isGuest = false;
+    Object.keys(wards).forEach(function(c){ wards[c].stressTicks = 0; });
+    document.getElementById('mobileInput').value = '';
+    document.getElementById('pushBanner').classList.remove('show');
+    document.getElementById('guestTag').classList.add('mb-hidden');
+    reportState = {step:1, category:null, ward:null};
+    showScreen('screen-login');
+  }
+
+  // ---------------- LOGIN ----------------
+  document.getElementById('sendOtpBtn').onclick = function(){
+    var v = document.getElementById('mobileInput').value.trim();
+    var err = document.getElementById('loginError');
+    if(!/^[6-9]\d{9}$/.test(v)){
+      err.textContent = 'Enter a valid 10-digit mobile number.';
+      return;
+    }
+    err.textContent = '';
+    mobileNumber = v;
+    isGuest = false;
+    document.getElementById('otpSentTo').textContent = 'Enter the 6-digit code sent to +91 ' + v.slice(0,5) + 'XXXXX';
+    buildOtpBoxes();
+    showScreen('screen-otp');
+  };
+
+  function buildOtpBoxes(){
+    var wrap = document.getElementById('otpBoxes');
+    wrap.innerHTML = '';
+    for(var i=0;i<6;i++){
+      var inp = document.createElement('input');
+      inp.className = 'mb-otp-box'; inp.maxLength=1; inp.inputMode='numeric';
+      inp.addEventListener('input', function(e){
+        if(e.target.value && e.target.nextElementSibling){ e.target.nextElementSibling.focus(); }
+      });
+      wrap.appendChild(inp);
+    }
+    setTimeout(function(){ wrap.children[0].focus(); }, 50);
+  }
+
+  document.getElementById('verifyBtn').onclick = function(){
+    var boxes = document.getElementById('otpBoxes').children;
+    var code = '';
+    for(var i=0;i<boxes.length;i++) code += boxes[i].value;
+    var err = document.getElementById('otpError');
+    if(code.length < 6){ err.textContent = 'Enter all 6 digits.'; return; }
+    err.textContent = '';
+    populateWardSelect();
+    showScreen('screen-location');
+  };
+  document.getElementById('guestBtn').onclick = function(){
+    isGuest = true;
+    mobileNumber = '';
+    populateWardSelect();
+    showScreen('screen-location');
+  };
+  document.getElementById('backToLoginBtn').onclick = function(){ showScreen('screen-login'); };
+
+  // ---------------- LOCATION ----------------
+  function populateWardSelect(){
+    var sel = document.getElementById('wardSelect');
+    sel.innerHTML = '<option value="">Choose your ward…</option>';
+    var codes = Object.keys(NAMES).sort(function(a,b){ return NAMES[a].localeCompare(NAMES[b]); });
+    codes.forEach(function(code){
+      var opt = document.createElement('option');
+      opt.value = code; opt.textContent = NAMES[code] + ' (Ward ' + code + ')';
+      sel.appendChild(opt);
+    });
+  }
+
+  function nearestWard(lat, lng){
+    var best = null, bestD = Infinity;
+    Object.keys(COORDS).forEach(function(code){
+      var c = COORDS[code];
+      var d = Math.pow(c[0]-lat,2) + Math.pow(c[1]-lng,2);
+      if(d < bestD){ bestD = d; best = code; }
+    });
+    return best;
+  }
+
+  document.getElementById('detectBtn').onclick = function(){
+    var status = document.getElementById('detectStatus');
+    if(!navigator.geolocation){
+      status.textContent = 'Location services unavailable here — please select manually below.';
+      return;
+    }
+    status.textContent = 'Detecting your location…';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var code = nearestWard(pos.coords.latitude, pos.coords.longitude);
+      document.getElementById('wardSelect').value = code;
+      status.textContent = 'Detected: ' + NAMES[code] + ' (Ward ' + code + ')';
+    }, function(){
+      status.textContent = 'Couldn\'t get a location fix — please select your ward manually below.';
+    }, {timeout:6000});
+  };
+
+  document.getElementById('continueBtn').onclick = function(){
+    var sel = document.getElementById('wardSelect');
+    if(!sel.value){ document.getElementById('detectStatus').textContent = 'Select a ward to continue.'; return; }
+    userWard = sel.value;
+    document.getElementById('wardChipNav').textContent = userWard + ' \u25BE';
+    document.getElementById('guestTag').classList.toggle('mb-hidden', !isGuest);
+    showScreen('screen-app');
+    boot();
+  };
+
+  // ---------------- ticket logic ----------------
+  function createTicket(wardCode, triggerType){
+    var t = {
+      id: 'MB-' + (1000+ticketSeq++), ward: wardCode, trigger: triggerType,
+      aqiAt: wards[wardCode].aqi, status: 'TICKET_RAISED', bmcRef: null,
+      history: [{status:'TICKET_RAISED', time:fmtTime(), note: triggerType==='AUTO_STRESS' ? 'Auto-generated: AQI sustained above 200 for 3+ hrs' : 'Filed from citizen report'}]
+    };
+    tickets.unshift(t);
+    renderTickets();
+    return t;
+  }
+  function advanceTicket(t){
+    if(t.status==='TICKET_RAISED'){
+      t.status='SENT_TO_WARD_DESK';
+      t.bmcRef = 'MCGM-' + Math.floor(100000+Math.random()*899999);
+      t.history.push({status:'SENT_TO_WARD_DESK', time:fmtTime(), note:'Auto-escalated to Ward Desk after 6hr threshold. Ref '+t.bmcRef});
+    } else if(t.status==='SENT_TO_WARD_DESK'){
+      t.status='IN_PROGRESS';
+      t.history.push({status:'IN_PROGRESS', time:fmtTime(), note:'Field officer assigned'});
+    } else if(t.status==='IN_PROGRESS'){
+      if(wards[t.ward].aqi < 100){
+        t.status='CLOSED_SAFE';
+        t.history.push({status:'CLOSED_SAFE', time:fmtTime(), note:'AQI naturally decreased below 100'});
+      } else {
+        t.status='ACTION_TAKEN';
+        t.history.push({status:'ACTION_TAKEN', time:fmtTime(), note:'Water sprinklers activated, mitigation photo logged', photo:true});
+      }
+    } else if(t.status==='ACTION_TAKEN'){
+      t.status='CLOSED_SAFE';
+      t.history.push({status:'CLOSED_SAFE', time:fmtTime(), note:'AQI naturally decreased below 100'});
+    }
+  }
+
+  // ---------------- tick loop ----------------
+  function tick(){
+    var maxAqi = 0;
+    Object.keys(wards).forEach(function(code){
+      var w = wards[code];
+      var delta = (Math.random()-0.48) * 22;
+      w.aqi = Math.max(25, Math.min(400, Math.round(w.aqi + delta)));
+      w.hist.push(w.aqi); if(w.hist.length>16) w.hist.shift();
+      maxAqi = Math.max(maxAqi, w.aqi);
+      if(w.aqi >= 201){ w.stressTicks++; } else { w.stressTicks = 0; }
+      // Automatic stress tickets are only ever raised for the signed-in user's own pinned ward —
+      // other wards still show as stressed on the map (flag dot) but won't self-file tickets.
+      if(code === userWard){
+        if(w.stressTicks === 3){ createTicket(code, 'AUTO_STRESS'); toast('Ticket auto-drafted for your ward: ' + code); }
+        if(w.stressTicks === 6){
+          var existing = tickets.find(function(t){return t.ward===code && t.status==='TICKET_RAISED';});
+          if(existing){ advanceTicket(existing); toast('Ticket ' + existing.id + ' escalated to BMC'); renderTickets(); }
+        }
+      }
+    });
+
+    // Harmful-level (201+) push alert for the user's own location — fires once per crossing
+    var uw = wards[userWard];
+    if(uw.aqi >= 201 && !wasHarmful){
+      showPushAlert('Harmful air quality detected in ' + uw.name + ' (Ward ' + uw.code + ') — AQI ' + uw.aqi + '. Wear an N95 mask and limit outdoor time.');
+      wasHarmful = true;
+    } else if(uw.aqi < 201){
+      wasHarmful = false;
+    }
+
+    if(Math.random() < 0.12) windStalled = !windStalled;
+    document.getElementById('ribbon').classList.toggle('stalled', windStalled);
+
+    tickets.forEach(function(t){ if(t.status!=='CLOSED_SAFE' && Math.random() < 0.10){ advanceTicket(t); } });
+
+    var grap = maxAqi >= 300 ? 'GRAP STAGE IV' : maxAqi >= 201 ? 'GRAP STAGE III' : maxAqi >= 151 ? 'GRAP STAGE II' : 'GRAP STAGE I';
+    document.getElementById('grapBadge').textContent = grap;
+
+    renderHero();
+    renderMap();
+    if(selectedWard) renderWardDetail(selectedWard);
+    renderTickets();
+    if(openTicketId) renderTimeline(openTicketId);
+  }
+
+  // ---------------- render: hero ----------------
+  function renderHero(){
+    var w = wards[userWard];
+    var band = bandFor(w.aqi);
+    var hero = document.getElementById('heroCard');
+    hero.style.background = 'linear-gradient(135deg, ' + band.hex + ', ' + band.hex + 'CC)';
+    document.getElementById('heroWardName').textContent = w.name + ' (Ward ' + w.code + ')';
+    document.getElementById('heroAqi').textContent = w.aqi;
+    document.getElementById('heroBand').textContent = band.name;
+
+    var maskBox = document.getElementById('heroMask');
+    var maskText = document.getElementById('heroMaskText');
+    if(w.aqi >= 201){
+      maskBox.classList.remove('mb-hidden');
+      maskText.textContent = 'Harmful air quality — wear an N95 mask outdoors and limit time outside.';
+    } else if(w.aqi >= 151){
+      maskBox.classList.remove('mb-hidden');
+      maskText.textContent = 'Unhealthy for sensitive groups — wear a mask outdoors today.';
+    } else {
+      maskBox.classList.add('mb-hidden');
+    }
+  }
+
+  // ---------------- render: map ----------------
+  function renderMap(){
+    var grid = document.getElementById('mapGrid');
+    grid.innerHTML = '';
+    ROWS.forEach(function(row){
+      var rowEl = document.createElement('div'); rowEl.className='mb-row';
+      row.forEach(function(code){
+        var w = wards[code]; var band = bandFor(w.aqi);
+        var el = document.createElement('div');
+        el.className = 'mb-ward' + (code===userWard ? ' mine' : '');
+        el.style.background = band.color;
+        var flag = w.stressTicks >= 1 ? '<div class="flag"></div>' : '';
+        el.innerHTML = '<div class="code">'+code+'</div><div class="val">'+w.aqi+'</div>' + flag;
+        el.onclick = function(){ selectedWard = code; renderWardDetail(code); };
+        rowEl.appendChild(el);
+      });
+      grid.appendChild(rowEl);
+    });
+  }
+
+  function renderWardDetail(code){
+    var w = wards[code]; var band = bandFor(w.aqi);
+    var prev = w.hist.length>1 ? w.hist[w.hist.length-2] : w.aqi;
+    var arrow = w.aqi>prev ? '&#8593;' : (w.aqi<prev ? '&#8595;' : '&#8594;');
+    var cause = CAUSES[code] || CAUSES['default'];
+    var stressNote = w.stressTicks>0 ? '<div class="mb-chip" style="border-color:var(--unhealthy); color:var(--unhealthy);">Sustained '+w.stressTicks+' cycle(s) above 200</div>' : '';
+    document.getElementById('wardDetail').innerHTML =
+      '<div class="mb-sheet">' +
+        '<div class="mb-sheet-head">' +
+          '<div><div class="mb-sheet-title">'+w.name+' &middot; Ward '+code+'</div><div class="mb-sheet-sub">Dominant pollutant: PM2.5</div></div>' +
+          '<div class="mb-aqi-big" style="color:'+band.color+'">'+w.aqi+' '+arrow+'</div>' +
+        '</div>' +
+        '<div class="mb-chip">'+band.name+'</div>' +
+        '<div class="mb-chip">Probable cause: '+cause+'</div>' +
+        stressNote +
+        '<div><button class="mb-btn accent" style="margin-top:12px;" id="reportHereBtn">Report a violation here</button></div>' +
+      '</div>';
+    document.getElementById('reportHereBtn').onclick = function(){
+      reportState = {step:1, category:null, ward:code};
+      switchTab('report'); renderReportFlow();
+    };
+  }
+
+  // ---------------- render: tickets ----------------
+  function renderTickets(){
+    var list = document.getElementById('ticketList');
+    if(tickets.length===0){
+      list.innerHTML = '<div class="mb-empty">No tickets yet. When a ward stays "Unhealthy" for a sustained period, a ticket auto-generates here — or file a citizen report from the Report tab.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    tickets.forEach(function(t){
+      var w = wards[t.ward];
+      var card = document.createElement('div'); card.className = 'mb-ticket-card';
+      card.innerHTML =
+        '<div class="mb-ticket-row">' +
+          '<div><div class="mb-ticket-ward">'+t.id+' &middot; '+t.ward+'</div>' +
+          '<div class="mb-tl-meta">'+(t.trigger==='AUTO_STRESS'?'Automatic escalation':'Citizen report')+(t.bmcRef ? ' &middot; '+t.bmcRef : '')+'</div></div>' +
+          '<div class="mb-status-pill st-'+t.status+'">'+t.status.replace(/_/g,' ')+'</div>' +
+        '</div>';
+      card.onclick = function(){ openTicketId = t.id; renderTimeline(t.id); };
+      list.appendChild(card);
+    });
+  }
+
+  function renderTimeline(ticketId){
+    var t = tickets.find(function(x){return x.id===ticketId;});
+    if(!t) return;
+    var steps = ['TICKET_RAISED','SENT_TO_WARD_DESK','IN_PROGRESS','ACTION_TAKEN','CLOSED_SAFE'];
+    var html = '<div class="mb-sheet"><div class="mb-sheet-title">'+t.id+' — '+wards[t.ward].name+'</div>' +
+      '<div class="mb-tl-meta">AQI at trigger: '+t.aqiAt+'</div><div class="mb-timeline">';
+    steps.forEach(function(s){
+      var entry = t.history.find(function(h){return h.status===s;});
+      var pending = !entry;
+      html += '<div class="mb-tl-node '+(pending?'pending':'')+'"><div class="mb-tl-dot"></div>' +
+        '<div><div class="mb-tl-title">'+s.replace(/_/g,' ')+'</div>' +
+        (entry ? '<div class="mb-tl-meta">'+entry.time+'</div><div class="mb-tl-note">'+entry.note+'</div>' : '<div class="mb-tl-meta">pending</div>') +
+        (entry && entry.photo ? '<div class="mb-photo-proof">Field officer photo evidence attached</div>' : '') +
+        '</div></div>';
+    });
+    html += '</div></div>';
+    document.getElementById('ticketTimeline').innerHTML = html;
+  }
+
+  // ---------------- report flow ----------------
+  var CATEGORIES = [
+    {id:'MISSING_LED', icon:'&#128204;', label:'Missing LED / sensor at site'},
+    {id:'OPEN_BURNING', icon:'&#128293;', label:'Open garbage burning'},
+    {id:'INDUSTRIAL', icon:'&#127981;', label:'Heavy industrial smoke'}
+  ];
+  function updateStepBar(){
+    ['stepBar1','stepBar2','stepBar3'].forEach(function(id,i){
+      document.getElementById(id).classList.toggle('done', reportState.step > i);
+    });
+  }
+  function renderReportFlow(){
+    var el = document.getElementById('reportFlow');
+    if(isGuest){
+      document.getElementById('stepBar1').parentElement.classList.add('mb-hidden');
+      el.innerHTML = '<div class="mb-empty" style="padding:40px 16px;">' +
+        '<div style="font-size:26px; margin-bottom:8px;">&#128274;</div>' +
+        '<div style="font-weight:600; color:var(--ink); margin-bottom:4px;">Sign in to file a report</div>' +
+        'Citizen reports need a verified mobile number so field officers can follow up and to keep the system spam-free.' +
+        '<div style="margin-top:14px;"><button class="mb-btn accent" id="guestSignInBtn" style="width:auto; padding:10px 18px;">Sign in now</button></div>' +
+        '</div>';
+      document.getElementById('guestSignInBtn').onclick = function(){ logout(); };
+      return;
+    }
+    document.getElementById('stepBar1').parentElement.classList.remove('mb-hidden');
+    updateStepBar();
+    var el = document.getElementById('reportFlow');
+    if(reportState.step===1){
+      var wardNote = reportState.ward ? ('<div class="mb-chip">Location: '+wards[reportState.ward].name+' ('+reportState.ward+')</div>') : '<div class="mb-chip">Location: '+wards[userWard].name+' ('+userWard+')</div>';
+      el.innerHTML = '<div class="mb-section-label">Tap 1 of 3 — What are you reporting?</div>' + wardNote + '<div class="mb-cat-grid" id="catGrid"></div>';
+      var grid = document.getElementById('catGrid');
+      CATEGORIES.forEach(function(c){
+        var card = document.createElement('div'); card.className = 'mb-cat-card';
+        card.innerHTML = '<div class="mb-cat-icon">'+c.icon+'</div><div class="mb-cat-label">'+c.label+'</div>';
+        card.onclick = function(){
+          reportState.category = c;
+          if(!reportState.ward) reportState.ward = userWard;
+          reportState.step = 2; renderReportFlow();
+        };
+        grid.appendChild(card);
+      });
+    } else if(reportState.step===2){
+      el.innerHTML = '<div class="mb-section-label">Tap 2 of 3 — Capture evidence</div>' +
+        '<div class="mb-capture-box"><div style="font-size:26px;">&#128247;</div><div style="font-size:11px; font-family:\'IBM Plex Mono\',monospace;">Capturing geotagged photo…</div></div>' +
+        '<div class="mb-verify-row" style="margin-top:10px;"><span id="vGeo" class="ok">&#10003; Geotag verified</span><span id="vTime" class="ok">&#10003; Timestamp verified</span></div>' +
+        '<button class="mb-btn" id="toStep3" style="display:none; margin-top:14px;">Continue</button>';
+      setTimeout(function(){ document.getElementById('vGeo').classList.add('show'); }, 500);
+      setTimeout(function(){
+        document.getElementById('vTime').classList.add('show');
+        var btn = document.getElementById('toStep3'); btn.style.display='block';
+        btn.onclick = function(){ reportState.step=3; renderReportFlow(); };
+      }, 1000);
+    } else if(reportState.step===3){
+      var w = wards[reportState.ward];
+      el.innerHTML = '<div class="mb-section-label">Tap 3 of 3 — Confirm &amp; submit</div>' +
+        '<div class="mb-chip">'+reportState.category.label+'</div>' +
+        '<div class="mb-chip">'+w.name+' ('+reportState.ward+')</div>' +
+        '<div class="mb-confirm-thumb">Photo evidence &middot; geotag + timestamp attached</div>' +
+        '<button class="mb-btn accent" id="submitBtn" style="margin-top:14px;">Submit report</button>' +
+        '<button class="mb-btn secondary" id="cancelBtn">Start over</button>';
+      document.getElementById('submitBtn').onclick = function(){
+        var t = createTicket(reportState.ward, 'CITIZEN_REPORT');
+        toast('Report submitted — linked to ' + t.id);
+        reportState = {step:1, category:null, ward:null};
+        renderReportFlow();
+        switchTab('tickets'); openTicketId = t.id; renderTimeline(t.id);
+      };
+      document.getElementById('cancelBtn').onclick = function(){ reportState = {step:1, category:null, ward:null}; renderReportFlow(); };
+    }
+  }
+
+  // ---------------- ribbon ----------------
+  function buildRibbon(){
+    var strip = document.getElementById('ribbonStrip');
+    var html = '';
+    for(var i=0;i<16;i++){ html += '<span>&#10132;</span>'; }
+    strip.innerHTML = html;
+  }
+
+  // ---------------- tabs ----------------
+  function switchTab(name){
+    document.querySelectorAll('.mb-navitem').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')===name); });
+    ['heatmap','tickets','report'].forEach(function(p){ document.getElementById('panel-'+p).classList.toggle('mb-hidden', p!==name); });
+  }
+  document.querySelectorAll('.mb-navitem').forEach(function(t){ t.addEventListener('click', function(){ switchTab(t.getAttribute('data-tab')); }); });
+  document.getElementById('wardChipNav').onclick = function(){ populateWardSelect(); document.getElementById('wardSelect').value = userWard; showScreen('screen-location'); };
+  document.getElementById('logoutBtn').onclick = function(){ logout(); };
+
+  var booted = false;
+  function boot(){
+    if(booted) return; booted = true;
+    wasHarmful = wards[userWard].aqi >= 201;
+    buildRibbon();
+    renderHero();
+    renderMap();
+    renderTickets();
+    renderReportFlow();
+    tickInterval = setInterval(tick, 4000);
+  }
+
+})();
+</script>

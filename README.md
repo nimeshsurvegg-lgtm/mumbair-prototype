@@ -1,30 +1,31 @@
-# mumbair-prototype
-# MumbAIR 🌬️
+# MumbAIR — Interactive Prototype
 
-An interactive web prototype designed for tracking air quality and driving civic action across Greater Mumbai. This project was generated with the help of Claude (AI).
+An interactive web prototype (v5) focused on air pollution tracking and civic action for Greater Mumbai.
 
-## About The Project
+## 🌟 Features
 
-MumbAIR is a front-end concept application built to help citizens monitor localized air quality and report violations. It demonstrates how civic tech can bridge the gap between environmental data and actionable reporting.
+* **User Authentication:** Users can log in using a 10-digit mobile number and a 6-digit OTP, or browse in a restricted "Guest" mode. Guest mode restricts the ability to file citizen reports.
 
-## Key Features
+* **Location Tracking:** Users can automatically detect their location using the Geolocation API or manually search and select a specific Mumbai ward (e.g., Andheri).
 
-* **Ward-Level AQI Tracking:** Simulates real-time Air Quality Index data for various wards across Mumbai[cite: 1].
-* **Citizen Reporting Flow:** An interactive prototype allowing users to file reports for issues like open garbage burning, heavy industrial smoke, or missing sensor displays[cite: 1].
-* **Ticket Management:** A timeline view tracking the status of civic reports from "Ticket Raised" to "Closed Safe"[cite: 1].
-* **Visual Data:** Includes a heatmap grid, a wind status ribbon, and localized GRAP (Graded Response Action Plan) alerts[cite: 1].
+* **Live AQI Dashboard:** Features a map grid and a hero card displaying real-time Air Quality Index (AQI) values, severity bands (Good, Moderate, Unhealthy, Severe), and probable pollution causes like construction dust or landfill smoke.
 
-## Built With
+* **Health Advisories:** Displays active GRAP (Graded Response Action Plan) stages and triggers a modal warning advising users to wear an N95 mask and avoid exertion if the AQI exceeds 200.
 
-* HTML5
-* CSS3
-* Vanilla JavaScript
-* Claude (AI Assistant)
+* **Environmental Simulation:** Includes an animated "wind ribbon" that visually indicates sea breeze or stalled wind conditions. The application uses a mock API and tick loop to simulate live AQI fluctuations and automatically drafts or escalates tickets for sustained high pollution levels.
 
-## How to Run This Project
+* **Civic Ticketing System:** Users can view active and closed municipal tickets and track their status timeline from "Ticket Raised" to "Closed Safe".
 
-Because this is a static prototype, you do not need any special servers or databases to run it.
+* **Smart Citizen Reporting:** A 3-step reporting flow allows verified users to log pollution violations with simulated geotagged photo evidence. It includes a smart duplicate check to display nearby active reports, allowing users to upvote existing issues rather than creating duplicates.
 
-1. Download the `mumbair_app (1).html` file to your computer.
-2. Double-click the file to open it in any modern web browser (like Chrome, Safari, or Edge).
-3. Interact with the UI (you can use the "Continue as Guest" option to bypass the simulated OTP screen).
+
+## 🛠️ Technical Implementation
+
+* The prototype is built entirely as a single-file application using HTML, CSS, and plain JavaScript.
+* It utilizes Google Fonts for its typography, specifically Archivo, IBM Plex Sans, and IBM Plex Mono.
+
+## 🚀 How to Run
+
+Because the project relies on mock data and simulated API fetching, the application runs locally in a web browser without requiring a backend server. Simply open the HTML file in any modern mobile or desktop browser to test the prototype.
+
+LINK : https://nimeshsurvegg-lgtm.github.io/mumbair-prototype/

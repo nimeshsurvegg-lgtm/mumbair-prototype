@@ -1,72 +1,48 @@
-# MumbAIR 🌫️📲
-**Air quality tracking & civic action for Greater Mumbai.**
+<div align="center">
+  <h1>🌬️ MumbAIR</h1>
+  <h3><em>Air quality tracking & civic action for Greater Mumbai</em></h3>
+</div>
 
-MumbAIR is a mobile-first web application prototype designed to democratize air quality monitoring and empower citizens to take civic action. The platform provides localized Air Quality Index (AQI) tracking for various municipal wards across Mumbai, coupled with a robust community-driven incident reporting system for environmental violations.
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT">
+</p>
 
-## 🌟 Key Features
+> **Overview:** MumbAIR is an interactive web-based prototype designed to monitor air pollution. It features a live Air Quality Index (AQI) heatmap and a ticketing system for citizens to report environmental violations.
 
-* **Authentication & Onboarding**
-    * Mobile number login with simulated OTP verification.
-    * "Guest Mode" for users who just want to browse live AQI and BMC ticket data without filing reports.
-* **Intelligent Localization**
-    * Automatic geolocation to detect the user's current ward.
-    * Manual search integration covering key Mumbai wards (e.g., Andheri, Bandra, Colaba).
-* **Real-Time AQI Dashboard**
-    * Live AQI tracking with dynamic categorization (Good, Moderate, Sensitive, Unhealthy, Severe).
-    * Interactive ward grid map visually displaying localized pollution levels.
-    * Automated Health Alerts: Modal warnings trigger when AQI crosses 200, advising users to wear N95 masks.
-    * Live wind condition ribbon and GRAP (Graded Response Action Plan) stage indicators.
-* **Civic Action & Reporting Engine**
-    * Multi-category reporting for violations: Missing LEDs, Open garbage burning, Industrial smoke, and Construction dust.
-    * **Smart Duplicate Check:** Before filing, users are shown existing nearby reports to upvote instead of duplicating tickets.
-    * Simulated geotagging and timestamp verification for photo evidence.
-* **Ticket Tracking System**
-    * Detailed timeline views for raised tickets.
-    * Status tracking phases: Ticket Raised, Sent to Ward Desk, In Progress, Action Taken, and Closed Safe.
+---
 
-## 🛠️ Tech Stack
+## 📖 Table of Contents
+- [Features](#-features)
+- [Prerequisites](#-prerequisites)
+- [Installation & Usage](#-installation--usage)
+- [Technical Architecture](#-technical-architecture)
+- [License](#-license)
 
-MumbAIR is built as a lightweight, zero-dependency, single-file prototype. 
+---
 
-* **Frontend Structure:** HTML5
-* **Styling:** Vanilla CSS (CSS Variables, Flexbox, CSS Grid, Custom Animations)
-* **Logic & State Management:** Vanilla JavaScript
-* **Typography:** Google Fonts (Archivo, IBM Plex Sans, IBM Plex Mono)
+## 🚀 Features
 
-## 🚀 Getting Started
+* **Flexible Authentication:** Users can log in using a mobile number with a 6-digit OTP, or bypass login by continuing in Guest Mode[cite: 3].
+* **Live AQI Heatmap:** Features a color-coded ward map displaying real-time air quality bands ranging from "Good" to "Severe"[cite: 3].
+* **Location Detection:** Automatically detects the user's nearest ward using Geolocation, or allows manual ward searches[cite: 3].
+* **Civic Ticketing System:** Citizens can report issues such as open garbage burning, heavy industrial smoke, uncovered construction dust, and missing LED sensors[cite: 3].
+* **Smart Duplicate Checking:** Before filing, the system surfaces existing nearby reports in the user's ward, allowing them to upvote an existing ticket instead of creating a duplicate[cite: 3].
+* **Timeline Tracking:** Users can track the status of tickets as they progress from "Ticket Raised" to "Action Taken" and "Closed Safe"[cite: 3].
 
-Since this is a client-side only prototype, there is no complex build process or backend setup required.
+---
 
-### Prerequisites
-* A modern web browser (Chrome, Firefox, Safari, Edge).
+## ⚙️ Prerequisites
 
-### Installation & Execution
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/yourusername/mumbair.git](https://github.com/yourusername/mumbair.git)
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd mumbair
-    ```
-3.  Open the file directly in your browser:
-    ```bash
-    # On macOS
-    open mumbair_final_gemini.html
-    
-    # On Linux
-    xdg-open mumbair_final_gemini.html
-    
-    # On Windows
-    start mumbair_final_gemini.html
-    ```
+This is a frontend-only web application. All you need is a modern web browser (Google Chrome, Mozilla Firefox, Safari, or Edge).
 
-## 📱 Usage Guide (Demo Mode)
+---
 
-1.  **Login:** Enter any valid 10-digit number and input any 6 digits for the OTP to pass the mock authentication. Alternatively, select "Continue as Guest".
-2.  **Set Location:** Use the auto-detect feature (requires browser location permissions) or type a ward name (e.g., "Kandivali" or "G/S") into the search bar.
-3.  **Navigate:** Use the bottom navigation bar to switch between the "Home" (Heatmap), "Tickets", and "Report" panels.
-4.  **File a Report:** Navigate to the "Report" tab, pass the smart duplicate check, select an issue category, simulate capturing evidence, and submit the ticket. 
+## 💻 Installation & Usage
 
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
+1. Clone this repository to your local machine:
+   ```bash
+   git clone [https://github.com/nimeshsurvegg-lgtm/mumbair.git](https://github.com/nimeshsurvegg-lgtm/mumbair.git)
+   cd mumbair

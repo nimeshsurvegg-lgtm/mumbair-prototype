@@ -46,3 +46,21 @@ This is a frontend-only web application. All you need is a modern web browser (G
    ```bash
    git clone [https://github.com/nimeshsurvegg-lgtm/mumbair.git](https://github.com/nimeshsurvegg-lgtm/mumbair.git)
    cd mumbair
+2. Open the application:
+Simply double-click the index.html file to open it in your default web browser. No local server or build step is required!
+
+Usage Notes:
+
+Demo OTP: You can enter any 6-digit code during the login phase to proceed[cite: 3].
+
+Guest Mode: Guest mode allows browsing of AQI data and existing tickets, but a verified mobile number is required to file new reports[cite: 3].
+
+## 🧠 Technical Architecture
+Frontend: Vanilla HTML5, CSS3, and JavaScript.
+
+Design: Custom CSS variables for theming, CSS Grid/Flexbox for layout, and integrated Google Fonts (Archivo, IBM Plex Sans, IBM Plex Mono)[cite: 3].
+
+No Dependencies: The prototype runs entirely entirely in the browser without the need for external libraries like React or Vue.
+
+## 📜 License
+Distributed under the MIT License. See LICENSE for more information.

@@ -10,6 +10,8 @@
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT">
 </p>
 
+> **Status:** 🚧 Actively under development. Features and documentation are being updated frequently.
+
 > **Overview:** MumbAIR is an interactive web-based prototype designed to monitor air pollution. It features a live Air Quality Index (AQI) heatmap and a ticketing system for citizens to report environmental violations.
 
 ---

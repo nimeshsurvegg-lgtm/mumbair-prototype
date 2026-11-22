@@ -1,44 +1,57 @@
 /* ==============================================================================
-   MumbAIR — Layout CSS (Top Navigation, Citizen Layout, Authority Layout & Breakpoints)
+   MumbAIR — Layout CSS (Header, Responsive Citizen Layout & Authority Workspace)
+   Strictly prevents horizontal page overflow at all breakpoints (360px - 1440px)
    ============================================================================== */
 
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
 /* =============================================================================
-   1. CITIZEN PORTAL LAYOUT
+   1. CITIZEN PORTAL HEADER & NAVIGATION
    ============================================================================= */
 
 .citizen-header {
-  background: var(--bg-glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-inner {
-  max-width: 1400px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Brand Link */
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--brand-teal), #0284C7);
   display: flex;
@@ -47,8 +60,8 @@
   color: #fff;
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 19px;
-  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.25);
+  font-size: 18px;
+  box-shadow: 0 3px 8px rgba(13, 148, 136, 0.22);
 }
 
 .brand-text {
@@ -58,7 +71,7 @@
 
 .brand-title {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.1875rem;
   font-weight: 800;
   color: var(--ink-primary);
   line-height: 1.1;
@@ -70,7 +83,7 @@
 }
 
 .brand-sub {
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   color: var(--ink-muted);
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -85,17 +98,18 @@
 .location-trigger-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-full);
-  padding: 6px 14px;
-  font-size: 0.8125rem;
+  padding: 5px 12px;
+  font-size: 0.78125rem;
   font-weight: 600;
   color: var(--ink-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-xs);
+  max-width: 190px;
 }
 
 .location-trigger-btn:hover {
@@ -105,42 +119,42 @@
 }
 
 .loc-pin {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .loc-text {
-  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .loc-arrow {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--ink-muted);
 }
 
-/* Citizen Nav (Clean 6 Core Tabs) */
+/* Citizen Nav (5 Clean Core Tabs) */
 .citizen-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: var(--bg-subtle);
-  padding: 4px;
+  padding: 3px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 5px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
   border: none;
   background: transparent;
   color: var(--ink-muted);
-  font-size: 0.8125rem;
+  font-size: 0.78125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -160,29 +174,20 @@
 }
 
 .nav-icon {
-  font-size: 14px;
-}
-
-.nav-pill-badge {
-  background: var(--brand-amber);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  border-radius: var(--radius-full);
-  padding: 1px 6px;
+  font-size: 13px;
 }
 
 /* Header Actions */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .icon-action-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -193,6 +198,7 @@
   position: relative;
   transition: all var(--transition-fast);
   color: var(--ink-secondary);
+  font-size: 13px;
 }
 
 .icon-action-btn:hover {
@@ -220,12 +226,13 @@
   border: 1px solid #334155;
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .btn-authority:hover {
@@ -234,22 +241,25 @@
 }
 
 .badge-lock {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 /* Citizen Main Container */
 .citizen-main {
-  max-width: 1400px;
+  max-width: 1360px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px;
   flex: 1;
+  box-sizing: border-box;
 }
 
 /* Tab Views Container */
 .tab-view {
   display: none;
   animation: fadeIn 0.2s ease-in-out;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tab-view.active {
@@ -257,7 +267,7 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -265,18 +275,20 @@
 .app-footer {
   background: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
-  padding: 24px;
+  padding: 20px;
   margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .footer-inner {
-  max-width: 1400px;
+  max-width: 1360px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 14px;
   font-size: 0.8125rem;
   color: var(--ink-muted);
 }
@@ -284,7 +296,7 @@
 .footer-links {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* =============================================================================
@@ -297,7 +309,9 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-  padding: 24px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .authority-header {
@@ -307,37 +321,41 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .authority-header-inner {
-  max-width: 1440px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .auth-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .auth-crest {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .auth-title {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #fff;
 }
 
 .auth-subtitle {
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   color: #94A3B8;
   letter-spacing: 0.02em;
 }
@@ -345,21 +363,21 @@
 .officer-profile-card {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: #1E293B;
   border: 1px solid #334155;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
 }
 
 .officer-avatar {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--brand-teal);
   color: #fff;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -371,60 +389,62 @@
 }
 
 .officer-name {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #fff;
 }
 
 .officer-role-pill {
-  font-size: 0.625rem;
+  font-size: 0.6rem;
   color: #94A3B8;
 }
 
 .officer-badge-pill {
   font-family: var(--font-mono);
-  font-size: 0.625rem;
+  font-size: 0.6rem;
   background: #0F172A;
   color: #38BDF8;
   border: 1px solid #0284C7;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: var(--radius-xs);
 }
 
 .authority-body {
-  max-width: 1440px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* =============================================================================
-   3. RESPONSIVE BREAKPOINTS (1440px, 1024px, 768px, 430px, 390px, 360px)
+   3. RESPONSIVE BREAKPOINTS (1280px, 1024px, 768px, 430px, 390px, 360px)
+   Strictly zero horizontal overflow at all screens!
    ============================================================================= */
 
-@media (max-width: 1024px) {
+@media (max-width: 1120px) {
   .header-inner {
-    padding: 10px 16px;
+    padding: 8px 14px;
+    gap: 8px;
   }
-  .citizen-nav {
-    overflow-x: auto;
-    max-width: 440px;
+  .nav-link {
+    padding: 5px 9px;
+    font-size: 0.75rem;
+  }
+  .location-trigger-btn {
+    max-width: 150px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .header-inner {
     flex-wrap: wrap;
-    gap: 10px;
   }
   .citizen-nav {
     order: 3;
     width: 100%;
-    max-width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 6px;
+    justify-content: center;
+    margin-top: 4px;
   }
   .location-picker-wrap {
     order: 2;
@@ -433,22 +453,45 @@
     order: 2;
   }
   .citizen-main {
-    padding: 16px 12px;
+    padding: 14px 10px;
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 600px) {
+  .header-inner {
+    padding: 8px 10px;
+  }
   .brand-sub {
     display: none;
   }
-  .loc-text {
-    max-width: 110px;
+  .brand-title {
+    font-size: 1.05rem;
   }
-  .btn-authority span:last-child {
+  .location-trigger-btn {
+    max-width: 120px;
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
+  .btn-profile-header span:last-child {
+    display: none;
+  }
+  .btn-authority .btn-auth-label {
     display: none;
   }
   .nav-link {
-    padding: 5px 10px;
-    font-size: 0.75rem;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .location-trigger-btn {
+    max-width: 95px;
+  }
+  .nav-link span:last-child {
+    display: none;
+  }
+  .nav-link {
+    padding: 5px 8px;
   }
 }

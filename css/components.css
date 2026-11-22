@@ -377,6 +377,7 @@
   flex-direction: column;
   gap: 10px;
   pointer-events: none;
+  max-width: calc(100vw - 32px);
 }
 
 .toast {
@@ -391,6 +392,20 @@
   gap: 10px;
   box-shadow: var(--shadow-lg);
   animation: toastIn 0.25s ease-out;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100% - 24px);
+  }
+  .toast {
+    font-size: 0.75rem;
+    padding: 8px 12px;
+  }
 }
 
 @keyframes toastIn {

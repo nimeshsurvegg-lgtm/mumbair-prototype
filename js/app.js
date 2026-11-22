@@ -326,12 +326,12 @@ window.MumbAIR.APP = (function(){
     var domBadge = document.getElementById('heroDominantBadge');
     if(domBadge) domBadge.textContent = 'Dominant: ' + wardAqi.dominant;
 
-    // SVG Circular Gauge Arc Animation (Circumference ~ 251.3)
+    // SVG Circular Gauge Arc Animation (Circumference ~ 267)
     var arc = document.getElementById('aqiArcProgress');
     if(arc){
       var maxAqi = 500;
       var ratio = Math.min(1, Math.max(0, wardAqi.aqi / maxAqi));
-      var dashoffset = 251.3 - (ratio * 251.3);
+      var dashoffset = 267 - (ratio * 267);
       arc.style.strokeDashoffset = dashoffset;
       arc.style.stroke = wardAqi.color;
     }
@@ -347,13 +347,13 @@ window.MumbAIR.APP = (function(){
     var healthText = document.getElementById('heroHealthText');
     if(healthText){
       if(wardAqi.aqi <= 50){
-        healthText.textContent = 'Air quality is satisfactory and poses little or no risk to public health. Ideal conditions for outdoor activities across Mumbai.';
+        healthText.textContent = 'Air quality is satisfactory and poses minimal health impact. Favorable conditions for outdoor exercise.';
         healthText.style.borderLeftColor = 'var(--aqi-good)';
       } else if(wardAqi.aqi <= 100){
-        healthText.textContent = 'Acceptable air quality; minor breathing discomfort possible for exceptionally sensitive individuals with respiratory ailments.';
+        healthText.textContent = 'Air quality is satisfactory; exceptionally sensitive individuals may consider reducing prolonged outdoor heavy exertion.';
         healthText.style.borderLeftColor = 'var(--aqi-satisfactory)';
       } else if(wardAqi.aqi <= 200){
-        healthText.textContent = 'Air quality is moderate. Children, older adults, and individuals with asthma should consider limiting prolonged outdoor exertion.';
+        healthText.textContent = 'Moderate air quality. Children, older adults, and individuals with respiratory conditions should moderate prolonged exertion.';
         healthText.style.borderLeftColor = 'var(--aqi-moderate)';
       } else if(wardAqi.aqi <= 300){
         healthText.textContent = 'Poor air quality. Breathing discomfort likely for most people on prolonged outdoor exposure. N95 particulate mask advised during transit.';
@@ -376,31 +376,50 @@ window.MumbAIR.APP = (function(){
     var c = airData.current;
 
     var mapping = [
-      { id: 'pm25', val: c.pm2_5, max: 60, unit: 'µg/m³' },
-      { id: 'pm10', val: c.pm10, max: 100, unit: 'µg/m³' },
-      { id: 'no2',  val: c.nitrogen_dioxide, max: 80, unit: 'µg/m³' },
-      { id: 'so2',  val: c.sulphur_dioxide, max: 80, unit: 'µg/m³' },
-      { id: 'co',   val: c.carbon_monoxide ? (c.carbon_monoxide / 1000).toFixed(1) : 1.2, max: 2.0, unit: 'mg/m³' },
-      { id: 'o3',   val: c.ozone, max: 100, unit: 'µg/m³' }
+      { domId: 'Pm25', val: c.pm2_5, max: 60, unit: 'µg/m³' },
+      { domId: 'Pm10', val: c.pm10, max: 100, unit: 'µg/m³' },
+      { domId: 'No2',  val: c.nitrogen_dioxide, max: 80, unit: 'µg/m³' },
+      { domId: 'So2',  val: c.sulphur_dioxide, max: 80, unit: 'µg/m³' },
+      { domId: 'Co',   val: (typeof c.carbon_monoxide === 'number') ? (c.carbon_monoxide / 1000).toFixed(1) : (c.carbon_monoxide || null), max: 2.0, unit: 'mg/m³' },
+      { domId: 'O3',   val: c.ozone, max: 100, unit: 'µg/m³' }
     ];
 
     mapping.forEach(function(item){
-      var numEl = document.getElementById('val' + item.id.toUpperCase());
-      var meterEl = document.getElementById('meter' + item.id.toUpperCase());
-      var statusEl = document.getElementById('status' + item.id.toUpperCase());
+      var numEl = document.getElementById('val' + item.domId);
+      var meterEl = document.getElementById('meter' + item.domId);
+      var statusEl = document.getElementById('status' + item.domId);
 
-      var val = item.val !== null ? item.val : 0;
-      if(numEl) numEl.textContent = val;
+      var hasVal = item.val !== null && item.val !== undefined && item.val !== '';
+      var numVal = hasVal ? parseFloat(item.val) : null;
+
+      if(numEl){
+        if(hasVal && !isNaN(numVal)){
+          numEl.textContent = (numVal % 1 === 0) ? numVal : numVal.toFixed(1);
+          numEl.style.fontSize = '1.35rem';
+        } else {
+          numEl.textContent = 'No reading';
+          numEl.style.fontSize = '0.9rem';
+        }
+      }
 
       if(meterEl){
-        var pct = Math.min(100, Math.max(0, (val / item.max) * 50)); // 100% on meter is 2x CPCB limit
-        meterEl.style.width = pct + '%';
-        meterEl.style.background = val > item.max * 1.5 ? 'var(--aqi-poor)' : (val > item.max ? 'var(--aqi-moderate)' : 'var(--aqi-good)');
+        if(hasVal && !isNaN(numVal)){
+          var pct = Math.min(100, Math.max(0, (numVal / item.max) * 50));
+          meterEl.style.width = pct + '%';
+          meterEl.style.background = numVal > item.max * 1.5 ? 'var(--aqi-poor)' : (numVal > item.max ? 'var(--aqi-moderate)' : 'var(--aqi-good)');
+        } else {
+          meterEl.style.width = '0%';
+        }
       }
 
       if(statusEl){
-        statusEl.textContent = val > item.max ? 'Elevated' : 'Compliant';
-        statusEl.style.color = val > item.max ? 'var(--aqi-poor)' : 'var(--aqi-good)';
+        if(hasVal && !isNaN(numVal)){
+          statusEl.textContent = numVal > item.max ? 'Elevated' : 'Compliant';
+          statusEl.style.color = numVal > item.max ? 'var(--aqi-poor)' : 'var(--aqi-good)';
+        } else {
+          statusEl.textContent = 'Unavailable';
+          statusEl.style.color = 'var(--ink-muted)';
+        }
       }
     });
   }
@@ -421,22 +440,8 @@ window.MumbAIR.APP = (function(){
     var dir = document.getElementById('weatherWindDir');
     if(dir){
       var deg = Math.round(w.wind_direction_10m || 270);
-      var dirCard = deg >= 225 && deg <= 315 ? 'Westerly (Sea)' : (deg >= 45 && deg <= 135 ? 'Easterly (Land)' : 'Northerly');
+      var dirCard = deg >= 225 && deg <= 315 ? 'Westerly (Onshore)' : (deg >= 45 && deg <= 135 ? 'Easterly (Inland)' : 'Northerly');
       dir.textContent = deg + '° · ' + dirCard;
-    }
-
-    var arrow = document.getElementById('windArrowIcon');
-    if(arrow){
-      arrow.style.transform = 'rotate(' + (w.wind_direction_10m || 270) + 'deg)';
-    }
-
-    var dispDesc = document.getElementById('dispersionDesc');
-    if(dispDesc){
-      if(w.wind_speed_10m >= 12){
-        dispDesc.textContent = 'Active maritime sea breeze is dispersing vehicle emissions inland toward the Thane creek basin.';
-      } else {
-        dispDesc.textContent = 'Light winds creating nocturnal atmospheric inversion, causing localized particulate stagnation near arterial roads.';
-      }
     }
   }
 
@@ -728,9 +733,13 @@ window.MumbAIR.APP = (function(){
       };
     });
 
-    // Home Quick Action Cards
-    var qm = document.getElementById('qcardMap');
-    if(qm) qm.onclick = function(){ switchTab('tab-map'); };
+    // Home Feature Map & Quick Action Cards
+    var btnHomeOpenMap = document.getElementById('btnHomeOpenFullMap');
+    if(btnHomeOpenMap){
+      btnHomeOpenMap.onclick = function(){ switchTab('tab-map'); };
+    }
+    var qaq = document.getElementById('qcardAirQuality');
+    if(qaq) qaq.onclick = function(){ switchTab('tab-air-quality'); };
     var qr = document.getElementById('qcardReport');
     if(qr) qr.onclick = function(){ switchTab('tab-reports'); };
     var qt = document.getElementById('qcardTrends');
@@ -1296,6 +1305,14 @@ window.MumbAIR.APP = (function(){
     }
 
     NOTIFICATIONS.renderBadge();
+
+    // Initialize home page mini map preview
+    if(window.L && document.getElementById('homeMiniMap')){
+      MAP.initMiniMap('homeMiniMap', function(wardCode){
+        selectWard(wardCode);
+      });
+    }
+
     refreshAtmosphericData(false);
 
     // Initial check for URL hash routing

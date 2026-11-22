@@ -1,6 +1,6 @@
 /* ==============================================================================
-   MumbAIR — Map Layer (Leaflet & OpenStreetMap Interactive Visualization)
-   Resilient tile loading, automatic resize invalidation, search & layer controls
+   MumbAIR — Map Layer (Leaflet Interactive Visualization & Vector Geometry)
+   Resilient tile loading, embedded Mumbai geography, automatic resize invalidation
    ============================================================================== */
 
 window.MumbAIR = window.MumbAIR || {};
@@ -12,15 +12,25 @@ window.MumbAIR.MAP = (function(){
   var UTILS = window.MumbAIR.UTILS;
 
   var mapInstance = null;
+  var miniMapInstance = null;
   var wardMarkersLayer = null;
   var footprintLayer = null;
   var reportMarkersLayer = null;
   var userLocationLayer = null;
   var markersMap = {}; // Maps ward code to Leaflet marker instance
 
+  // Simplified Mumbai coastline & land boundary coordinates for offline/reliable rendering
+  var MUMBAI_COASTLINE_COORDS = [
+    [18.9000, 72.8100], [18.9150, 72.8140], [18.9400, 72.8220], [18.9700, 72.8100],
+    [19.0100, 72.8150], [19.0600, 72.8250], [19.1200, 72.8200], [19.1700, 72.8250],
+    [19.2400, 72.8300], [19.2900, 72.8600], [19.2700, 72.9300], [19.1900, 72.9700],
+    [19.1200, 72.9600], [19.0500, 72.9300], [18.9800, 72.8700], [18.9300, 72.8400],
+    [18.9000, 72.8100]
+  ];
+
   function initMap(containerId, onWardSelect, onReportSelect){
     if(!window.L){
-      console.warn('Leaflet (L) library not loaded. Interactive map unavailable.');
+      console.warn('Leaflet (L) library not detected; check vendor/leaflet/leaflet.js');
       return null;
     }
 
@@ -45,18 +55,31 @@ window.MumbAIR.MAP = (function(){
       scrollWheelZoom: true
     });
 
-    // Primary High-Resolution CartoDB Positron Base Tiles
-    var primaryTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // Add CartoDB Positron tiles with OSM standard fallback
+    var baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19
     });
 
-    primaryTiles.on('tileerror', function(){
-      console.warn('Carto tile error, fallback active.');
+    baseTiles.on('tileerror', function(){
+      // Fallback to OpenStreetMap standard tiles
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(mapInstance);
     });
 
-    primaryTiles.addTo(mapInstance);
+    baseTiles.addTo(mapInstance);
+
+    // Vector Coastline Boundary polygon (provides geographic context even if offline)
+    L.polygon(MUMBAI_COASTLINE_COORDS, {
+      color: '#0D9488',
+      weight: 1.5,
+      fillColor: '#0D9488',
+      fillOpacity: 0.04,
+      dashArray: '4, 4'
+    }).addTo(mapInstance);
 
     // Layer Groups
     footprintLayer = L.layerGroup().addTo(mapInstance);
@@ -64,19 +87,57 @@ window.MumbAIR.MAP = (function(){
     reportMarkersLayer = L.layerGroup().addTo(mapInstance);
     userLocationLayer = L.layerGroup().addTo(mapInstance);
 
-    // Ensure initial dimensions are computed
     invalidateSize();
 
     return mapInstance;
   }
 
+  function initMiniMap(containerId, onWardSelect){
+    if(!window.L) return null;
+    var mapEl = document.getElementById(containerId);
+    if(!mapEl) return null;
+
+    if(miniMapInstance){
+      try { miniMapInstance.remove(); } catch(e) {}
+      miniMapInstance = null;
+    }
+
+    miniMapInstance = L.map(containerId, {
+      center: [19.0760, 72.8777],
+      zoom: 10,
+      zoomControl: false,
+      attributionControl: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      dragging: false
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(miniMapInstance);
+
+    L.polygon(MUMBAI_COASTLINE_COORDS, {
+      color: '#0D9488',
+      weight: 1,
+      fillColor: '#0D9488',
+      fillOpacity: 0.05
+    }).addTo(miniMapInstance);
+
+    return miniMapInstance;
+  }
+
   function invalidateSize(){
-    if(!mapInstance) return;
-    setTimeout(function(){
-      try {
-        mapInstance.invalidateSize();
-      } catch(e) {}
-    }, 100);
+    if(mapInstance){
+      setTimeout(function(){
+        try { mapInstance.invalidateSize(); } catch(e) {}
+      }, 100);
+    }
+    if(miniMapInstance){
+      setTimeout(function(){
+        try { miniMapInstance.invalidateSize(); } catch(e) {}
+      }, 100);
+    }
   }
 
   function renderWardMarkers(wardsData, wardAqiMap, onWardSelect){
@@ -90,7 +151,7 @@ window.MumbAIR.MAP = (function(){
 
       // High-contrast custom HTML pin
       var iconHtml =
-        '<div class="ward-map-marker" style="background:' + aqiInfo.color + '; width:36px; height:36px;">' +
+        '<div class="ward-map-marker" style="background:' + aqiInfo.color + '; width:34px; height:34px;">' +
           '<div class="marker-code">' + w.code + '</div>' +
           '<div class="marker-aqi">' + aqiInfo.aqi + '</div>' +
         '</div>';
@@ -98,19 +159,19 @@ window.MumbAIR.MAP = (function(){
       var customIcon = L.divIcon({
         className: 'custom-ward-pin',
         html: iconHtml,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        popupAnchor: [0, -18]
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -17]
       });
 
       var marker = L.marker([w.lat, w.lng], { icon: customIcon });
 
       var popupHtml =
-        '<div style="min-width:210px;">' +
+        '<div style="min-width:200px;">' +
           '<div class="popup-ward-title">' + w.name + ' (Ward ' + w.code + ')</div>' +
           '<div class="popup-aqi-stat" style="color:' + aqiInfo.color + '">AQI ' + aqiInfo.aqi + ' &middot; ' + aqiInfo.category + '</div>' +
           '<div style="font-size:11px; color:#64748B;">Zone: ' + w.zone + ' &middot; ' + w.station + '</div>' +
-          '<div style="margin:8px 0; font-size:11.5px; line-height:1.4;">' +
+          '<div style="margin:7px 0; font-size:11.5px; line-height:1.4;">' +
             '<strong>Local vectors:</strong> ' + w.defaultCause +
           '</div>' +
           '<div style="display:flex; gap:6px; margin-top:10px;">' +
@@ -133,10 +194,23 @@ window.MumbAIR.MAP = (function(){
         color: aqiInfo.color,
         fillColor: aqiInfo.color,
         fillOpacity: 0.12,
-        radius: 1250,
+        radius: 1200,
         weight: 1.5
       });
       footprintLayer.addLayer(circle);
+
+      // Render simplified dot marker on mini map if initialized
+      if(miniMapInstance){
+        var miniDot = L.circleMarker([w.lat, w.lng], {
+          radius: 5,
+          fillColor: aqiInfo.color,
+          color: '#fff',
+          weight: 1.5,
+          opacity: 1,
+          fillOpacity: 0.9
+        });
+        miniDot.addTo(miniMapInstance);
+      }
     });
   }
 
@@ -162,18 +236,18 @@ window.MumbAIR.MAP = (function(){
       var customIcon = L.divIcon({
         className: 'custom-report-pin',
         html: iconHtml,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        popupAnchor: [0, -14]
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13]
       });
 
       var marker = L.marker([r.latitude, r.longitude], { icon: customIcon });
 
       var popupHtml =
-        '<div style="min-width:200px;">' +
-          '<div style="font-weight:700; font-size:13px; color:#DC2626;">' + r.id + ' &middot; ' + (r.title || 'Civic Violation') + '</div>' +
+        '<div style="min-width:190px;">' +
+          '<div style="font-weight:700; font-size:12.5px; color:#DC2626;">' + r.id + ' &middot; ' + (r.title || 'Civic Violation') + '</div>' +
           '<div style="font-size:11px; color:#64748B; margin-top:2px;">Ward ' + r.ward + ' &middot; Status: ' + (r.status.replace(/_/g, ' ')) + '</div>' +
-          '<div style="font-size:12px; margin:6px 0; line-height:1.4;">' + r.description + '</div>' +
+          '<div style="font-size:11.5px; margin:6px 0; line-height:1.4;">' + r.description + '</div>' +
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
             '<span style="font-size:11px; font-weight:700; color:#0D9488;">👍 ' + (r.upvotes || 0) + ' Endorsements</span>' +
             '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.viewReportTimeline(\'' + r.id + '\')">Details</button>' +
@@ -226,8 +300,8 @@ window.MumbAIR.MAP = (function(){
         var userIcon = L.divIcon({
           className: 'user-gps-container',
           html: '<div class="user-gps-marker"></div>',
-          iconSize: [18, 18],
-          iconAnchor: [9, 9]
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
         });
 
         var userMarker = L.marker([lat, lng], { icon: userIcon });
@@ -246,8 +320,10 @@ window.MumbAIR.MAP = (function(){
           }
         });
 
-        mapInstance.setView([lat, lng], 13, { animate: true });
-        setTimeout(function(){ userMarker.openPopup(); }, 300);
+        if(mapInstance){
+          mapInstance.setView([lat, lng], 13, { animate: true });
+          setTimeout(function(){ userMarker.openPopup(); }, 300);
+        }
 
         if(typeof onFound === 'function') onFound({ lat: lat, lng: lng, closestWard: closestWard, distanceKm: minDistance });
       },
@@ -279,6 +355,7 @@ window.MumbAIR.MAP = (function(){
 
   return {
     initMap: initMap,
+    initMiniMap: initMiniMap,
     invalidateSize: invalidateSize,
     renderWardMarkers: renderWardMarkers,
     renderReportMarkers: renderReportMarkers,

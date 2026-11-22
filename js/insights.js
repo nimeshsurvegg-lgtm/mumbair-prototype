@@ -1,5 +1,6 @@
 /* ==============================================================================
    MumbAIR — Insights & Environmental Intelligence Engine
+   Data-driven, verifiable calculations with zero invented claims
    ============================================================================== */
 
 window.MumbAIR = window.MumbAIR || {};
@@ -8,127 +9,121 @@ window.MumbAIR.INSIGHTS = (function(){
   'use strict';
 
   /**
-   * Compute deterministic environmental insights from live air & weather metrics
+   * Compute deterministic environmental insights strictly from available data
    */
   function generateInsights(airData, weatherData, wardCode){
     var insights = [];
-    if(!airData || !airData.current) return insights;
+    if(!airData || !airData.current) {
+      insights.push({
+        type: 'info',
+        title: 'ℹ️ Sensor Synchronization in Progress',
+        body: 'Atmospheric telemetry is currently synchronizing with meteorological models. Metric summaries will refresh shortly.',
+        source: 'System Monitor'
+      });
+      return insights;
+    }
 
     var curr = airData.current;
     var hourly = airData.hourly;
-    var weather = weatherData ? weatherData.current : null;
 
-    // 1. Dominant Pollutant Analysis
-    var pm25 = curr.pm2_5 || 0;
-    var pm10 = curr.pm10 || 0;
-    var no2 = curr.nitrogen_dioxide || 0;
+    var pm25 = typeof curr.pm2_5 === 'number' ? curr.pm2_5 : null;
+    var pm10 = typeof curr.pm10 === 'number' ? curr.pm10 : null;
+    var no2 = typeof curr.nitrogen_dioxide === 'number' ? curr.nitrogen_dioxide : null;
 
-    if(pm25 > 60){
+    // 1. Dominant Parameter Verification
+    if(pm25 !== null && pm25 > 60){
       insights.push({
         type: 'alert',
-        title: '⚠️ PM2.5 is Currently the Dominant Hazard',
-        body: 'Fine particulate matter (PM2.5 at ' + Math.round(pm25) + ' µg/m³) exceeds the CPCB 24-hour safety threshold of 60 µg/m³. Due to its microscopic diameter (≤ 2.5 µm), it penetrates deep into alveolar lung tissue and the bloodstream.',
-        source: 'Calculated from Open-Meteo Atmospheric Ingestion'
+        title: '⚠️ PM2.5 is the Dominant Factor',
+        body: 'Fine particulate concentration (' + Math.round(pm25) + ' µg/m³) is currently elevated above the CPCB 24-hour reference limit (60 µg/m³). Inhalable particulates of this size remain suspended in ambient air.',
+        source: 'Calculated from Copernicus CAMS Data Grid'
+      });
+    } else if(pm10 !== null && pm10 > 100){
+      insights.push({
+        type: 'warning',
+        title: '⚠️ Coarse Particulate (PM10) is Elevated',
+        body: 'PM10 concentration (' + Math.round(pm10) + ' µg/m³) is above the 24-hour reference limit (100 µg/m³). Coarse particles primarily originate from mechanical suspension and road transit.',
+        source: 'Calculated from Copernicus CAMS Data Grid'
+      });
+    } else {
+      insights.push({
+        type: 'info',
+        title: '✅ Monitored Parameters Within Reference Range',
+        body: 'Current particulate concentrations are within standard CPCB 24-hour regulatory benchmarks for the selected monitoring coordinates.',
+        source: 'CPCB NAQI Benchmark Comparison'
       });
     }
 
-    // 2. Trend & 24-Hour Delta Analysis
+    // 2. 24-Hour Concentration Delta (Measured from hourly records)
     if(hourly && hourly.pm2_5 && hourly.pm2_5.length >= 24){
       var recent = hourly.pm2_5[hourly.pm2_5.length - 1];
       var past24 = hourly.pm2_5[Math.max(0, hourly.pm2_5.length - 25)];
-      var delta = Math.round(recent - past24);
-
-      if(Math.abs(delta) >= 15){
-        var isRising = delta > 0;
-        insights.push({
-          type: isRising ? 'warning' : 'info',
-          title: isRising ? '📈 Particulate Concentrations Rising' : '📉 Air Quality Showing Gradual Improvement',
-          body: 'Ambient PM2.5 has ' + (isRising ? 'increased' : 'decreased') + ' by ' + Math.abs(delta) + ' µg/m³ compared to the same hour yesterday. Atmospheric stability and localized emissions are primary drivers.',
-          source: '24-Hour Moving Rolling Trend Analysis'
-        });
+      if(typeof recent === 'number' && typeof past24 === 'number'){
+        var delta = Math.round(recent - past24);
+        if(Math.abs(delta) >= 12){
+          var isRising = delta > 0;
+          insights.push({
+            type: isRising ? 'warning' : 'info',
+            title: isRising ? '📈 24-Hour Particulate Increase' : '📉 24-Hour Particulate Reduction',
+            body: 'Measured PM2.5 has ' + (isRising ? 'risen' : 'declined') + ' by ' + Math.abs(delta) + ' µg/m³ compared to the corresponding hour yesterday.',
+            source: 'Open-Meteo Hourly Time-Series Analysis'
+          });
+        }
       }
     }
 
-    // 3. Coastal Sea Breeze & Inversion Analysis
-    if(weather){
-      var windSpd = weather.wind_speed_10m || 0;
-      var windDir = weather.wind_direction_10m || 0; // 0=N, 90=E, 180=S, 270=W
-
-      // Mumbai sea breeze comes from 240° - 310° (WSW / W / WNW Arabian Sea)
-      var isMaritimeBreeze = (windDir >= 230 && windDir <= 330);
-      var isStalled = (windSpd < 8);
-
-      if(isStalled){
-        insights.push({
-          type: 'alert',
-          title: '🌬️ Coastal Sea Breeze Inversion Stalled',
-          body: 'Low surface wind velocity (' + windSpd.toFixed(1) + ' km/h) creates stagnant dispersion conditions. Particulate pollutants from transport corridors and eastern petrochemical zones (Chembur / Mahul) cannot disperse seaward.',
-          source: 'Open-Meteo Surface Weather Ingestion'
-        });
-      } else if(isMaritimeBreeze && windSpd >= 12){
-        insights.push({
-          type: 'info',
-          title: '🌊 Active Arabian Sea Breeze Inflow',
-          body: 'Clean onshore maritime airflow (' + windSpd.toFixed(1) + ' km/h from ' + Math.round(windDir) + '°) is actively dispersing vehicular emissions across Western Suburbs and South Mumbai coastal corridors.',
-          source: 'Open-Meteo Marine Vector Calculation'
-        });
-      }
-    }
-
-    // 4. Ward Specific Environmental Context
-    if(wardCode === 'M/E' || wardCode === 'M/W'){
-      insights.push({
-        type: 'warning',
-        title: '🏭 Industrial & Landfill Perimeter Sensitivity',
-        body: 'Ward ' + wardCode + ' experiences compounded particulate stress from petrochemical refinery flare corridors and Deonar landfill proximity. Nighttime thermal inversions regularly elevate PM10 and SO₂.',
-        source: 'MCGM Environmental Ward Profile'
-      });
-    }
+    // 3. Technical Data Attribution & Coverage Limitations
+    insights.push({
+      type: 'info',
+      title: '🌐 Model Coverage & Grid Transparency',
+      body: 'Data is assimilated from Copernicus Atmosphere Monitoring Service (CAMS) and ECMWF forecast models at ~11 km spatial resolution. Values represent area-averaged ambient concentrations rather than physical fence-line micro-sensors.',
+      source: 'Open-Meteo Air Quality Reference Standard'
+    });
 
     return insights;
   }
 
   /**
-   * Health precautions matching active AQI category
+   * Health precautions matching active AQI category (CPCB NAQI guidelines)
    */
   function getHealthAdvisory(aqiCategory){
     var cat = aqiCategory || 'Moderate';
     var advisories = {
       'Good': {
-        general: 'Air quality is satisfactory. Ideal conditions for outdoor exercise and recreation.',
-        vulnerable: 'No special precautions required for sensitive groups.',
-        mask: 'No mask necessary.',
-        windows: 'Safe to ventilate indoor living spaces.'
+        general: 'Air quality is considered satisfactory, and air pollution poses little or no risk.',
+        vulnerable: 'No restrictions required.',
+        mask: 'No mask required.',
+        windows: 'Windows can remain open for fresh air.'
       },
       'Satisfactory': {
-        general: 'Air quality is acceptable. Normal outdoor activities can be enjoyed.',
-        vulnerable: 'Minor breathing discomfort possible for unusually sensitive individuals with asthma.',
-        mask: 'Not needed for general public.',
-        windows: 'Safe for regular home ventilation.'
+        general: 'Air quality is acceptable for outdoor recreation.',
+        vulnerable: 'Exceptionally sensitive individuals may consider reducing prolonged outdoor heavy exertion.',
+        mask: 'Not generally needed.',
+        windows: 'Adequate ventilation.'
       },
       'Moderate': {
-        general: 'Breathing discomfort possible to people with lung disease such as asthma and heart ailments.',
-        vulnerable: 'Children and seniors should reduce prolonged vigorous outdoor exertion.',
-        mask: 'Consider cloth or surgical mask if walking near heavy traffic corridors.',
-        windows: 'Limit morning cross-ventilation during peak traffic hours.'
+        general: 'Air quality is acceptable; may cause minor breathing discomfort to sensitive individuals.',
+        vulnerable: 'People with respiratory conditions, asthma, or heart disease should take occasional breaks during outdoor exertion.',
+        mask: 'Optional particulate mask for prolonged transit along major highways.',
+        windows: 'Normal ventilation.'
       },
       'Poor': {
-        general: 'Breathing discomfort to most people on prolonged exposure. Limit early morning jogs.',
-        vulnerable: 'People with asthma and respiratory conditions must keep quick-relief medication handy.',
-        mask: 'N95 or particulate respirator recommended outdoors.',
-        windows: 'Keep windows shut during evening traffic and early morning hours.'
+        general: 'Breathing discomfort likely for most people on prolonged outdoor exposure.',
+        vulnerable: 'Children, the elderly, and individuals with lung or heart ailments should limit outdoor exertion.',
+        mask: 'N95 particulate respirator recommended for prolonged outdoor transit.',
+        windows: 'Keep windows closed during peak traffic hours.'
       },
       'Very Poor': {
-        general: 'Respiratory illness on prolonged exposure. Significant physical fatigue outdoors.',
-        vulnerable: 'Children, pregnant women, and elderly should strictly avoid outdoor physical activity.',
-        mask: 'Mandatory N95 respirator outdoors.',
-        windows: 'Keep windows closed; run HEPA air purifiers if accessible.'
+        general: 'Respiratory illness on prolonged exposure. Significant health impact across the population.',
+        vulnerable: 'Avoid outdoor physical activity. Keep emergency inhalers accessible if prescribed.',
+        mask: 'N95 respirator strongly advised outdoors.',
+        windows: 'Keep doors and windows closed; use air filtration where available.'
       },
       'Severe': {
-        general: 'Emergency health advisory. Serious risk of respiratory effects even in healthy individuals.',
-        vulnerable: 'Complete restriction of outdoor activity. Seek medical advice if wheezing occurs.',
-        mask: 'Strict N95/N99 respirator required for any emergency outdoor transit.',
-        windows: 'Completely seal windows and external door vents.'
+        general: 'Emergency atmospheric conditions. Affects healthy people and seriously impacts those with existing diseases.',
+        vulnerable: 'Strictly avoid outdoor physical transit.',
+        mask: 'Mandatory high-efficiency mask if transit is unavoidable.',
+        windows: 'Keep indoor spaces sealed.'
       }
     };
 

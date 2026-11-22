@@ -1,5 +1,6 @@
 /* ==============================================================================
-   MumbAIR — Dashboard CSS (Apple Weather Inspired Hero AQI, Pollutants & Weather)
+   MumbAIR — Dashboard CSS (Apple Weather Style Hero AQI, Weather & Map Feature)
+   Visually balanced, zero dead whitespace, robust responsiveness
    ============================================================================== */
 
 /* Home Meta Freshness Line */
@@ -9,14 +10,22 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+}
+
+.location-headline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .city-title {
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 800;
   color: var(--ink-primary);
   letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .station-meta-line {
@@ -24,8 +33,8 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
-  font-size: 0.8125rem;
+  margin-top: 3px;
+  font-size: 0.78125rem;
   color: var(--ink-muted);
 }
 
@@ -35,7 +44,7 @@
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.6875rem;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-xs);
 }
 
@@ -61,15 +70,15 @@
 .meta-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-/* Hero Grid Layout (Hero AQI Card + Marine Dispersion Weather) */
+/* Hero Grid Layout (Hero AQI Card + Weather Card) */
 .home-hero-grid {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: 20px;
-  margin-bottom: 24px;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 18px;
+  margin-bottom: 22px;
 }
 
 @media (max-width: 960px) {
@@ -78,12 +87,15 @@
   }
 }
 
-/* Master AQI Hero Card (Apple Weather Inspiration) */
+/* =============================================================================
+   MASTER AQI HERO CARD (Apple Weather Inspiration)
+   ============================================================================= */
+
 .aqi-hero-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 22px 24px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
@@ -97,24 +109,70 @@
   box-shadow: var(--shadow-md);
 }
 
-.aqi-hero-inner {
-  display: flex;
-  align-items: center;
-  gap: 28px;
+.card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--brand-teal);
+  font-weight: 700;
 }
 
-@media (max-width: 600px) {
-  .aqi-hero-inner {
+.aqi-card-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aqi-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aqi-category-badge {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(202, 138, 4, 0.12);
+  color: var(--aqi-moderate);
+  transition: all 0.3s ease;
+}
+
+.dominant-pollutant-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.aqi-hero-content-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+@media (max-width: 620px) {
+  .aqi-hero-content-row {
     flex-direction: column;
     text-align: center;
-    gap: 16px;
+    gap: 14px;
   }
 }
 
 /* Circular Arc Gauge Visual */
 .aqi-gauge-visual {
   position: relative;
-  width: 170px;
+  width: 190px;
   height: 125px;
   flex-shrink: 0;
   display: flex;
@@ -129,7 +187,7 @@
 }
 
 .arc-bg {
-  stroke: var(--bg-muted);
+  stroke: #E2E8F0;
 }
 
 .arc-progress {
@@ -139,7 +197,7 @@
 
 .aqi-center-stat {
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   left: 0;
   right: 0;
   display: flex;
@@ -149,73 +207,35 @@
 
 .aqi-big-val {
   font-family: var(--font-mono);
-  font-size: 3.25rem;
+  font-size: 3.4rem;
   font-weight: 800;
   line-height: 1;
   color: var(--aqi-moderate);
   transition: color 0.4s ease;
+  letter-spacing: -0.02em;
 }
 
-.aqi-unit-label {
-  font-size: 0.6875rem;
+.aqi-scale-caption {
+  font-size: 0.65rem;
   font-family: var(--font-mono);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--ink-muted);
   letter-spacing: 0.05em;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
-/* AQI Content Details */
-.aqi-hero-content {
+/* AQI Content Details Column */
+.aqi-health-column {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.aqi-badge-status-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.aqi-category-badge {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.875rem;
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  background: rgba(202, 138, 4, 0.12);
-  color: var(--aqi-moderate);
-  transition: all 0.3s ease;
-}
-
-.dominant-pollutant-badge {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-  color: var(--ink-secondary);
-  border: 1px solid var(--border-subtle);
-}
-
-.grap-stage-badge {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: var(--radius-xs);
-  background: #FEF3C7;
-  color: #B45309;
-  border: 1px solid #FDE68A;
+  min-width: 0;
 }
 
 .aqi-health-recommendation {
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   color: var(--ink-secondary);
   line-height: 1.45;
   background: var(--bg-canvas);
@@ -225,13 +245,15 @@
 }
 
 /* CPCB NAQI Scale Track */
-.cpcb-scale-track {
-  margin-top: 4px;
+.cpcb-scale-track-wrap {
   position: relative;
+  margin-top: 2px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cpcb-segments {
-  height: 7px;
+  height: 6px;
   border-radius: var(--radius-full);
   display: flex;
   overflow: hidden;
@@ -252,8 +274,8 @@
 .scale-cursor {
   position: absolute;
   top: -3px;
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--ink-primary);
   border: 2px solid #fff;
@@ -266,30 +288,24 @@
   display: flex;
   justify-content: space-between;
   font-family: var(--font-mono);
-  font-size: 0.625rem;
+  font-size: 0.6rem;
   color: var(--ink-light);
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
-/* Weather & Coastal Dispersion Card */
+/* =============================================================================
+   WEATHER CARD (Clean Metrics, No Unsupported Narratives)
+   ============================================================================= */
+
 .weather-corridor-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 22px;
+  padding: 20px 22px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.weather-card-header .card-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--brand-teal);
-  font-weight: 700;
 }
 
 .weather-card-header .card-heading {
@@ -299,41 +315,11 @@
   margin-top: 2px;
 }
 
-.marine-dispersion-indicator {
-  margin: 12px 0;
-  background: #F0FDFA;
-  border: 1px solid #CCFBF1;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-}
-
-.dispersion-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: #0F766E;
-}
-
-.wind-arrow-icon {
-  font-size: 16px;
-  font-weight: 800;
-  display: inline-block;
-  transform: rotate(45deg);
-}
-
-.dispersion-subtext {
-  font-size: 0.75rem;
-  color: #115E59;
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
 .weather-tiles-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
+  margin: 12px 0 8px 0;
 }
 
 .weather-tile {
@@ -356,32 +342,45 @@
 }
 
 .tile-label {
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   color: var(--ink-muted);
 }
 
 .tile-val {
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ink-primary);
 }
 
-/* 6-Parameter Pollutant Strip */
+.weather-source-footnote {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-light);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* =============================================================================
+   6-PARAMETER POLLUTANT STRIP
+   ============================================================================= */
+
 .pollutant-strip-section {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 22px;
+  padding: 20px 22px;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .section-title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .section-heading {
@@ -391,24 +390,24 @@
 }
 
 .section-subtext {
-  font-size: 0.8125rem;
+  font-size: 0.78125rem;
   color: var(--ink-muted);
   margin-top: 2px;
 }
 
 .standards-disclaimer {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   color: var(--ink-muted);
 }
 
 .pollutants-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1080px) {
   .pollutants-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -424,11 +423,12 @@
   background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 14px 12px;
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: transform var(--transition-fast), border-color var(--transition-fast);
+  min-width: 0;
 }
 
 .pollutant-box:hover {
@@ -440,10 +440,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 4px;
 }
 
 .pbox-name {
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   color: var(--ink-muted);
   font-weight: 600;
   white-space: nowrap;
@@ -461,29 +462,30 @@
 .pbox-val-row {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin: 8px 0;
+  gap: 3px;
+  margin: 6px 0;
 }
 
 .pbox-number {
   font-family: var(--font-mono);
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--ink-primary);
+  line-height: 1;
 }
 
 .pbox-unit {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   color: var(--ink-muted);
 }
 
 .pbox-meter {
-  height: 5px;
+  height: 4px;
   background: var(--bg-muted);
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .pbox-meter-fill {
@@ -496,7 +498,7 @@
 .pbox-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   color: var(--ink-muted);
 }
 
@@ -504,11 +506,43 @@
   font-weight: 700;
 }
 
+/* =============================================================================
+   PROMINENT MUMBAI MAP FEATURE CARD ON HOME
+   ============================================================================= */
+
+.home-map-feature-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 22px;
+}
+
+.map-feature-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.home-map-preview-canvas {
+  width: 100%;
+  height: 260px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+  background: #E2E8F0;
+}
+
 /* Home Quick Action Cards */
 .home-quick-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 
 @media (max-width: 860px) {
@@ -521,10 +555,10 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-xs);
@@ -537,30 +571,30 @@
 }
 
 .quick-icon {
-  font-size: 28px;
+  font-size: 24px;
   flex-shrink: 0;
 }
 
 .quick-info h4 {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--ink-primary);
 }
 
 .quick-info p {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--ink-muted);
   margin-top: 2px;
 }
 
 .quick-arrow {
   margin-left: auto;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-light);
   transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
 .quick-action-card:hover .quick-arrow {
   color: var(--brand-teal);
-  transform: translateX(4px);
+  transform: translateX(3px);
 }

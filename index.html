@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MumbAIR — Greater Mumbai Air Quality &amp; Civic Action Platform</title>
   
-  <!-- Leaflet Map CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <!-- Local Vendor Libraries (Offline & Zero-CDN Dependent) -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 
   <!-- Design System CSS -->
   <link rel="stylesheet" href="css/base.css">
@@ -32,7 +32,7 @@
           <div class="brand-mark">M</div>
           <div class="brand-text">
             <div class="brand-title">Mumb<span>AIR</span></div>
-            <div class="brand-sub">Greater Mumbai Air Intelligence</div>
+            <div class="brand-sub">Mumbai Air Intelligence</div>
           </div>
         </a>
 
@@ -40,12 +40,12 @@
         <div class="location-picker-wrap">
           <button class="location-trigger-btn" id="btnOpenLocationModal" title="Select monitored ward in Greater Mumbai">
             <span class="loc-pin">📍</span>
-            <span class="loc-text" id="headerLocationText">Chembur / Mahul (Ward M/E)</span>
+            <span class="loc-text" id="headerLocationText">Chembur / Mahul (M/E)</span>
             <span class="loc-arrow">▾</span>
           </button>
         </div>
 
-        <!-- 6 Core Navigation Tabs -->
+        <!-- 5 Core Navigation Tabs -->
         <nav class="citizen-nav" id="citizenNav">
           <button class="nav-link active" data-tab="tab-home">
             <span class="nav-icon">📊</span>
@@ -65,36 +65,31 @@
           </button>
           <button class="nav-link" data-tab="tab-reports">
             <span class="nav-icon">📸</span>
-            <span>Pollution Reports</span>
-          </button>
-          <button class="nav-link" data-tab="tab-alerts">
-            <span class="nav-icon">🔔</span>
-            <span>Alerts</span>
-            <span class="nav-pill-badge" id="navAlertCount">2</span>
+            <span>Reports</span>
           </button>
         </nav>
 
         <!-- Right Header Action Controls -->
         <div class="header-actions">
-          <button class="icon-action-btn" id="btnRefreshLive" title="Refresh Live Atmospheric Data">
+          <button class="icon-action-btn" id="btnRefreshLive" title="Refresh Atmospheric Data">
             <span class="btn-icon">🔄</span>
           </button>
           
-          <button class="icon-action-btn notif-btn" id="btnNotificationCenter" title="Environmental Notifications">
+          <button class="icon-action-btn notif-btn" id="btnNotificationCenter" title="Advisories &amp; Alerts">
             <span class="btn-icon">🔔</span>
             <span class="notif-count-pill" id="headerNotifBadge">0</span>
           </button>
 
           <!-- Citizen Profile / Login -->
-          <button class="btn btn-outline btn-sm" id="btnCitizenAuth" title="Citizen Account &amp; Favorites">
+          <button class="btn btn-outline btn-sm btn-profile-header" id="btnCitizenAuth" title="Citizen Account &amp; Favorites">
             <span>👤</span>
             <span id="citizenAuthLabel">Guest</span>
           </button>
 
           <!-- Municipal Authority Entry Point -->
-          <button class="btn btn-authority btn-sm" id="btnGoToAuthority" title="Access Brihanmumbai Municipal Corporation Operations Command">
+          <button class="btn btn-authority btn-sm" id="btnGoToAuthority" title="Access BMC / MCGM Municipal Command">
             <span class="badge-lock">🔒</span>
-            <span>Municipal Authority</span>
+            <span class="btn-auth-label">Authority</span>
           </button>
         </div>
       </div>
@@ -103,7 +98,7 @@
     <!-- Notification Dropdown Popover -->
     <div class="notif-popover hidden" id="notifPopover">
       <div class="notif-popover-header">
-        <h4>Environmental Notifications</h4>
+        <h4>Environmental Advisories &amp; Notifications</h4>
         <button class="btn-text-sm" id="btnClearNotifs">Mark all read</button>
       </div>
       <div class="notif-items" id="notifListContainer"></div>
@@ -120,9 +115,11 @@
         <!-- Meta Location & Data Freshness Header -->
         <div class="home-meta-bar">
           <div class="meta-location-info">
-            <h1 class="city-title" id="homeCityTitle">Mumbai, Maharashtra</h1>
-            <div class="station-meta-line">
+            <div class="location-headline-wrap">
+              <h1 class="city-title" id="homeCityTitle">Mumbai, Maharashtra</h1>
               <span class="ward-pill" id="homeWardBadge">Ward M/E</span>
+            </div>
+            <div class="station-meta-line">
               <span class="meta-station-name" id="homeStationName">Mahul Petrochemical CAAQMS</span>
               <span class="meta-dot">&middot;</span>
               <span class="meta-source" id="homeSourceAttribution">Live API (Open-Meteo)</span>
@@ -132,41 +129,44 @@
           </div>
           <div class="meta-actions">
             <button class="btn btn-sm btn-ghost" id="btnDetectGps"><span class="btn-icon">🎯</span> Locate Me</button>
-            <button class="btn btn-sm btn-ghost" id="btnShareAqi"><span class="btn-icon">📤</span> Share AQI</button>
+            <button class="btn btn-sm btn-ghost" id="btnShareAqi"><span class="btn-icon">📤</span> Share</button>
           </div>
         </div>
 
-        <!-- Hero AQI + Weather Corridor Grid -->
+        <!-- Hero AQI + Weather Grid -->
         <div class="home-hero-grid">
           
-          <!-- Master AQI Gauge Card -->
+          <!-- Master AQI Hero Card (Apple Weather Inspiration) -->
           <div class="aqi-hero-card" id="heroAqiCard">
-            <div class="aqi-hero-inner">
+            <div class="aqi-card-topbar">
+              <span class="card-eyebrow">NATIONAL AIR QUALITY INDEX</span>
+              <div class="aqi-pill-group">
+                <span class="aqi-category-badge" id="heroCategoryBadge">Moderate</span>
+                <span class="dominant-pollutant-badge" id="heroDominantBadge">Dominant: PM2.5</span>
+              </div>
+            </div>
+
+            <div class="aqi-hero-content-row">
+              <!-- Radial Semi-Circular Gauge -->
               <div class="aqi-gauge-visual">
-                <!-- SVG Semi-Circular Arc Gauge -->
-                <svg class="aqi-arc-svg" viewBox="0 0 200 120">
-                  <path class="arc-bg" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#E2E8F0" stroke-width="14" stroke-linecap="round"/>
-                  <path class="arc-progress" id="aqiArcProgress" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#CA8A04" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="125"/>
+                <svg class="aqi-arc-svg" viewBox="0 0 220 130">
+                  <path class="arc-bg" d="M 25 115 A 85 85 0 0 1 195 115" fill="none" stroke="#E2E8F0" stroke-width="16" stroke-linecap="round"/>
+                  <path class="arc-progress" id="aqiArcProgress" d="M 25 115 A 85 85 0 0 1 195 115" fill="none" stroke="#CA8A04" stroke-width="16" stroke-linecap="round" stroke-dasharray="267" stroke-dashoffset="133"/>
                 </svg>
                 <div class="aqi-center-stat">
                   <div class="aqi-big-val" id="heroAqiNumber">142</div>
-                  <div class="aqi-unit-label">CPCB NAQI</div>
+                  <div class="aqi-scale-caption">CPCB NAQI</div>
                 </div>
               </div>
 
-              <div class="aqi-hero-content">
-                <div class="aqi-badge-status-row">
-                  <span class="aqi-category-badge" id="heroCategoryBadge">Moderate</span>
-                  <span class="dominant-pollutant-badge" id="heroDominantBadge">Dominant: PM2.5</span>
-                  <span class="grap-stage-badge" id="heroGrapBadge">GRAP Stage II</span>
-                </div>
-
+              <!-- Health Guidance Box -->
+              <div class="aqi-health-column">
                 <div class="aqi-health-recommendation" id="heroHealthText">
                   Air quality is acceptable; however, sensitive groups may experience minor breathing discomfort with prolonged outdoor exertion.
                 </div>
 
                 <!-- CPCB Scale Progress Bar -->
-                <div class="cpcb-scale-track">
+                <div class="cpcb-scale-track-wrap">
                   <div class="cpcb-segments">
                     <div class="seg seg-good" title="Good (0-50)"></div>
                     <div class="seg seg-sat" title="Satisfactory (51-100)"></div>
@@ -177,28 +177,23 @@
                   </div>
                   <div class="scale-cursor" id="heroScaleCursor" style="left: 28%;"></div>
                   <div class="scale-ticks">
-                    <span>0</span><span>50</span><span>100</span><span>200</span><span>300</span><span>400</span><span>500</span>
+                    <span>0 Good</span>
+                    <span>100</span>
+                    <span>200 Mod</span>
+                    <span>300</span>
+                    <span>400</span>
+                    <span>500+ Sev</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Weather & Coastal Dispersion Card -->
+          <!-- Weather Conditions Card -->
           <div class="weather-corridor-card">
             <div class="weather-card-header">
-              <span class="card-kicker">Atmospheric Marine Dispersion</span>
-              <h3 class="card-heading">Arabian Sea Inflow &amp; Weather</h3>
-            </div>
-
-            <div class="marine-dispersion-indicator" id="marineDispersionStatus">
-              <div class="dispersion-pill active">
-                <span class="wind-arrow-icon" id="windArrowIcon">↗</span>
-                <span id="dispersionSummaryText">Active Onshore Marine Breeze</span>
-              </div>
-              <p class="dispersion-subtext" id="dispersionDesc">
-                Westerly coastal airflow is actively displacing vehicular particulate inland toward the Thane Creek basin.
-              </p>
+              <span class="card-eyebrow">METEOROLOGICAL CONTEXT</span>
+              <h3 class="card-heading">Surface Weather</h3>
             </div>
 
             <div class="weather-tiles-grid">
@@ -231,6 +226,10 @@
                 </div>
               </div>
             </div>
+
+            <div class="weather-source-footnote">
+              ECMWF &middot; Measured at 10m elevation &middot; Asia/Kolkata
+            </div>
           </div>
 
         </div>
@@ -240,9 +239,9 @@
           <div class="section-title-row">
             <div>
               <h3 class="section-heading">🧪 Real-Time Pollutant Breakdown</h3>
-              <p class="section-subtext">Benchmarked against CPCB National Ambient Air Quality Standards</p>
+              <p class="section-subtext">Concentrations benchmarked against CPCB National Ambient Air Quality 24-hr standards</p>
             </div>
-            <div class="standards-disclaimer">Standard: CPCB 24-hr Limits</div>
+            <div class="standards-disclaimer">Values from Copernicus CAMS model grid (~11km)</div>
           </div>
 
           <div class="pollutants-grid">
@@ -260,7 +259,7 @@
                 <div class="pbox-meter-fill" id="meterPm25" style="width: 50%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 60</span>
+                <span class="pbox-limit">CPCB Limit: 60</span>
                 <span class="pbox-status" id="statusPm25">Moderate</span>
               </div>
             </div>
@@ -279,7 +278,7 @@
                 <div class="pbox-meter-fill" id="meterPm10" style="width: 60%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 100</span>
+                <span class="pbox-limit">CPCB Limit: 100</span>
                 <span class="pbox-status" id="statusPm10">Moderate</span>
               </div>
             </div>
@@ -298,7 +297,7 @@
                 <div class="pbox-meter-fill" id="meterNo2" style="width: 35%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 80</span>
+                <span class="pbox-limit">CPCB Limit: 80</span>
                 <span class="pbox-status" id="statusNo2">Good</span>
               </div>
             </div>
@@ -317,7 +316,7 @@
                 <div class="pbox-meter-fill" id="meterSo2" style="width: 20%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 80</span>
+                <span class="pbox-limit">CPCB Limit: 80</span>
                 <span class="pbox-status" id="statusSo2">Good</span>
               </div>
             </div>
@@ -336,7 +335,7 @@
                 <div class="pbox-meter-fill" id="meterCo" style="width: 25%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 2.0</span>
+                <span class="pbox-limit">CPCB Limit: 2.0</span>
                 <span class="pbox-status" id="statusCo">Good</span>
               </div>
             </div>
@@ -355,20 +354,38 @@
                 <div class="pbox-meter-fill" id="meterO3" style="width: 30%;"></div>
               </div>
               <div class="pbox-footer">
-                <span class="pbox-limit">CPCB Max: 100</span>
+                <span class="pbox-limit">CPCB Limit: 100</span>
                 <span class="pbox-status" id="statusO3">Good</span>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Prominent Mumbai Map Preview Section -->
+        <div class="home-map-feature-card">
+          <div class="map-feature-header">
+            <div>
+              <span class="card-eyebrow">GEOSPATIAL INTELLIGENCE</span>
+              <h3 class="section-heading">Greater Mumbai Atmospheric Map</h3>
+              <p class="section-subtext">Spatial surveillance across 24 administrative wards and community reported violations</p>
+            </div>
+            <button class="btn btn-primary" id="btnHomeOpenFullMap">
+              🗺️ Open Full Interactive Map ➔
+            </button>
+          </div>
+          <div class="home-map-preview-canvas" id="homeMapPreviewContainer">
+            <!-- Mini interactive Leaflet preview -->
+            <div id="homeMiniMap" style="width:100%; height:260px; border-radius:var(--radius-md);"></div>
+          </div>
+        </div>
+
         <!-- Quick Action Nav Cards -->
         <div class="home-quick-actions">
-          <div class="quick-action-card" id="qcardMap">
-            <span class="quick-icon">🗺️</span>
+          <div class="quick-action-card" id="qcardAirQuality">
+            <span class="quick-icon">🧪</span>
             <div class="quick-info">
-              <h4>Explore Mumbai on Map</h4>
-              <p>View 24 wards, live CAAQMS station footprints &amp; citizen-reported violations.</p>
+              <h4>Compare 24 Wards</h4>
+              <p>Explore all Mumbai CAAQMS monitoring stations and compare wards side-by-side.</p>
             </div>
             <span class="quick-arrow">➔</span>
           </div>
@@ -386,7 +403,7 @@
             <span class="quick-icon">📈</span>
             <div class="quick-info">
               <h4>24-Hour Trends &amp; Forecast</h4>
-              <p>Analyze fine particulate curves and coastal sea breeze dispersion patterns.</p>
+              <p>Analyze fine particulate curves and coastal meteorological trajectories.</p>
             </div>
             <span class="quick-arrow">➔</span>
           </div>
@@ -413,11 +430,11 @@
             </div>
           </div>
           <div style="display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:220px;">
+            <div style="flex:1; min-width:200px;">
               <label class="form-label">Ward A</label>
               <select class="form-select" id="compareSelectA"></select>
             </div>
-            <div style="flex:1; min-width:220px;">
+            <div style="flex:1; min-width:200px;">
               <label class="form-label">Ward B</label>
               <select class="form-select" id="compareSelectB"></select>
             </div>
@@ -494,7 +511,7 @@
         <div class="section-title-row" style="margin-bottom:20px;">
           <div>
             <h2 class="city-title" style="font-size:1.5rem;">📈 Atmospheric Trends &amp; Time-Series Analytics</h2>
-            <p class="section-subtext">24-hour and 7-day particulate matter trajectories benchmarked against meteorological sea breeze cycles</p>
+            <p class="section-subtext">24-hour particulate matter trajectories from Copernicus CAMS model reanalysis</p>
           </div>
         </div>
 
@@ -512,12 +529,27 @@
         </div>
 
         <!-- Deterministic Environmental Insights -->
-        <div class="card">
+        <div class="card" style="margin-bottom:20px;">
           <div class="card-header">
             <div class="card-title">💡 Deterministic Environmental Insights</div>
-            <div class="card-subtitle">Verifiable analytical deductions computed from current atmospheric sensor readings</div>
+            <div class="card-subtitle">Verifiable calculations derived directly from live atmospheric measurements</div>
           </div>
           <div id="insightsList"></div>
+        </div>
+
+        <!-- Local Deterministic AI Health Assistant -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🤖 Local Environmental Health Assistant</div>
+            <span class="ward-pill">Deterministic AI</span>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <input type="text" class="form-input" id="inputAiQuery" placeholder="e.g. Can I jog outside today? Should children wear N95 masks?">
+            <button class="btn btn-primary" id="btnAiAsk">Consult</button>
+          </div>
+          <div style="background:var(--bg-subtle); padding:14px 16px; border-radius:var(--radius-sm); font-size:13px; line-height:1.5;" id="bubbleAiAnswer">
+            Hello! I am your MumbAIR Environmental Assistant. Ask me any health, outdoor exercise, or mask precaution question based on Mumbai's current air quality.
+          </div>
         </div>
       </section>
 
@@ -527,7 +559,7 @@
       <section class="tab-view" id="tab-reports">
         <div class="reports-subnav-bar">
           <button class="subnav-pill active" id="btnSubnavReportWizard">📸 File a Violation Report</button>
-          <button class="subnav-pill" id="btnSubnavReportTracker">🎫 Track Civic Complaints &amp; Community Stream</button>
+          <button class="subnav-pill" id="btnSubnavReportTracker">🎫 Track Civic Complaints</button>
         </div>
 
         <!-- SUBVIEW A: Reporting Wizard -->
@@ -648,52 +680,6 @@
         </div>
       </section>
 
-      <!-- ======================================================== -->
-      <!-- TAB 6: ALERTS & HEALTH ADVISORIES                        -->
-      <!-- ======================================================== -->
-      <section class="tab-view" id="tab-alerts">
-        <div class="section-title-row" style="margin-bottom:20px;">
-          <div>
-            <h2 class="city-title" style="font-size:1.5rem;">🔔 Active Mumbai Environmental Advisories</h2>
-            <p class="section-subtext">Graded Response Action Plan (GRAP) protocols, coastal weather warnings, and health guidance</p>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px;">
-          <!-- GRAP Protocol Card -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">⚠️ Graded Response Action Plan (GRAP) — Active Protocol</div>
-              <span class="grap-stage-badge">STAGE II IN FORCE</span>
-            </div>
-            <div style="font-size:13px; line-height:1.5; color:var(--ink-secondary);">
-              <p>Under GRAP Stage II (Air Quality Index 201–300), the Brihanmumbai Municipal Corporation enforces mandatory dust suppression across all active construction sites and bans open biomass combustion.</p>
-              <ul style="margin:12px 0 12px 20px; line-height:1.6;">
-                <li>Daily mechanical / vacuum sweeping of heavy arterial traffic roads.</li>
-                <li>Water sprinkling across ready-mix concrete (RMC) plants and Metro rail corridors.</li>
-                <li>Ban on diesel generator sets except for emergency hospital services.</li>
-                <li>Strict vigilance against open waste combustion at Deonar &amp; Mulund dumping grounds.</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Deterministic AI Health Assistant Card -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">🤖 Local Environmental Assistant</div>
-              <span class="ward-pill">AI Query</span>
-            </div>
-            <div style="display:flex; gap:8px; margin-bottom:12px;">
-              <input type="text" class="form-input" id="inputAiQuery" placeholder="e.g. Can I jog outside today? Should children wear masks?">
-              <button class="btn btn-primary" id="btnAiAsk">Consult</button>
-            </div>
-            <div style="background:var(--bg-subtle); padding:12px 14px; border-radius:var(--radius-sm); font-size:12.5px; line-height:1.45;" id="bubbleAiAnswer">
-              Hello! I am your MumbAIR Environmental Assistant. I analyze live CPCB atmospheric measurements across Mumbai's 24 wards to provide actionable health guidance.
-            </div>
-          </div>
-        </div>
-      </section>
-
     </main>
 
     <!-- Global Footer -->
@@ -706,11 +692,9 @@
         <div class="footer-links">
           <span>MIT License</span>
           <span>&middot;</span>
-          <span>Zero Dependencies</span>
-          <span>&middot;</span>
           <span>24 MCGM Wards</span>
           <span>&middot;</span>
-          <a href="#" id="footerAuthorityLink" style="font-weight:700; color:var(--ink-primary);">Municipal Authority Login ➔</a>
+          <a href="#" id="footerAuthorityLink" style="font-weight:700; color:var(--ink-primary);">Municipal Operations Portal ➔</a>
         </div>
       </div>
     </footer>
@@ -728,8 +712,8 @@
         <div class="auth-header">
           <div class="bmc-emblem-badge">🏛️</div>
           <h2>Brihanmumbai Municipal Corporation</h2>
-          <p class="auth-sub">Environmental Vigilance &amp; Operations Command (MCGM)</p>
-          <div class="auth-badge-notice">Official Municipal Personnel Only</div>
+          <p class="auth-sub">Environmental Operations Command (MCGM)</p>
+          <div class="auth-badge-notice">Demonstration &amp; Presentation Mode</div>
         </div>
 
         <form id="formAuthorityLogin" class="auth-form" onsubmit="return false;">
@@ -798,7 +782,7 @@
           </div>
 
           <div class="auth-nav-controls" style="display:flex; gap:8px;">
-            <button class="btn btn-sm btn-outline-light" id="btnSwitchBackToCitizen">🌐 Public Citizen App</button>
+            <button class="btn btn-sm btn-outline-light" id="btnSwitchBackToCitizen">🌐 Citizen App</button>
             <button class="btn btn-sm btn-danger-subtle" id="btnAuthorityLogout">🚪 Logout</button>
           </div>
         </div>
@@ -871,9 +855,9 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- External Map & Chart Libraries -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Local Offline Vendor Libraries -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/chartjs/chart.umd.min.js"></script>
 
   <!-- Modular Application Scripts Loaded in Strict Dependency Order -->
   <script src="js/config.js"></script>

@@ -55,19 +55,21 @@ window.MumbAIR.MAP = (function(){
       scrollWheelZoom: true
     });
 
-    // Add CartoDB Positron tiles with OSM standard fallback
-    var baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+    // Primary OpenStreetMap standard tiles (100% open-source, zero API key required)
+    var baseTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
       maxZoom: 19
     });
 
     baseTiles.on('tileerror', function(){
-      // Fallback to OpenStreetMap standard tiles
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(mapInstance);
+      // Seamless fallback to Esri World Light Gray Canvas if OSM is unreachable
+      if(!mapInstance._hasFallbackTile){
+        mapInstance._hasFallbackTile = true;
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 16,
+          attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+        }).addTo(mapInstance);
+      }
     });
 
     baseTiles.addTo(mapInstance);
@@ -112,10 +114,18 @@ window.MumbAIR.MAP = (function(){
       dragging: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
+    var miniTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19
-    }).addTo(miniMapInstance);
+    });
+    miniTiles.on('tileerror', function(){
+      if(!miniMapInstance._hasFallbackTile){
+        miniMapInstance._hasFallbackTile = true;
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 16
+        }).addTo(miniMapInstance);
+      }
+    });
+    miniTiles.addTo(miniMapInstance);
 
     L.polygon(MUMBAI_COASTLINE_COORDS, {
       color: '#0D9488',

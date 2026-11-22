@@ -65,7 +65,7 @@ The application strictly avoids overwhelming users with cluttered dashboards. Th
 
 3. **🗺️ Explore Map:**
    - Full-height (620px) Leaflet interactive map centered on Greater Mumbai (`19.0760° N, 72.8777° E`).
-   - High-resolution CartoDB Positron base tiles with OpenStreetMap fallback.
+   - Open-source OpenStreetMap standard tiles with Esri World Light Gray fallback (100% free, zero API key required).
    - Automatic container resize invalidation (`MAP.invalidateSize()`) on tab display.
    - High-contrast custom HTML pins displaying Ward Code and live AQI value.
    - Layer toggles: `24 Wards / Stations`, `Dispersion Footprints`, and `Civic Reports`.
@@ -246,6 +246,6 @@ For presentations, hackathon evaluations, and reviewer grading, the **Municipal 
 ## 📜 Attribution & License
 
 * **Atmospheric Data:** [Open-Meteo](https://open-meteo.com/) (Licensed under CC BY 4.0 / Copernicus CAMS & ECMWF).
-* **Map Data:** &copy; [OpenStreetMap](https://www.openstreetmap.org/) contributors, &copy; [CARTO](https://carto.com/).
+* **Map Data:** &copy; [OpenStreetMap](https://www.openstreetmap.org/) contributors, &copy; Esri. Zero API key required.
 * **Typography:** Archivo, IBM Plex Sans, IBM Plex Mono (SIL Open Font License).
 * **Software License:** Distributed under the **MIT License**. See [LICENSE](file:///C:/Users/Nimesh/.gemini/antigravity/scratch/mumbair-prototype/LICENSE) for details.

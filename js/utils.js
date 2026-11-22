@@ -144,6 +144,8 @@ window.MumbAIR.UTILS = (function(){
     formatTime: formatTime,
     formatDateTime: formatDateTime,
     relativeTime: relativeTime,
+    timeAgo: relativeTime,
+    formatTimeAgo: relativeTime,
     escapeHtml: escapeHtml
   };
 })();

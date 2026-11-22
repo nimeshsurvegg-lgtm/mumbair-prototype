@@ -761,39 +761,94 @@
 
     <!-- Screen B: Authority Dashboard Workspace (When authenticated) -->
     <div id="authority-dashboard-view" class="authority-dashboard-workspace hidden">
-      <!-- Authority Header -->
-      <header class="authority-header">
-        <div class="authority-header-inner">
-          <div class="auth-brand">
-            <span class="auth-crest">🏛️</span>
+      <!-- Top Command Bar -->
+      <header class="ops-topbar">
+        <div class="ops-topbar-left">
+          <button class="ops-sidebar-toggle" id="btnOpsSidebarToggle" title="Toggle Navigation Sidebar">☰</button>
+          <div class="ops-brand">
+            <span class="ops-crest">🏛️</span>
             <div>
-              <div class="auth-title">MCGM Operations Command</div>
-              <div class="auth-subtitle">Environmental Vigilance &amp; Compliance System</div>
+              <span class="ops-title">MCGM Operations Command</span>
+              <span class="ops-node-badge"><span class="pulse-dot"></span> SECURE MUNICIPAL NODE &middot; CPCB SYNC</span>
             </div>
           </div>
+          <!-- Global Command Search (Ctrl+K) -->
+          <div class="ops-command-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="opsGlobalSearch" placeholder="Search complaints, wards, officers, hotspots (Ctrl+K)...">
+          </div>
+        </div>
 
-          <div class="officer-profile-card">
+        <div class="ops-topbar-right">
+          <!-- Quick Evaluator Persona Switcher -->
+          <div class="ops-persona-selector">
+            <label for="opsRoleSwitcher">Role:</label>
+            <select id="opsRoleSwitcher" class="ops-role-select">
+              <option value="FIELD_OFFICER">⚡ Field Officer</option>
+              <option value="WARD_OFFICER">🏛️ Ward Officer</option>
+              <option value="DEPARTMENT_HEAD">🏢 Dept Head</option>
+              <option value="CITY_ADMIN">🌆 City Admin</option>
+              <option value="SUPER_ADMIN">🔒 Super Admin</option>
+            </select>
+          </div>
+
+          <!-- Live Officer Profile Pill -->
+          <div class="ops-officer-pill">
             <div class="officer-avatar" id="authOfficerAvatar">S</div>
-            <div class="officer-meta">
-              <span class="officer-name" id="authOfficerName">Officer Sanjay Shinde</span>
-              <span class="officer-role-pill" id="authOfficerRolePill">Field Operations Officer</span>
+            <div class="officer-info">
+              <div class="officer-name-row">
+                <span class="officer-name" id="authOfficerName">Officer Sanjay Shinde</span>
+                <span class="officer-badge" id="authOfficerBadge">BMC-FO-4412</span>
+              </div>
+              <div class="officer-scope" id="authOfficerScope">Ward M/E &middot; SWM</div>
             </div>
-            <div class="officer-badge-pill" id="authOfficerBadge">BMC-FO-4412</div>
           </div>
 
-          <div class="auth-nav-controls" style="display:flex; gap:8px;">
-            <button class="btn btn-sm btn-outline-light" id="btnSwitchBackToCitizen">🌐 Citizen App</button>
-            <button class="btn btn-sm btn-danger-subtle" id="btnAuthorityLogout">🚪 Logout</button>
-          </div>
+          <!-- Citizen App & Logout Controls -->
+          <button class="btn btn-sm btn-outline-light" id="btnSwitchBackToCitizen" title="Return to Public Citizen Portal">🌐 Citizen App</button>
+          <button class="btn btn-sm btn-danger-subtle" id="btnAuthorityLogout" title="Logout Session">🚪 Sign Out</button>
         </div>
       </header>
 
-      <!-- Authority Role-Specific Container -->
-      <div class="authority-body">
-        <div class="authority-workspace-content" id="authorityWorkspaceContent">
-          <!-- Dynamically populated based on active role -->
-        </div>
+      <!-- Operations Shell: Sidebar + Main Content -->
+      <div class="ops-shell-layout">
+        <!-- Collapsible Navigation Sidebar -->
+        <aside class="ops-sidebar" id="opsSidebar">
+          <nav class="ops-nav-groups" id="opsNavMenu">
+            <!-- Populated dynamically based on user role permissions -->
+          </nav>
+          <div class="ops-sidebar-footer">
+            <div class="ops-sys-status">
+              <div class="status-indicator online"></div>
+              <div>
+                <div class="sys-label">MCGM Command v2.4</div>
+                <div class="sys-sub">Synced with CPCB &amp; MPCB</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Viewport Content Area -->
+        <main class="ops-main-viewport" id="opsMainViewport">
+          <!-- Viewport Header: Breadcrumbs & Contextual Actions -->
+          <div class="ops-viewport-header" id="opsViewportHeader">
+            <div class="ops-breadcrumbs" id="opsBreadcrumbs">
+              <span>Operations</span> / <span class="current">Command Center</span>
+            </div>
+            <div class="ops-viewport-actions" id="opsViewportActions">
+              <!-- Dynamically populated contextual actions -->
+            </div>
+          </div>
+
+          <!-- Module Container -->
+          <div class="ops-module-container" id="opsModuleContainer">
+            <!-- Active operational module view rendered here -->
+          </div>
+        </main>
       </div>
+
+      <!-- Legacy compatibility hook container for existing references -->
+      <div id="authorityWorkspaceContent" style="display:none;"></div>
     </div>
 
   </div>
@@ -849,6 +904,42 @@
           <button class="btn-text-sm" id="btnContinueGuest">Continue in Guest Mode</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Case Detail Operations Workspace                                   -->
+  <!-- ========================================================================= -->
+  <div class="ops-modal-backdrop hidden" id="modalCaseDetail">
+    <div class="ops-case-modal" id="opsCaseModalContent">
+      <!-- Injected dynamically by OPERATIONS.openCaseDetail() -->
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Dispatch & Officer Assignment                                      -->
+  <!-- ========================================================================= -->
+  <div class="ops-modal-backdrop hidden" id="modalDispatch">
+    <div class="ops-case-modal" style="max-width: 600px;" id="opsDispatchModalContent">
+      <!-- Injected dynamically by OPERATIONS.openDispatchModal() -->
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Public Advisory Broadcast Publisher                                -->
+  <!-- ========================================================================= -->
+  <div class="ops-modal-backdrop hidden" id="modalAdvisory">
+    <div class="ops-case-modal" style="max-width: 620px;" id="opsAdvisoryModalContent">
+      <!-- Injected dynamically by OPERATIONS.openAdvisoryModal() -->
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Resolution Review & Quality Verification                           -->
+  <!-- ========================================================================= -->
+  <div class="ops-modal-backdrop hidden" id="modalVerification">
+    <div class="ops-case-modal" style="max-width: 720px;" id="opsVerificationModalContent">
+      <!-- Injected dynamically by OPERATIONS.openVerificationModal() -->
     </div>
   </div>
 

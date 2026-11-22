@@ -102,7 +102,9 @@ window.MumbAIR.APP = (function(){
     document.getElementById('portal-authority').classList.add('active');
     document.getElementById('portal-authority').classList.remove('hidden');
 
-    window.location.hash = 'authority';
+    if(!window.location.hash || window.location.hash.indexOf('#authority') !== 0){
+      window.location.hash = 'authority';
+    }
 
     // Verify session
     if(AUTH.isAuthorityAuthenticated()){
@@ -144,19 +146,8 @@ window.MumbAIR.APP = (function(){
   function renderAuthorityWorkspace(){
     var user = AUTH.getAuthorityUser();
     if(!user) return;
-    var container = document.getElementById('authorityWorkspaceContent');
-    if(!container) return;
-
-    if(user.role === 'FIELD_OFFICER'){
-      OPERATIONS.renderFieldOps(container, user);
-    } else if(user.role === 'WARD_OFFICER'){
-      OPERATIONS.renderWardCommand(container, user);
-    } else if(user.role === 'DEPARTMENT_HEAD'){
-      OPERATIONS.renderDeptCommand(container, user);
-    } else if(user.role === 'CITY_ADMIN'){
-      OPERATIONS.renderCityCommand(container);
-    } else if(user.role === 'SUPER_ADMIN'){
-      OPERATIONS.renderSystemAdmin(container);
+    if(window.MumbAIR.OPERATIONS && window.MumbAIR.OPERATIONS.initAuthorityShell){
+      window.MumbAIR.OPERATIONS.initAuthorityShell();
     }
   }
 
@@ -1317,7 +1308,7 @@ window.MumbAIR.APP = (function(){
 
     // Initial check for URL hash routing
     var hash = window.location.hash.replace('#', '');
-    if(hash === 'authority'){
+    if(hash === 'authority' || hash.indexOf('authority') === 0){
       switchToAuthorityPortal();
     } else if(hash && document.getElementById('tab-' + hash)){
       switchTab('tab-' + hash);

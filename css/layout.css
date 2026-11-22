@@ -138,38 +138,39 @@ html, body {
   display: flex;
   align-items: center;
   gap: 3px;
-  background: var(--bg-subtle);
-  padding: 3px;
+  background: rgba(241, 245, 249, 0.9);
+  padding: 4px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   flex-shrink: 0;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   border: none;
   background: transparent;
-  color: var(--ink-muted);
-  font-size: 0.78125rem;
+  color: var(--ink-secondary);
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
 .nav-link:hover {
   color: var(--ink-primary);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .nav-link.active {
-  background: var(--bg-surface);
-  color: var(--brand-teal-dark);
-  box-shadow: var(--shadow-xs);
+  background: #FFFFFF;
+  color: var(--brand-teal);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(13, 148, 136, 0.1);
   font-weight: 700;
 }
 

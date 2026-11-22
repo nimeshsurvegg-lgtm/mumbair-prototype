@@ -25,21 +25,22 @@
   --border-medium: rgba(15, 23, 42, 0.14);
   --border-strong: rgba(15, 23, 42, 0.24);
 
-  /* Brand Accents (Teal & Aqua) */
+  /* Brand Accents (Vibrant Teal, Aqua & Violet Sky) */
   --brand-teal: #0D9488;
   --brand-teal-dark: #0F766E;
   --brand-teal-light: #CCFBF1;
-  --brand-teal-glow: rgba(13, 148, 136, 0.15);
+  --brand-teal-glow: rgba(13, 148, 136, 0.18);
   --brand-aqua: #06B6D4;
-  --brand-amber: #D97706;
+  --brand-amber: #F59E0B;
+  --brand-indigo: #6366F1;
 
-  /* Official Indian National AQI (CPCB) Standard Breakpoints & Colors */
-  --aqi-good: #16A34A;          /* 0 - 50: Good */
-  --aqi-satisfactory: #65A30D;  /* 51 - 100: Satisfactory */
-  --aqi-moderate: #CA8A04;      /* 101 - 200: Moderate */
-  --aqi-poor: #EA580C;          /* 201 - 300: Poor */
-  --aqi-very-poor: #DC2626;     /* 301 - 400: Very Poor */
-  --aqi-severe: #7F1D1D;        /* 401 - 500+: Severe */
+  /* Official Indian National AQI (CPCB) Standard Breakpoints — Refined Vibrant Spectrum */
+  --aqi-good: #10B981;          /* 0 - 50: Good (Vibrant Emerald) */
+  --aqi-satisfactory: #84CC16;  /* 51 - 100: Satisfactory (Luminous Lime) */
+  --aqi-moderate: #F59E0B;      /* 101 - 200: Moderate (Sunny Amber) */
+  --aqi-poor: #F97316;          /* 201 - 300: Poor (Sunset Orange) */
+  --aqi-very-poor: #EF4444;     /* 301 - 400: Very Poor (Crimson Red) */
+  --aqi-severe: #991B1B;        /* 401 - 500+: Severe (Deep Maroon) */
 
   /* Semantic State Colors */
   --color-success: #16A34A;
@@ -88,7 +89,8 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-canvas);
+  background: radial-gradient(circle at 50% -80px, #E0F2FE 0%, #F0FDFA 220px, #F8FAFC 480px, #F1F5F9 100%);
+  background-attachment: fixed;
   color: var(--ink-primary);
   line-height: 1.5;
   min-height: 100vh;

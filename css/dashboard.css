@@ -92,21 +92,31 @@
    ============================================================================= */
 
 .aqi-hero-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+  border: 1px solid rgba(13, 148, 136, 0.18);
   border-radius: var(--radius-lg);
-  padding: 22px 24px;
-  box-shadow: var(--shadow-sm);
+  padding: 24px 26px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(13, 148, 136, 0.04);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  transition: box-shadow var(--transition-normal);
+  transition: all var(--transition-normal);
+}
+
+.aqi-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0D9488, #06B6D4, #3B82F6);
 }
 
 .aqi-hero-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(13, 148, 136, 0.08);
 }
 
 .card-eyebrow {
@@ -298,14 +308,31 @@
    ============================================================================= */
 
 .weather-corridor-card {
-  background: var(--bg-surface);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  box-shadow: var(--shadow-sm);
+  padding: 24px 26px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.weather-corridor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0284C7, #38BDF8);
+}
+
+.weather-corridor-card:hover {
+  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.1);
 }
 
 .weather-card-header .card-heading {
@@ -420,15 +447,23 @@
 }
 
 .pollutant-box {
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-subtle);
+  background: #FFFFFF;
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: var(--radius-md);
-  padding: 12px 10px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   min-width: 0;
+  position: relative;
+}
+
+.pollutant-box:hover {
+  transform: translateY(-3px);
+  border-color: rgba(13, 148, 136, 0.35);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
 }
 
 .pollutant-box:hover {
@@ -511,12 +546,24 @@
    ============================================================================= */
 
 .home-map-feature-card {
-  background: var(--bg-surface);
+  background: #FFFFFF;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  box-shadow: var(--shadow-sm);
+  padding: 24px 26px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
   margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-map-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10B981, #0D9488);
 }
 
 .map-feature-header {

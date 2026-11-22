@@ -55,24 +55,31 @@ window.MumbAIR.MAP = (function(){
       scrollWheelZoom: true
     });
 
-    // Primary OpenStreetMap standard tiles (100% open-source, zero API key required)
-    var baseTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
-      maxZoom: 19
+    // Base tile layers (100% free, zero API key required, zero referer blocks from file:// or localhost)
+    var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: '&copy; Esri &mdash; Mumbai Street Map'
     });
 
-    baseTiles.on('tileerror', function(){
-      // Seamless fallback to Esri World Light Gray Canvas if OSM is unreachable
-      if(!mapInstance._hasFallbackTile){
-        mapInstance._hasFallbackTile = true;
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-          maxZoom: 16,
-          attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
-        }).addTo(mapInstance);
-      }
+    var esriCanvas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      attribution: '&copy; Esri &mdash; Light Gray Canvas'
     });
 
-    baseTiles.addTo(mapInstance);
+    var osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &middot; HOT'
+    });
+
+    // Default to detailed street map
+    esriStreet.addTo(mapInstance);
+
+    // Add Basemap switcher control
+    L.control.layers({
+      "🗺️ Detailed Streets (Esri)": esriStreet,
+      "🎨 Light Canvas (Esri)": esriCanvas,
+      "🌍 Humanitarian (OSM HOT)": osmHot
+    }, null, { position: 'topright', collapsed: true }).addTo(mapInstance);
 
     // Vector Coastline Boundary polygon (provides geographic context even if offline)
     L.polygon(MUMBAI_COASTLINE_COORDS, {
@@ -114,16 +121,8 @@ window.MumbAIR.MAP = (function(){
       dragging: false
     });
 
-    var miniTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    });
-    miniTiles.on('tileerror', function(){
-      if(!miniMapInstance._hasFallbackTile){
-        miniMapInstance._hasFallbackTile = true;
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-          maxZoom: 16
-        }).addTo(miniMapInstance);
-      }
+    var miniTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18
     });
     miniTiles.addTo(miniMapInstance);
 

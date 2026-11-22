@@ -1,0 +1,454 @@
+/* ==============================================================================
+   MumbAIR — Layout CSS (Top Navigation, Citizen Layout, Authority Layout & Breakpoints)
+   ============================================================================== */
+
+/* =============================================================================
+   1. CITIZEN PORTAL LAYOUT
+   ============================================================================= */
+
+.citizen-header {
+  background: var(--bg-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Brand Link */
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--brand-teal), #0284C7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 19px;
+  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.25);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.brand-title span {
+  color: var(--brand-teal);
+}
+
+.brand-sub {
+  font-size: 0.6875rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Location Selector Trigger Button */
+.location-picker-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.location-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+}
+
+.location-trigger-btn:hover {
+  background: var(--bg-subtle);
+  border-color: var(--brand-teal);
+  color: var(--brand-teal-dark);
+}
+
+.loc-pin {
+  font-size: 13px;
+}
+
+.loc-text {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loc-arrow {
+  font-size: 10px;
+  color: var(--ink-muted);
+}
+
+/* Citizen Nav (Clean 6 Core Tabs) */
+.citizen-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-subtle);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: var(--ink-primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.nav-link.active {
+  background: var(--bg-surface);
+  color: var(--brand-teal-dark);
+  box-shadow: var(--shadow-xs);
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 14px;
+}
+
+.nav-pill-badge {
+  background: var(--brand-amber);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  padding: 1px 6px;
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.icon-action-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+  color: var(--ink-secondary);
+}
+
+.icon-action-btn:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-medium);
+}
+
+.notif-count-pill {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-surface);
+}
+
+/* Municipal Authority Button in Citizen Topbar */
+.btn-authority {
+  background: #0F172A;
+  color: #F8FAFC !important;
+  border: 1px solid #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-authority:hover {
+  background: #1E293B;
+  border-color: #475569;
+}
+
+.badge-lock {
+  font-size: 11px;
+}
+
+/* Citizen Main Container */
+.citizen-main {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  flex: 1;
+}
+
+/* Tab Views Container */
+.tab-view {
+  display: none;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.tab-view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Global Footer */
+.app-footer {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  padding: 24px;
+  margin-top: auto;
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* =============================================================================
+   2. MUNICIPAL AUTHORITY PORTAL LAYOUT
+   ============================================================================= */
+
+.authority-login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  padding: 24px;
+}
+
+.authority-header {
+  background: #0F172A;
+  color: #fff;
+  border-bottom: 1px solid #334155;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.authority-header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-crest {
+  font-size: 24px;
+}
+
+.auth-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.auth-subtitle {
+  font-size: 0.6875rem;
+  color: #94A3B8;
+  letter-spacing: 0.02em;
+}
+
+.officer-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1E293B;
+  border: 1px solid #334155;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+
+.officer-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--brand-teal);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.officer-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.officer-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.officer-role-pill {
+  font-size: 0.625rem;
+  color: #94A3B8;
+}
+
+.officer-badge-pill {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  background: #0F172A;
+  color: #38BDF8;
+  border: 1px solid #0284C7;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.authority-body {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  width: 100%;
+}
+
+/* =============================================================================
+   3. RESPONSIVE BREAKPOINTS (1440px, 1024px, 768px, 430px, 390px, 360px)
+   ============================================================================= */
+
+@media (max-width: 1024px) {
+  .header-inner {
+    padding: 10px 16px;
+  }
+  .citizen-nav {
+    overflow-x: auto;
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .citizen-nav {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px;
+  }
+  .location-picker-wrap {
+    order: 2;
+  }
+  .header-actions {
+    order: 2;
+  }
+  .citizen-main {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-sub {
+    display: none;
+  }
+  .loc-text {
+    max-width: 110px;
+  }
+  .btn-authority span:last-child {
+    display: none;
+  }
+  .nav-link {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+}

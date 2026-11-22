@@ -1,929 +1,894 @@
-<!-- MumbAIR — interactive prototype v2 -->
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MumbAIR — Greater Mumbai Air Quality &amp; Civic Action Platform</title>
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 
-  :root{
-    --ink:#1E2A32;
-    --ink-soft:#3B454C;
-    --haze:#E3E1D8;
-    --haze-deep:#D6D3C6;
-    --card:#F4F2EB;
-    --line: rgba(30,42,50,0.13);
-    --accent:#E8963C;
-    --accent-deep:#C97821;
-    --good:#5B8C6E;
-    --moderate:#C9A227;
-    --sensitive:#D97A3D;
-    --unhealthy:#B8483F;
-    --severe:#6E2A3A;
-  }
-  *{box-sizing:border-box;}
-  .mb-outer{
-    font-family:'IBM Plex Sans', sans-serif;
-    display:flex; justify-content:center;
-    padding:24px 10px;
-    color:var(--ink);
-    background:
-      radial-gradient(circle at 18% 8%, rgba(232,150,60,0.16), transparent 42%),
-      radial-gradient(circle at 82% 92%, rgba(91,140,110,0.14), transparent 45%),
-      radial-gradient(rgba(30,42,50,0.07) 1px, transparent 1px) 0 0/14px 14px,
-      var(--haze);
-  }
-  .mb-brand-badge{
-    width:56px; height:56px; border-radius:16px; margin:0 auto 16px auto;
-    background:linear-gradient(135deg, var(--accent), var(--severe));
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Archivo',sans-serif; font-weight:800; font-size:24px; color:#fff;
-    box-shadow:0 8px 20px rgba(232,150,60,0.35);
-  }
-  .mb-phone{
-    width:100%; max-width:400px; height:800px;
-    background:var(--haze);
-    border-radius:30px;
-    box-shadow:0 20px 50px rgba(30,42,50,0.28), 0 0 0 8px #14181c;
-    overflow:hidden;
-    position:relative;
-    display:flex; flex-direction:column;
-  }
-  .mb-notch{
-    position:absolute; top:0; left:50%; transform:translateX(-50%);
-    width:120px; height:20px; background:#14181c; border-radius:0 0 14px 14px; z-index:30;
-  }
-  .mb-screen{flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0;}
-  .mb-hidden{display:none !important;}
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/reports.css">
+  <link rel="stylesheet" href="css/operations.css">
+</head>
+<body class="theme-light">
 
-  /* ---------- auth screens ---------- */
-  .mb-auth{
-    flex:1; display:flex; flex-direction:column; justify-content:center;
-    padding:40px 28px; text-align:center;
-  }
-  .mb-auth-word{
-    font-family:'Archivo',sans-serif; font-weight:800; font-size:26px; margin-bottom:6px;
-  }
-  .mb-auth-word span{color:var(--accent-deep);}
-  .mb-auth-tag{font-size:13px; color:var(--ink-soft); margin-bottom:34px;}
-  .mb-field-label{
-    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600;
-    letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px;
-  }
-  .mb-phone-input-row{
-    display:flex; gap:8px; margin-bottom:16px;
-  }
-  .mb-cc{
-    background:var(--card); border:1px solid var(--line); border-radius:7px; padding:12px 10px;
-    font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; color:var(--ink-soft);
-  }
-  .mb-input{
-    flex:1; background:#fff; border:1px solid var(--line); border-radius:7px; padding:12px 12px;
-    font-family:'IBM Plex Mono',monospace; font-size:15px; letter-spacing:0.02em; color:var(--ink);
-    outline:none;
-  }
-  .mb-input:focus{border-color:var(--accent);}
-  .mb-otp-boxes{display:flex; gap:8px; justify-content:center; margin-bottom:10px;}
-  .mb-otp-box{
-    width:42px; height:50px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:20px;
-    background:#fff; border:1px solid var(--line); border-radius:7px; outline:none;
-  }
-  .mb-otp-box:focus{border-color:var(--accent);}
-  .mb-hint{font-size:11px; color:var(--ink-soft); margin-bottom:20px;}
-  .mb-btn{
-    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:14px;
-    background:var(--ink); color:var(--haze); border:none; padding:13px 16px; border-radius:8px;
-    cursor:pointer; width:100%;
-  }
-  .mb-btn:hover{background:var(--ink-soft);}
-  .mb-btn.secondary{background:transparent; color:var(--ink-soft); border:1px solid var(--line); margin-top:10px;}
-  .mb-btn.accent{background:var(--accent); color:#2b1c0a;}
-  .mb-error{color:var(--unhealthy); font-size:11px; margin-top:8px; min-height:14px; font-family:'IBM Plex Mono',monospace;}
-  .mb-guest-divider{
-    display:flex; align-items:center; gap:10px; margin:20px 0 16px 0; font-size:11px; color:var(--ink-soft);
-    font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.05em;
-  }
-  .mb-guest-divider::before, .mb-guest-divider::after{content:''; flex:1; height:1px; background:var(--line);}
-  .mb-guest-note{font-size:10.5px; color:var(--ink-soft); margin-top:10px; line-height:1.4;}
-  .mb-guest-tag{
-    font-family:'IBM Plex Mono',monospace; font-size:8.5px; font-weight:600; letter-spacing:0.05em;
-    text-transform:uppercase; color:var(--severe); background:rgba(110,42,58,0.1);
-    border:1px solid rgba(110,42,58,0.25); padding:2px 6px; border-radius:3px; margin-left:6px; vertical-align:2px;
-  }
+  <!-- ========================================================================= -->
+  <!-- 1. PUBLIC CITIZEN PORTAL (PRIMARY USER PRODUCT)                           -->
+  <!-- ========================================================================= -->
+  <div id="portal-citizen" class="portal-root active">
 
-  /* location screen */
-  .mb-loc-icon{font-size:36px; margin-bottom:10px;}
-  .mb-detect-status{
-    font-size:12px; color:var(--ink-soft); margin:10px 0 18px 0; font-family:'IBM Plex Mono',monospace; min-height:16px;
-  }
-  .mb-divider-or{
-    display:flex; align-items:center; gap:10px; margin:18px 0; font-size:11px; color:var(--ink-soft);
-    font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.05em;
-  }
-  .mb-divider-or::before, .mb-divider-or::after{content:''; flex:1; height:1px; background:var(--line);}
-  .mb-select{
-    width:100%; background:#fff; border:1px solid var(--line); border-radius:7px; padding:12px;
-    font-family:'IBM Plex Sans',sans-serif; font-size:14px; color:var(--ink); margin-bottom:16px;
-  }
+    <!-- Top Citizen Header -->
+    <header class="citizen-header">
+      <div class="header-inner">
+        <!-- Brand Link -->
+        <a class="brand-link" href="#" id="btnLogoHome">
+          <div class="brand-mark">M</div>
+          <div class="brand-text">
+            <div class="brand-title">Mumb<span>AIR</span></div>
+            <div class="brand-sub">Greater Mumbai Air Intelligence</div>
+          </div>
+        </a>
 
-  /* ---------- app chrome ---------- */
-  .mb-nav{
-    background:var(--ink); color:var(--haze); padding:22px 16px 12px 16px;
-    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
-  }
-  .mb-wordmark{font-family:'Archivo', sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:6px;}
-  .mb-wordmark span{color:var(--accent);}
-  .mb-nav-right{display:flex; align-items:center; gap:8px;}
-  .mb-grap{
-    font-family:'IBM Plex Mono', monospace; font-size:9.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase;
-    background:rgba(232,150,60,0.18); color:var(--accent); border:1px solid rgba(232,150,60,0.4);
-    padding:4px 8px; border-radius:3px; white-space:nowrap;
-  }
-  .mb-ward-chip{
-    font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:600; color:var(--haze);
-    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18);
-    padding:4px 9px; border-radius:20px; cursor:pointer; white-space:nowrap;
-  }
-  .mb-logout-btn{
-    width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.1);
-    border:1px solid rgba(255,255,255,0.18); color:var(--haze); display:flex; align-items:center;
-    justify-content:center; cursor:pointer; font-size:12px; flex-shrink:0;
-  }
-  .mb-logout-btn:hover{background:rgba(255,255,255,0.2);}
+        <!-- Location Picker Trigger -->
+        <div class="location-picker-wrap">
+          <button class="location-trigger-btn" id="btnOpenLocationModal" title="Select monitored ward in Greater Mumbai">
+            <span class="loc-pin">📍</span>
+            <span class="loc-text" id="headerLocationText">Chembur / Mahul (Ward M/E)</span>
+            <span class="loc-arrow">▾</span>
+          </button>
+        </div>
 
-  /* push notification banner */
-  .mb-push-banner{
-    position:absolute; top:26px; left:12px; right:12px; z-index:60;
-    background:var(--ink); color:#fff; border-radius:12px; padding:13px 14px;
-    display:flex; gap:10px; align-items:flex-start; box-shadow:0 10px 28px rgba(0,0,0,0.4);
-    transform:translateY(-160%); transition:transform .35s cubic-bezier(.2,.8,.3,1); cursor:pointer;
-  }
-  .mb-push-banner.show{transform:translateY(0);}
-  .mb-push-icon{
-    width:30px; height:30px; border-radius:8px; background:var(--severe); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:16px;
-  }
-  .mb-push-title{font-family:'Archivo',sans-serif; font-weight:700; font-size:12.5px; display:flex; justify-content:space-between; gap:8px;}
-  .mb-push-body{font-size:11.5px; color:var(--haze); opacity:0.9; margin-top:3px; line-height:1.4;}
-  .mb-push-close{background:none; border:none; color:rgba(255,255,255,0.6); font-size:14px; cursor:pointer; line-height:1; padding:0;}
+        <!-- 6 Core Navigation Tabs -->
+        <nav class="citizen-nav" id="citizenNav">
+          <button class="nav-link active" data-tab="tab-home">
+            <span class="nav-icon">📊</span>
+            <span>Home</span>
+          </button>
+          <button class="nav-link" data-tab="tab-air-quality">
+            <span class="nav-icon">🧪</span>
+            <span>Air Quality</span>
+          </button>
+          <button class="nav-link" data-tab="tab-map">
+            <span class="nav-icon">🗺️</span>
+            <span>Explore Map</span>
+          </button>
+          <button class="nav-link" data-tab="tab-trends">
+            <span class="nav-icon">📈</span>
+            <span>Trends</span>
+          </button>
+          <button class="nav-link" data-tab="tab-reports">
+            <span class="nav-icon">📸</span>
+            <span>Pollution Reports</span>
+          </button>
+          <button class="nav-link" data-tab="tab-alerts">
+            <span class="nav-icon">🔔</span>
+            <span>Alerts</span>
+            <span class="nav-pill-badge" id="navAlertCount">2</span>
+          </button>
+        </nav>
 
-  .mb-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
-  .mb-panel{padding:16px; padding-bottom:30px;}
+        <!-- Right Header Action Controls -->
+        <div class="header-actions">
+          <button class="icon-action-btn" id="btnRefreshLive" title="Refresh Live Atmospheric Data">
+            <span class="btn-icon">🔄</span>
+          </button>
+          
+          <button class="icon-action-btn notif-btn" id="btnNotificationCenter" title="Environmental Notifications">
+            <span class="btn-icon">🔔</span>
+            <span class="notif-count-pill" id="headerNotifBadge">0</span>
+          </button>
 
-  /* hero card */
-  .mb-hero{
-    border-radius:12px; padding:18px; margin-bottom:16px; color:#fff;
-    box-shadow:0 4px 14px rgba(30,42,50,0.18);
-  }
-  .mb-hero-top{display:flex; justify-content:space-between; align-items:flex-start;}
-  .mb-hero-label{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; opacity:0.85; display:flex; align-items:center; gap:6px;}
-  .mb-livedot{width:6px; height:6px; border-radius:50%; background:#fff; animation:mbPulse 1.8s ease-in-out infinite;}
-  @keyframes mbPulse{0%,100%{opacity:0.4;} 50%{opacity:1;}}
-  .mb-hero-ward{font-family:'Archivo',sans-serif; font-weight:700; font-size:16px; margin-top:2px;}
-  .mb-hero-aqi{font-family:'IBM Plex Mono',monospace; font-size:44px; font-weight:600; line-height:1; text-align:right;}
-  .mb-hero-band{font-size:12px; opacity:0.9; text-align:right; margin-top:2px;}
-  .mb-hero-mask{
-    margin-top:14px; background:rgba(0,0,0,0.18); border-radius:8px; padding:10px 12px;
-    display:flex; gap:9px; align-items:center; font-size:12.5px; font-weight:500;
-  }
-  .mb-hero-mask .ic{font-size:18px;}
+          <!-- Citizen Profile / Login -->
+          <button class="btn btn-outline btn-sm" id="btnCitizenAuth" title="Citizen Account &amp; Favorites">
+            <span>👤</span>
+            <span id="citizenAuthLabel">Guest</span>
+          </button>
 
-  /* wind ribbon - fixed marquee */
-  .mb-ribbon-wrap{
-    position:relative; height:32px; margin-bottom:14px; overflow:hidden; border-radius:6px;
-    background:var(--card); border:1px solid var(--line);
-  }
-  .mb-ribbon-label{
-    position:absolute; left:10px; top:0; bottom:0; display:flex; align-items:center; z-index:3;
-    font-family:'IBM Plex Mono', monospace; font-size:9.5px; font-weight:600; letter-spacing:0.05em;
-    text-transform:uppercase; color:var(--ink-soft); background:var(--card); padding-right:8px;
-  }
-  .mb-ribbon-clip{position:absolute; inset:0; left:96px; overflow:hidden;}
-  .mb-ribbon-strip{
-    display:flex; gap:34px; white-space:nowrap; height:100%; align-items:center;
-    animation: mbScroll 5s linear infinite;
-    color:var(--good); font-size:14px; opacity:0.7;
-  }
-  @keyframes mbScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .mb-ribbon-wrap.stalled .mb-ribbon-strip{animation-play-state:paused; color:var(--unhealthy); opacity:0.4;}
-  .mb-stall-tag{
-    position:absolute; right:8px; top:0; bottom:0; display:none; align-items:center; z-index:3;
-    font-family:'IBM Plex Mono', monospace; font-size:9px; font-weight:600; color:var(--unhealthy);
-    background:var(--card); padding-left:8px;
-  }
-  .mb-ribbon-wrap.stalled .mb-stall-tag{display:flex;}
-
-  /* ward grid map */
-  .mb-map-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
-  .mb-map{display:flex; flex-direction:column; gap:5px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px;}
-  .mb-row{display:flex; gap:5px; justify-content:center;}
-  .mb-ward{
-    flex:1; max-width:80px; min-width:48px; aspect-ratio:1/1; border-radius:6px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
-    color:#fff; font-family:'IBM Plex Mono', monospace; transition:transform .12s; position:relative;
-    border:1px solid rgba(0,0,0,0.08);
-  }
-  .mb-ward.mine{box-shadow:0 0 0 2px var(--ink), 0 0 0 4px var(--accent);}
-  .mb-ward:hover{transform:translateY(-2px);}
-  .mb-ward .code{font-size:11px; font-weight:600;}
-  .mb-ward .val{font-size:14px; font-weight:600; margin-top:1px;}
-  .mb-ward .flag{position:absolute; top:3px; right:3px; width:6px; height:6px; border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,0.15);}
-
-  .mb-legend{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
-  .mb-legend-item{display:flex; align-items:center; gap:5px; font-size:9.5px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);}
-  .mb-legend-swatch{width:9px; height:9px; border-radius:2px;}
-
-  .mb-sheet{margin-top:14px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; animation: slideUp .18s ease-out;}
-  @keyframes slideUp{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
-  .mb-sheet-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
-  .mb-sheet-title{font-family:'Archivo', sans-serif; font-weight:700; font-size:15.5px;}
-  .mb-sheet-sub{font-size:11px; color:var(--ink-soft); margin-top:2px;}
-  .mb-aqi-big{font-family:'IBM Plex Mono', monospace; font-size:26px; font-weight:600;}
-  .mb-chip{display:inline-block; font-size:10.5px; font-family:'IBM Plex Mono',monospace; font-weight:500; padding:4px 9px; border-radius:20px; margin:8px 6px 0 0; border:1px solid var(--line); background:#fff;}
-
-  .mb-section-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin:18px 0 8px 0;}
-
-  /* tickets */
-  .mb-ticket-card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:13px; margin-bottom:9px; cursor:pointer;}
-  .mb-ticket-row{display:flex; justify-content:space-between; align-items:center; gap:8px;}
-  .mb-ticket-ward{font-family:'Archivo',sans-serif; font-weight:700; font-size:13px;}
-  .mb-status-pill{font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.03em; padding:4px 8px; border-radius:20px; text-transform:uppercase; white-space:nowrap;}
-  .st-TICKET_RAISED{background:#EFE0C4; color:#7A5A12;}
-  .st-SENT_TO_WARD_DESK{background:#E0DDF0; color:#4A3E8C;}
-  .st-IN_PROGRESS{background:#D6E6DF; color:#2C5C46;}
-  .st-ACTION_TAKEN{background:#CDE6D0; color:#25602C;}
-  .st-CLOSED_SAFE{background:#DDE8D6; color:#3B5C2C;}
-
-  .mb-timeline{margin-top:14px;}
-  .mb-tl-node{display:flex; gap:12px; padding-bottom:18px; position:relative;}
-  .mb-tl-node::before{content:''; position:absolute; left:7px; top:20px; bottom:-2px; width:2px; background:var(--line);}
-  .mb-tl-node:last-child::before{display:none;}
-  .mb-tl-dot{width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:2px; background:var(--ink); border:3px solid var(--card); box-shadow:0 0 0 1px var(--line);}
-  .mb-tl-node.pending .mb-tl-dot{background:#fff; box-shadow:0 0 0 1px var(--line);}
-  .mb-tl-title{font-weight:600; font-size:12.5px;}
-  .mb-tl-node.pending .mb-tl-title{color:var(--ink-soft); font-weight:500;}
-  .mb-tl-meta{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-top:2px;}
-  .mb-tl-note{font-size:11.5px; margin-top:4px; color:var(--ink-soft);}
-  .mb-photo-proof{margin-top:6px; width:100%; max-width:220px; height:70px; border-radius:6px; background:repeating-linear-gradient(45deg, var(--haze-deep), var(--haze-deep) 8px, var(--haze) 8px, var(--haze) 16px); display:flex; align-items:center; justify-content:center; font-size:9.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border:1px solid var(--line);}
-
-  /* report */
-  .mb-cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px;}
-  .mb-cat-card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 8px; text-align:center; cursor:pointer;}
-  .mb-cat-card:hover{border-color:var(--accent);}
-  .mb-cat-icon{font-size:24px; margin-bottom:6px;}
-  .mb-cat-label{font-size:11.5px; font-weight:600;}
-  .mb-step-track{display:flex; gap:4px; margin-bottom:16px;}
-  .mb-step-track div{flex:1; height:3px; background:var(--haze-deep); border-radius:2px;}
-  .mb-step-track div.done{background:var(--accent);}
-  .mb-capture-box{background:var(--ink); color:var(--haze); border-radius:10px; height:170px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;}
-  .mb-verify-row{display:flex; gap:14px; font-family:'IBM Plex Mono',monospace; font-size:10.5px;}
-  .mb-verify-row .ok{color:#8FD3A8; opacity:0; transition:opacity .3s;}
-  .mb-verify-row .ok.show{opacity:1;}
-  .mb-confirm-thumb{width:100%; height:110px; border-radius:8px; margin-top:10px; background:repeating-linear-gradient(45deg, var(--haze-deep), var(--haze-deep) 8px, var(--haze) 8px, var(--haze) 16px); display:flex; align-items:center; justify-content:center; font-size:10.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border:1px solid var(--line);}
-
-  .mb-empty{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:26px 10px;}
-
-  .mb-toast{position:absolute; bottom:78px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--haze); padding:11px 18px; border-radius:7px; font-size:12.5px; font-weight:500; z-index:50; opacity:0; transition:opacity .25s; font-family:'IBM Plex Sans',sans-serif; white-space:nowrap; max-width:88%; text-overflow:ellipsis; overflow:hidden;}
-  .mb-toast.show{opacity:1;}
-
-  /* bottom nav */
-  .mb-bottomnav{
-    display:flex; flex-shrink:0; border-top:1px solid var(--line); background:var(--card);
-  }
-  .mb-navitem{flex:1; text-align:center; padding:9px 4px 11px 4px; cursor:pointer; color:var(--ink-soft);}
-  .mb-navitem.active{color:var(--ink);}
-  .mb-navitem .ic{font-size:18px; display:inline-flex; align-items:center; justify-content:center; width:34px; height:26px; border-radius:14px; margin-bottom:3px;}
-  .mb-navitem.active .ic{background:rgba(232,150,60,0.22);}
-  .mb-navitem .lb{font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; display:block;}
-  .mb-navitem.active .lb{color:var(--accent-deep);}
-</style>
-
-<div class="mb-outer">
-<div class="mb-phone">
-  <div class="mb-notch"></div>
-
-  <!-- LOGIN -->
-  <div class="mb-screen" id="screen-login">
-    <div class="mb-auth">
-      <div class="mb-brand-badge">M</div>
-      <div class="mb-auth-word">Mumb<span>AIR</span></div>
-      <div class="mb-auth-tag">Air quality tracking &amp; civic action for Greater Mumbai</div>
-      <div class="mb-field-label">Mobile number</div>
-      <div class="mb-phone-input-row">
-        <div class="mb-cc">+91</div>
-        <input class="mb-input" id="mobileInput" maxlength="10" placeholder="98XXXXXXXX" inputmode="numeric">
+          <!-- Municipal Authority Entry Point -->
+          <button class="btn btn-authority btn-sm" id="btnGoToAuthority" title="Access Brihanmumbai Municipal Corporation Operations Command">
+            <span class="badge-lock">🔒</span>
+            <span>Municipal Authority</span>
+          </button>
+        </div>
       </div>
-      <div class="mb-error" id="loginError"></div>
-      <button class="mb-btn accent" id="sendOtpBtn">Send OTP</button>
-      <div class="mb-guest-divider">or</div>
-      <button class="mb-btn secondary" id="guestBtn" style="margin-top:0;">Continue as Guest</button>
-      <div class="mb-guest-note">Guest mode lets you browse live AQI and BMC ticket data. Sign in with your number to file citizen reports and get alerts for your ward.</div>
-    </div>
-  </div>
+    </header>
 
-  <!-- OTP -->
-  <div class="mb-screen mb-hidden" id="screen-otp">
-    <div class="mb-auth">
-      <div class="mb-auth-word">Verify it's you</div>
-      <div class="mb-auth-tag" id="otpSentTo">Enter the 6-digit code sent to +91 —</div>
-      <div class="mb-otp-boxes" id="otpBoxes"></div>
-      <div class="mb-hint">Demo mode — enter any 6 digits to continue</div>
-      <div class="mb-error" id="otpError"></div>
-      <button class="mb-btn accent" id="verifyBtn">Verify &amp; continue</button>
-      <button class="mb-btn secondary" id="backToLoginBtn">Change number</button>
-    </div>
-  </div>
-
-  <!-- LOCATION -->
-  <div class="mb-screen mb-hidden" id="screen-location">
-    <div class="mb-auth">
-      <div class="mb-brand-badge">&#128205;</div>
-      <div class="mb-auth-word" style="font-size:20px;">Set your location</div>
-      <div class="mb-auth-tag">So we can show you AQI for your ward first</div>
-      <button class="mb-btn" id="detectBtn">Detect my location automatically</button>
-      <div class="mb-detect-status" id="detectStatus"></div>
-      <div class="mb-divider-or">or choose manually</div>
-      <div class="mb-field-label">Ward</div>
-      <select class="mb-select" id="wardSelect"></select>
-      <button class="mb-btn accent" id="continueBtn">Continue to MumbAIR</button>
-    </div>
-  </div>
-
-  <!-- MAIN APP -->
-  <div class="mb-screen mb-hidden" id="screen-app">
-    <div class="mb-nav">
-      <div class="mb-wordmark">Mumb<span>AIR</span><span class="mb-guest-tag mb-hidden" id="guestTag">Guest</span></div>
-      <div class="mb-nav-right">
-        <div class="mb-grap" id="grapBadge">GRAP STAGE I</div>
-        <div class="mb-ward-chip" id="wardChipNav">— &#9662;</div>
-        <div class="mb-logout-btn" id="logoutBtn" title="Log out">&#9211;</div>
+    <!-- Notification Dropdown Popover -->
+    <div class="notif-popover hidden" id="notifPopover">
+      <div class="notif-popover-header">
+        <h4>Environmental Notifications</h4>
+        <button class="btn-text-sm" id="btnClearNotifs">Mark all read</button>
       </div>
+      <div class="notif-items" id="notifListContainer"></div>
     </div>
 
-    <div class="mb-push-banner" id="pushBanner">
-      <div class="mb-push-icon">&#9888;</div>
-      <div style="flex:1; min-width:0;">
-        <div class="mb-push-title"><span>MumbAIR Alert</span><button class="mb-push-close" id="pushClose">&#10005;</button></div>
-        <div class="mb-push-body" id="pushBody">—</div>
-      </div>
-    </div>
+    <!-- Main Citizen Application Container -->
+    <main class="citizen-main">
 
-    <div class="mb-body">
-      <!-- HEATMAP -->
-      <div class="mb-panel" id="panel-heatmap">
-        <div class="mb-hero" id="heroCard">
-          <div class="mb-hero-top">
-            <div>
-              <div class="mb-hero-label"><span class="mb-livedot"></span>Your air right now</div>
-              <div class="mb-hero-ward" id="heroWardName">—</div>
-            </div>
-            <div>
-              <div class="mb-hero-aqi" id="heroAqi">—</div>
-              <div class="mb-hero-band" id="heroBand">—</div>
+      <!-- ======================================================== -->
+      <!-- TAB 1: HOME (Apple Weather Inspired AQI Experience)      -->
+      <!-- ======================================================== -->
+      <section class="tab-view active" id="tab-home">
+        
+        <!-- Meta Location & Data Freshness Header -->
+        <div class="home-meta-bar">
+          <div class="meta-location-info">
+            <h1 class="city-title" id="homeCityTitle">Mumbai, Maharashtra</h1>
+            <div class="station-meta-line">
+              <span class="ward-pill" id="homeWardBadge">Ward M/E</span>
+              <span class="meta-station-name" id="homeStationName">Mahul Petrochemical CAAQMS</span>
+              <span class="meta-dot">&middot;</span>
+              <span class="meta-source" id="homeSourceAttribution">Live API (Open-Meteo)</span>
+              <span class="meta-dot">&middot;</span>
+              <span class="meta-updated" id="homeLastUpdated">Updated: Just now</span>
             </div>
           </div>
-          <div class="mb-hero-mask mb-hidden" id="heroMask">
-            <div class="ic">&#128567;</div>
-            <div id="heroMaskText">Wear an N95 mask outdoors today.</div>
+          <div class="meta-actions">
+            <button class="btn btn-sm btn-ghost" id="btnDetectGps"><span class="btn-icon">🎯</span> Locate Me</button>
+            <button class="btn btn-sm btn-ghost" id="btnShareAqi"><span class="btn-icon">📤</span> Share AQI</button>
           </div>
         </div>
 
-        <div class="mb-ribbon-wrap" id="ribbon">
-          <div class="mb-ribbon-label">Sea breeze</div>
-          <div class="mb-ribbon-clip">
-            <div class="mb-ribbon-strip" id="ribbonStrip"></div>
+        <!-- Hero AQI + Weather Corridor Grid -->
+        <div class="home-hero-grid">
+          
+          <!-- Master AQI Gauge Card -->
+          <div class="aqi-hero-card" id="heroAqiCard">
+            <div class="aqi-hero-inner">
+              <div class="aqi-gauge-visual">
+                <!-- SVG Semi-Circular Arc Gauge -->
+                <svg class="aqi-arc-svg" viewBox="0 0 200 120">
+                  <path class="arc-bg" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#E2E8F0" stroke-width="14" stroke-linecap="round"/>
+                  <path class="arc-progress" id="aqiArcProgress" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#CA8A04" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="125"/>
+                </svg>
+                <div class="aqi-center-stat">
+                  <div class="aqi-big-val" id="heroAqiNumber">142</div>
+                  <div class="aqi-unit-label">CPCB NAQI</div>
+                </div>
+              </div>
+
+              <div class="aqi-hero-content">
+                <div class="aqi-badge-status-row">
+                  <span class="aqi-category-badge" id="heroCategoryBadge">Moderate</span>
+                  <span class="dominant-pollutant-badge" id="heroDominantBadge">Dominant: PM2.5</span>
+                  <span class="grap-stage-badge" id="heroGrapBadge">GRAP Stage II</span>
+                </div>
+
+                <div class="aqi-health-recommendation" id="heroHealthText">
+                  Air quality is acceptable; however, sensitive groups may experience minor breathing discomfort with prolonged outdoor exertion.
+                </div>
+
+                <!-- CPCB Scale Progress Bar -->
+                <div class="cpcb-scale-track">
+                  <div class="cpcb-segments">
+                    <div class="seg seg-good" title="Good (0-50)"></div>
+                    <div class="seg seg-sat" title="Satisfactory (51-100)"></div>
+                    <div class="seg seg-mod" title="Moderate (101-200)"></div>
+                    <div class="seg seg-poor" title="Poor (201-300)"></div>
+                    <div class="seg seg-vpoor" title="Very Poor (301-400)"></div>
+                    <div class="seg seg-sev" title="Severe (401-500)"></div>
+                  </div>
+                  <div class="scale-cursor" id="heroScaleCursor" style="left: 28%;"></div>
+                  <div class="scale-ticks">
+                    <span>0</span><span>50</span><span>100</span><span>200</span><span>300</span><span>400</span><span>500</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="mb-stall-tag">Stalled — dust risk, E. suburbs</div>
+
+          <!-- Weather & Coastal Dispersion Card -->
+          <div class="weather-corridor-card">
+            <div class="weather-card-header">
+              <span class="card-kicker">Atmospheric Marine Dispersion</span>
+              <h3 class="card-heading">Arabian Sea Inflow &amp; Weather</h3>
+            </div>
+
+            <div class="marine-dispersion-indicator" id="marineDispersionStatus">
+              <div class="dispersion-pill active">
+                <span class="wind-arrow-icon" id="windArrowIcon">↗</span>
+                <span id="dispersionSummaryText">Active Onshore Marine Breeze</span>
+              </div>
+              <p class="dispersion-subtext" id="dispersionDesc">
+                Westerly coastal airflow is actively displacing vehicular particulate inland toward the Thane Creek basin.
+              </p>
+            </div>
+
+            <div class="weather-tiles-grid">
+              <div class="weather-tile">
+                <span class="tile-icon">🌡️</span>
+                <div class="tile-meta">
+                  <span class="tile-label">Ambient Temp</span>
+                  <span class="tile-val" id="weatherTemp">—</span>
+                </div>
+              </div>
+              <div class="weather-tile">
+                <span class="tile-icon">💧</span>
+                <div class="tile-meta">
+                  <span class="tile-label">Relative Humidity</span>
+                  <span class="tile-val" id="weatherHumidity">—</span>
+                </div>
+              </div>
+              <div class="weather-tile">
+                <span class="tile-icon">💨</span>
+                <div class="tile-meta">
+                  <span class="tile-label">Wind Velocity</span>
+                  <span class="tile-val" id="weatherWindSpeed">—</span>
+                </div>
+              </div>
+              <div class="weather-tile">
+                <span class="tile-icon">🧭</span>
+                <div class="tile-meta">
+                  <span class="tile-label">Wind Direction</span>
+                  <span class="tile-val" id="weatherWindDir">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <div class="mb-map-label">All wards</div>
-        <div class="mb-map" id="mapGrid"></div>
+        <!-- 6-Parameter Pollutant Strip -->
+        <div class="pollutant-strip-section">
+          <div class="section-title-row">
+            <div>
+              <h3 class="section-heading">🧪 Real-Time Pollutant Breakdown</h3>
+              <p class="section-subtext">Benchmarked against CPCB National Ambient Air Quality Standards</p>
+            </div>
+            <div class="standards-disclaimer">Standard: CPCB 24-hr Limits</div>
+          </div>
 
-        <div class="mb-legend">
-          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--good)"></div>Good</div>
-          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--moderate)"></div>Moderate</div>
-          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--sensitive)"></div>Sensitive</div>
-          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--unhealthy)"></div>Unhealthy</div>
-          <div class="mb-legend-item"><div class="mb-legend-swatch" style="background:var(--severe)"></div>Severe</div>
+          <div class="pollutants-grid">
+            <!-- PM2.5 -->
+            <div class="pollutant-box" id="pbox-pm25">
+              <div class="pbox-top">
+                <span class="pbox-name">Fine Particulate</span>
+                <span class="pbox-formula">PM2.5</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valPm25">—</span>
+                <span class="pbox-unit">µg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterPm25" style="width: 50%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 60</span>
+                <span class="pbox-status" id="statusPm25">Moderate</span>
+              </div>
+            </div>
+
+            <!-- PM10 -->
+            <div class="pollutant-box" id="pbox-pm10">
+              <div class="pbox-top">
+                <span class="pbox-name">Coarse Dust</span>
+                <span class="pbox-formula">PM10</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valPm10">—</span>
+                <span class="pbox-unit">µg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterPm10" style="width: 60%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 100</span>
+                <span class="pbox-status" id="statusPm10">Moderate</span>
+              </div>
+            </div>
+
+            <!-- NO2 -->
+            <div class="pollutant-box" id="pbox-no2">
+              <div class="pbox-top">
+                <span class="pbox-name">Nitrogen Dioxide</span>
+                <span class="pbox-formula">NO₂</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valNo2">—</span>
+                <span class="pbox-unit">µg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterNo2" style="width: 35%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 80</span>
+                <span class="pbox-status" id="statusNo2">Good</span>
+              </div>
+            </div>
+
+            <!-- SO2 -->
+            <div class="pollutant-box" id="pbox-so2">
+              <div class="pbox-top">
+                <span class="pbox-name">Sulphur Dioxide</span>
+                <span class="pbox-formula">SO₂</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valSo2">—</span>
+                <span class="pbox-unit">µg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterSo2" style="width: 20%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 80</span>
+                <span class="pbox-status" id="statusSo2">Good</span>
+              </div>
+            </div>
+
+            <!-- CO -->
+            <div class="pollutant-box" id="pbox-co">
+              <div class="pbox-top">
+                <span class="pbox-name">Carbon Monoxide</span>
+                <span class="pbox-formula">CO</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valCo">—</span>
+                <span class="pbox-unit">mg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterCo" style="width: 25%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 2.0</span>
+                <span class="pbox-status" id="statusCo">Good</span>
+              </div>
+            </div>
+
+            <!-- O3 -->
+            <div class="pollutant-box" id="pbox-o3">
+              <div class="pbox-top">
+                <span class="pbox-name">Surface Ozone</span>
+                <span class="pbox-formula">O₃</span>
+              </div>
+              <div class="pbox-val-row">
+                <span class="pbox-number" id="valO3">—</span>
+                <span class="pbox-unit">µg/m³</span>
+              </div>
+              <div class="pbox-meter">
+                <div class="pbox-meter-fill" id="meterO3" style="width: 30%;"></div>
+              </div>
+              <div class="pbox-footer">
+                <span class="pbox-limit">CPCB Max: 100</span>
+                <span class="pbox-status" id="statusO3">Good</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div id="wardDetail"></div>
-      </div>
+        <!-- Quick Action Nav Cards -->
+        <div class="home-quick-actions">
+          <div class="quick-action-card" id="qcardMap">
+            <span class="quick-icon">🗺️</span>
+            <div class="quick-info">
+              <h4>Explore Mumbai on Map</h4>
+              <p>View 24 wards, live CAAQMS station footprints &amp; citizen-reported violations.</p>
+            </div>
+            <span class="quick-arrow">➔</span>
+          </div>
 
-      <!-- TICKETS -->
-      <div class="mb-panel mb-hidden" id="panel-tickets">
-        <div class="mb-section-label">Active &amp; closed tickets</div>
-        <div id="ticketList"></div>
-        <div id="ticketTimeline"></div>
-      </div>
+          <div class="quick-action-card" id="qcardReport">
+            <span class="quick-icon">📸</span>
+            <div class="quick-info">
+              <h4>Report Pollution Incident</h4>
+              <p>File garbage burning, construction dust, or industrial violations with GPS proof.</p>
+            </div>
+            <span class="quick-arrow">➔</span>
+          </div>
 
-      <!-- REPORT -->
-      <div class="mb-panel mb-hidden" id="panel-report">
-        <div class="mb-step-track"><div id="stepBar1"></div><div id="stepBar2"></div><div id="stepBar3"></div></div>
-        <div id="reportFlow"></div>
+          <div class="quick-action-card" id="qcardTrends">
+            <span class="quick-icon">📈</span>
+            <div class="quick-info">
+              <h4>24-Hour Trends &amp; Forecast</h4>
+              <p>Analyze fine particulate curves and coastal sea breeze dispersion patterns.</p>
+            </div>
+            <span class="quick-arrow">➔</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 2: AIR QUALITY (Station Directory & Comparisons)     -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-air-quality">
+        <div class="section-title-row" style="margin-bottom:20px;">
+          <div>
+            <h2 class="city-title" style="font-size:1.5rem;">🧪 Greater Mumbai Monitoring Stations &amp; Wards</h2>
+            <p class="section-subtext">Official CAAQMS stations, local emission factors, and side-by-side ward comparisons</p>
+          </div>
+        </div>
+
+        <!-- Ward Comparison Card -->
+        <div class="card" style="margin-bottom:24px;">
+          <div class="card-header">
+            <div>
+              <div class="card-title">⚖️ Side-by-Side Ward Air Quality Comparison</div>
+              <div class="card-subtitle">Compare environmental metrics and pollution vectors across any two Mumbai administrative wards</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+              <label class="form-label">Ward A</label>
+              <select class="form-select" id="compareSelectA"></select>
+            </div>
+            <div style="flex:1; min-width:220px;">
+              <label class="form-label">Ward B</label>
+              <select class="form-select" id="compareSelectB"></select>
+            </div>
+          </div>
+          <div style="height:250px; position:relative;">
+            <canvas id="comparisonCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- 24 Wards / CAAQMS Stations Directory -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🏛️ 24 BMC Administrative Wards Directory</div>
+              <div class="card-subtitle">Real-time air quality index benchmarks across Island City, Western Suburbs, and Eastern Suburbs</div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="text" id="filterStationSearch" class="form-input" placeholder="Filter ward or station..." style="width:200px; padding:6px 10px; font-size:12px;">
+            </div>
+          </div>
+          <div id="wardsDirectoryGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 3: EXPLORE MAP (Leaflet Interactive Map)             -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-map">
+        <div class="map-view-header">
+          <div class="map-title-block">
+            <h2 class="view-heading">🗺️ Greater Mumbai Atmospheric Surveillance Map</h2>
+            <p class="view-subtext">Spatial distribution of 24 municipal wards, official CAAQMS stations, and verified civic reports</p>
+          </div>
+          <div class="map-toolbar">
+            <div class="map-search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="mapSearchInput" class="map-search-input" placeholder="Search ward or station (e.g. Bandra, Worli, Chembur)...">
+            </div>
+            <div class="map-layer-chips">
+              <button class="layer-chip active" id="btnToggleLayerStations" data-layer="stations">🏛️ 24 Wards / Stations</button>
+              <button class="layer-chip active" id="btnToggleLayerFootprints" data-layer="footprints">⭕ Dispersion Footprint</button>
+              <button class="layer-chip active" id="btnToggleLayerReports" data-layer="reports">⚠️ Civic Reports</button>
+            </div>
+            <div class="map-action-btns">
+              <button class="btn btn-sm btn-outline" id="btnMapLocateMe" title="Locate my position">🎯 Locate</button>
+              <button class="btn btn-sm btn-outline" id="btnMapReset" title="Reset Mumbai view">🔄 Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Map Canvas Container with Explicit Sizing -->
+        <div class="map-canvas-wrapper">
+          <div id="leafletMap"></div>
+
+          <!-- Floating Map Legend -->
+          <div class="map-overlay-legend">
+            <div class="legend-header">CPCB Air Quality Scale</div>
+            <div class="legend-grid">
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-good)"></span> 0-50 Good</div>
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-satisfactory)"></span> 51-100 Satisfactory</div>
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-moderate)"></span> 101-200 Moderate</div>
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-poor)"></span> 201-300 Poor</div>
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-very-poor)"></span> 301-400 Very Poor</div>
+              <div class="legend-cell"><span class="legend-dot" style="background:var(--aqi-severe)"></span> 401+ Severe</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 4: TRENDS & ANALYTICS                                -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-trends">
+        <div class="section-title-row" style="margin-bottom:20px;">
+          <div>
+            <h2 class="city-title" style="font-size:1.5rem;">📈 Atmospheric Trends &amp; Time-Series Analytics</h2>
+            <p class="section-subtext">24-hour and 7-day particulate matter trajectories benchmarked against meteorological sea breeze cycles</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:24px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-sm btn-primary" id="btnTrend24h">Last 24 Hours</button>
+              <button class="btn btn-sm btn-outline" id="btnTrend48h">48 Hours</button>
+            </div>
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--ink-muted);">Data: Copernicus CAMS &amp; ECMWF Model Ingestion</span>
+          </div>
+          <div style="height:360px; position:relative;">
+            <canvas id="hourlyTrendCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Deterministic Environmental Insights -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💡 Deterministic Environmental Insights</div>
+            <div class="card-subtitle">Verifiable analytical deductions computed from current atmospheric sensor readings</div>
+          </div>
+          <div id="insightsList"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 5: POLLUTION REPORTS & CIVIC ACTION                  -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-reports">
+        <div class="reports-subnav-bar">
+          <button class="subnav-pill active" id="btnSubnavReportWizard">📸 File a Violation Report</button>
+          <button class="subnav-pill" id="btnSubnavReportTracker">🎫 Track Civic Complaints &amp; Community Stream</button>
+        </div>
+
+        <!-- SUBVIEW A: Reporting Wizard -->
+        <div id="subviewReportWizard" class="report-wizard-card">
+          <div class="form-group">
+            <label class="form-label">Step 1 — Select Environmental Violation Category</label>
+            <div class="category-selection-grid">
+              <div class="category-option-card selected" data-cat="OPEN_BURNING">
+                <div class="category-icon">🔥</div>
+                <div class="category-label">Open Garbage / Waste Burning</div>
+              </div>
+              <div class="category-option-card" data-cat="CONSTRUCTION_DUST">
+                <div class="category-icon">🏗️</div>
+                <div class="category-label">Uncovered Construction Debris</div>
+              </div>
+              <div class="category-option-card" data-cat="INDUSTRIAL_EMISSIONS">
+                <div class="category-icon">🏭</div>
+                <div class="category-label">Heavy Industrial Smoke / Flaring</div>
+              </div>
+              <div class="category-option-card" data-cat="VEHICLE_POLLUTION">
+                <div class="category-icon">🚛</div>
+                <div class="category-label">Excessive Vehicular Exhaust</div>
+              </div>
+              <div class="category-option-card" data-cat="SMOKE_LANDFILL">
+                <div class="category-icon">⛰️</div>
+                <div class="category-label">Landfill / Dumping Ground Fire</div>
+              </div>
+              <div class="category-option-card" data-cat="SENSOR_ISSUE">
+                <div class="category-icon">📍</div>
+                <div class="category-label">Public Display / Sensor Issue</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="duplicateAlertBanner" class="duplicate-alert-banner hidden"></div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label">Step 2 — Administrative Ward</label>
+              <select class="form-select" id="reportWardSelect"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Specific Incident Location</label>
+              <input type="text" class="form-input" id="reportAddressInput" placeholder="e.g. Near Link Road Junction, Chembur East">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Violation Title</label>
+            <input type="text" class="form-input" id="reportTitleInput" placeholder="Brief factual summary of environmental violation">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Factual Description</label>
+            <textarea class="form-textarea" id="reportDescriptionInput" placeholder="Detail the source, duration, visible smoke intensity, and nearby public landmarks..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Step 3 — Photographic Evidence (Optional, Max 5MB)</label>
+            <div class="evidence-capture-box">
+              <div class="evidence-placeholder">
+                <div style="font-size:28px;">📷</div>
+                <div style="font-size:13px; font-weight:700; margin-top:4px;">Attach Verifiable Photo Proof</div>
+                <div style="font-size:11px; color:var(--ink-muted); margin-top:2px;">
+                  Photos are stamped with GPS coordinates, Ward Code, and IST timestamp for BMC verification.
+                </div>
+                <label class="btn btn-sm btn-primary" style="cursor:pointer; margin-top:10px;">
+                  📁 Select Image File
+                  <input type="file" id="reportPhotoFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                </label>
+              </div>
+              <img id="evidencePreviewImg" class="evidence-canvas-output" alt="Evidence Preview">
+            </div>
+          </div>
+
+          <button class="btn btn-lg btn-primary" id="btnSubmitFinalReport" style="width:100%; margin-top:12px;">
+            🚀 Register Civic Violation with Ward Desk
+          </button>
+        </div>
+
+        <!-- SUBVIEW B: Complaint Tracker Feed -->
+        <div id="subviewReportTracker" class="hidden">
+          <div class="card" style="padding:16px; margin-bottom:18px;">
+            <div class="reports-feed-header">
+              <div class="reports-filter-group">
+                <select class="form-select" id="filterReportCategory" style="width:200px; padding:6px 10px; font-size:12.5px;">
+                  <option value="ALL">All Categories</option>
+                  <option value="OPEN_BURNING">Open Burning</option>
+                  <option value="CONSTRUCTION_DUST">Construction Dust</option>
+                  <option value="INDUSTRIAL_EMISSIONS">Industrial Smoke</option>
+                  <option value="VEHICLE_POLLUTION">Vehicle Exhaust</option>
+                  <option value="SMOKE_LANDFILL">Landfill Smoke</option>
+                  <option value="SENSOR_ISSUE">Sensor Issue</option>
+                </select>
+
+                <select class="form-select" id="filterReportStatus" style="width:170px; padding:6px 10px; font-size:12.5px;">
+                  <option value="ALL">All Statuses</option>
+                  <option value="SUBMITTED">Submitted</option>
+                  <option value="UNDER_REVIEW">Under Review</option>
+                  <option value="ASSIGNED">Assigned</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="ACTION_TAKEN">Action Taken</option>
+                  <option value="RESOLVED">Resolved</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="form-label" style="margin-bottom:0;">Sort by:</span>
+                <select class="form-select" id="sortReports" style="width:160px; padding:6px 10px; font-size:12.5px;">
+                  <option value="SUPPORTED">Most Supported</option>
+                  <option value="NEWEST">Most Recent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="reportsFeedContainer"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 6: ALERTS & HEALTH ADVISORIES                        -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-alerts">
+        <div class="section-title-row" style="margin-bottom:20px;">
+          <div>
+            <h2 class="city-title" style="font-size:1.5rem;">🔔 Active Mumbai Environmental Advisories</h2>
+            <p class="section-subtext">Graded Response Action Plan (GRAP) protocols, coastal weather warnings, and health guidance</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px;">
+          <!-- GRAP Protocol Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚠️ Graded Response Action Plan (GRAP) — Active Protocol</div>
+              <span class="grap-stage-badge">STAGE II IN FORCE</span>
+            </div>
+            <div style="font-size:13px; line-height:1.5; color:var(--ink-secondary);">
+              <p>Under GRAP Stage II (Air Quality Index 201–300), the Brihanmumbai Municipal Corporation enforces mandatory dust suppression across all active construction sites and bans open biomass combustion.</p>
+              <ul style="margin:12px 0 12px 20px; line-height:1.6;">
+                <li>Daily mechanical / vacuum sweeping of heavy arterial traffic roads.</li>
+                <li>Water sprinkling across ready-mix concrete (RMC) plants and Metro rail corridors.</li>
+                <li>Ban on diesel generator sets except for emergency hospital services.</li>
+                <li>Strict vigilance against open waste combustion at Deonar &amp; Mulund dumping grounds.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Deterministic AI Health Assistant Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🤖 Local Environmental Assistant</div>
+              <span class="ward-pill">AI Query</span>
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <input type="text" class="form-input" id="inputAiQuery" placeholder="e.g. Can I jog outside today? Should children wear masks?">
+              <button class="btn btn-primary" id="btnAiAsk">Consult</button>
+            </div>
+            <div style="background:var(--bg-subtle); padding:12px 14px; border-radius:var(--radius-sm); font-size:12.5px; line-height:1.45;" id="bubbleAiAnswer">
+              Hello! I am your MumbAIR Environmental Assistant. I analyze live CPCB atmospheric measurements across Mumbai's 24 wards to provide actionable health guidance.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div>
+          <strong>MumbAIR</strong> &middot; Greater Mumbai Air Quality Intelligence &amp; Civic Action Platform.<br>
+          <span style="font-size:11px; color:var(--ink-light);">Open-source civic technology dedicated to environmental transparency across Maharashtra.</span>
+        </div>
+        <div class="footer-links">
+          <span>MIT License</span>
+          <span>&middot;</span>
+          <span>Zero Dependencies</span>
+          <span>&middot;</span>
+          <span>24 MCGM Wards</span>
+          <span>&middot;</span>
+          <a href="#" id="footerAuthorityLink" style="font-weight:700; color:var(--ink-primary);">Municipal Authority Login ➔</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MUNICIPAL AUTHORITY PORTAL (SEPARATE PROTECTED EXPERIENCE)             -->
+  <!-- ========================================================================= -->
+  <div id="portal-authority" class="portal-root hidden">
+
+    <!-- Screen A: Authority Login View (When unauthenticated) -->
+    <div id="authority-login-view" class="authority-login-screen">
+      <div class="auth-card-wrapper">
+        <div class="auth-header">
+          <div class="bmc-emblem-badge">🏛️</div>
+          <h2>Brihanmumbai Municipal Corporation</h2>
+          <p class="auth-sub">Environmental Vigilance &amp; Operations Command (MCGM)</p>
+          <div class="auth-badge-notice">Official Municipal Personnel Only</div>
+        </div>
+
+        <form id="formAuthorityLogin" class="auth-form" onsubmit="return false;">
+          <div class="form-group">
+            <label class="form-label">Officer Email / Service ID</label>
+            <input type="text" id="authOfficerId" class="form-input" placeholder="e.g. sanjay.shinde@mcgm.gov.in" value="sanjay.shinde@mcgm.gov.in.demo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password / Security Key</label>
+            <input type="password" id="authPassword" class="form-input" value="••••••••" placeholder="Enter secure passphrase">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Department</label>
+            <select id="authDeptSelect" class="form-select">
+              <option value="SWM">Solid Waste Management (SWM)</option>
+              <option value="APC">Air Pollution Control &amp; Environment (APC)</option>
+              <option value="BUILDING">Construction &amp; Demolition (BDR)</option>
+              <option value="ROADS">Roads &amp; Traffic Infrastructure (RTI)</option>
+              <option value="ALL">All Departments (Command Center)</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary btn-lg" id="btnSubmitAuthorityLogin" style="width:100%; margin-top:8px;">
+            🔒 Authenticate &amp; Enter Command Workspace
+          </button>
+        </form>
+
+        <!-- Evaluator Quick Switcher for Evaluation -->
+        <div class="demo-evaluator-box">
+          <div class="eval-title">🎯 Evaluator &amp; Demo Persona Quick Switcher:</div>
+          <div class="eval-chips">
+            <button class="eval-chip active" data-role="FIELD_OFFICER" title="Login as Field Inspector Sanjay Shinde">⚡ Field Officer</button>
+            <button class="eval-chip" data-role="WARD_OFFICER" title="Login as Ward M/E Officer Dr. Priya Kamble">🏛️ Ward Officer</button>
+            <button class="eval-chip" data-role="DEPARTMENT_HEAD" title="Login as Dept Head Vikram Deshmukh">🏢 Dept Head</button>
+            <button class="eval-chip" data-role="CITY_ADMIN" title="Login as Municipal Commissioner Ops">🌆 City Admin</button>
+            <button class="eval-chip" data-role="SUPER_ADMIN" title="Login as Root System Administrator">🔒 Super Admin</button>
+          </div>
+        </div>
+
+        <div class="auth-footer-link">
+          <button class="btn-text" id="btnReturnToCitizenPortal">← Return to Public Citizen Portal</button>
+        </div>
       </div>
     </div>
 
-    <div class="mb-toast" id="toast"></div>
+    <!-- Screen B: Authority Dashboard Workspace (When authenticated) -->
+    <div id="authority-dashboard-view" class="authority-dashboard-workspace hidden">
+      <!-- Authority Header -->
+      <header class="authority-header">
+        <div class="authority-header-inner">
+          <div class="auth-brand">
+            <span class="auth-crest">🏛️</span>
+            <div>
+              <div class="auth-title">MCGM Operations Command</div>
+              <div class="auth-subtitle">Environmental Vigilance &amp; Compliance System</div>
+            </div>
+          </div>
 
-    <div class="mb-bottomnav">
-      <div class="mb-navitem active" data-tab="heatmap"><span class="ic">&#127758;</span><span class="lb">Home</span></div>
-      <div class="mb-navitem" data-tab="tickets"><span class="ic">&#127915;</span><span class="lb">Tickets</span></div>
-      <div class="mb-navitem" data-tab="report"><span class="ic">&#128247;</span><span class="lb">Report</span></div>
+          <div class="officer-profile-card">
+            <div class="officer-avatar" id="authOfficerAvatar">S</div>
+            <div class="officer-meta">
+              <span class="officer-name" id="authOfficerName">Officer Sanjay Shinde</span>
+              <span class="officer-role-pill" id="authOfficerRolePill">Field Operations Officer</span>
+            </div>
+            <div class="officer-badge-pill" id="authOfficerBadge">BMC-FO-4412</div>
+          </div>
+
+          <div class="auth-nav-controls" style="display:flex; gap:8px;">
+            <button class="btn btn-sm btn-outline-light" id="btnSwitchBackToCitizen">🌐 Public Citizen App</button>
+            <button class="btn btn-sm btn-danger-subtle" id="btnAuthorityLogout">🚪 Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Authority Role-Specific Container -->
+      <div class="authority-body">
+        <div class="authority-workspace-content" id="authorityWorkspaceContent">
+          <!-- Dynamically populated based on active role -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: 24 Wards Location Selector                                         -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop hidden" id="modalLocationSelector">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Monitoring Ward</h3>
+        <button class="modal-close-btn" id="btnCloseLocationModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="location-search-row">
+          <span class="location-search-icon">🔍</span>
+          <input type="text" id="inputModalWardSearch" class="location-search-input" placeholder="Search ward (e.g. Bandra, Worli, Chembur)...">
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:12px; color:var(--ink-muted);">Greater Mumbai &middot; 24 Municipal Wards</span>
+          <button class="btn btn-sm btn-outline" id="btnModalGpsDetect">📍 Detect GPS</button>
+        </div>
+        <div id="modalWardListContainer"></div>
+      </div>
     </div>
   </div>
 
-</div>
-</div>
+  <!-- ========================================================================= -->
+  <!-- MODAL: Citizen Profile / Guest Login                                      -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop hidden" id="modalCitizenAuth">
+    <div class="modal-dialog" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="citizenModalTitle">Citizen Account</h3>
+        <button class="modal-close-btn" id="btnCloseCitizenModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--ink-secondary); margin-bottom:16px;">
+          Save your pinned home/office wards across Greater Mumbai and receive notifications on your submitted violation reports.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="inputCitizenName" placeholder="e.g. Aarav Patil" value="Aarav Patil">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number / Email</label>
+          <input type="text" class="form-input" id="inputCitizenContact" placeholder="e.g. +91 98200 12345" value="+91 98200 54321">
+        </div>
+        <button class="btn btn-primary btn-lg" id="btnSaveCitizenProfile" style="width:100%; margin-top:8px;">
+          Save Profile &amp; Preferences
+        </button>
+        <div style="text-align:center; margin-top:14px;">
+          <button class="btn-text-sm" id="btnContinueGuest">Continue in Guest Mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<script>
-(function(){
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
-  var AQI_BANDS = [
-    {max:100, color:'var(--good)', hex:'#5B8C6E', name:'Good'},
-    {max:150, color:'var(--moderate)', hex:'#C9A227', name:'Moderate'},
-    {max:200, color:'var(--sensitive)', hex:'#D97A3D', name:'Unhealthy (Sensitive)'},
-    {max:300, color:'var(--unhealthy)', hex:'#B8483F', name:'Unhealthy'},
-    {max:999, color:'var(--severe)', hex:'#6E2A3A', name:'Severe'}
-  ];
-  function bandFor(v){
-    for(var i=0;i<AQI_BANDS.length;i++) if(v <= AQI_BANDS[i].max) return AQI_BANDS[i];
-    return AQI_BANDS[AQI_BANDS.length-1];
-  }
+  <!-- External Map & Chart Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  var CAUSES = {
-    'M/E':'Refinery Emissions — Mahul','M/W':'Landfill Smoke — Deonar',
-    'G/S':'Construction Debris Dust','K/W':'Traffic Congestion — WEH',
-    'K/E':'Traffic Congestion — WEH', 'default':'Vehicular + Dust Mix'
-  };
-
-  var ROWS = [
-    ['R/C','R/N','R/S','S','T'],
-    ['P/N','P/S','N','L','M/W'],
-    ['K/W','K/E','H/W','H/E','M/E'],
-    ['G/S','G/N','F/S','F/N'],
-    ['D','E','C'],
-    ['B','A']
-  ];
-  var NAMES = {
-    'R/C':'Dahisar','R/N':'Borivali','R/S':'Kandivali','S':'Bhandup','T':'Mulund',
-    'P/N':'Malad','P/S':'Goregaon','N':'Ghatkopar','L':'Kurla','M/W':'Govandi',
-    'K/W':'Andheri W','K/E':'Andheri E','H/W':'Bandra W','H/E':'Bandra E','M/E':'Chembur / Mahul',
-    'G/S':'Worli / Lower Parel','G/N':'Dadar / Mahim','F/S':'Parel','F/N':'Matunga',
-    'D':'Malabar Hill','E':'Byculla','C':'Marine Lines','B':'Masjid Bunder','A':'Colaba / Fort'
-  };
-  // rough centroids for "nearest ward" demo geolocation matching
-  var COORDS = {
-    'A':[18.9067,72.8147],'B':[18.9634,72.8322],'C':[18.9440,72.8258],'D':[18.9547,72.8081],
-    'E':[18.9750,72.8327],'F/N':[19.0270,72.8554],'F/S':[19.0027,72.8407],'G/N':[19.0330,72.8397],
-    'G/S':[19.0100,72.8170],'H/E':[19.0600,72.8500],'H/W':[19.0596,72.8295],'K/E':[19.1150,72.8700],
-    'K/W':[19.1364,72.8296],'L':[19.0728,72.8826],'M/E':[19.0522,72.9005],'M/W':[19.0550,72.9150],
-    'N':[19.0863,72.9081],'P/N':[19.1860,72.8490],'P/S':[19.1663,72.8526],'R/C':[19.2540,72.8590],
-    'R/N':[19.2307,72.8567],'R/S':[19.2095,72.8526],'S':[19.1440,72.9350],'T':[19.1720,72.9560]
-  };
-
-  var wards = {};
-  Object.keys(NAMES).forEach(function(code){
-    var base = (code==='M/E') ? 205 : (code==='M/W' ? 175 : (code==='G/S'? 160 : 60 + Math.random()*90));
-    wards[code] = { code: code, name: NAMES[code], aqi: Math.round(base), stressTicks: 0, hist:[Math.round(base)] };
-  });
-  wards['M/E'].stressTicks = 2;
-
-  var windStalled = false;
-  var tickets = [];
-  var ticketSeq = 1;
-  var selectedWard = null;
-  var openTicketId = null;
-  var userWard = null;
-  var mobileNumber = '';
-  var isGuest = false;
-  var wasHarmful = false;
-  var tickInterval = null;
-
-  var reportState = {step:1, category:null, ward:null};
-
-  // ---------------- utility ----------------
-  function fmtTime(){ var d=new Date(); return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-  function toast(msg){
-    var t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 2600);
-  }
-  function showScreen(id){
-    ['screen-login','screen-otp','screen-location','screen-app'].forEach(function(s){
-      document.getElementById(s).classList.toggle('mb-hidden', s!==id);
-    });
-  }
-
-  var pushHideTimer = null;
-  function showPushAlert(msg){
-    var banner = document.getElementById('pushBanner');
-    document.getElementById('pushBody').textContent = msg;
-    banner.classList.add('show');
-    clearTimeout(pushHideTimer);
-    pushHideTimer = setTimeout(function(){ banner.classList.remove('show'); }, 7000);
-  }
-  document.getElementById('pushClose').onclick = function(e){
-    e.stopPropagation();
-    document.getElementById('pushBanner').classList.remove('show');
-    clearTimeout(pushHideTimer);
-  };
-  document.getElementById('pushBanner').onclick = function(){
-    document.getElementById('pushBanner').classList.remove('show');
-    clearTimeout(pushHideTimer);
-    switchTab('heatmap');
-    selectedWard = userWard;
-    renderWardDetail(userWard);
-  };
-
-  function logout(){
-    clearInterval(tickInterval); tickInterval = null; booted = false;
-    mobileNumber = ''; userWard = null; selectedWard = null; openTicketId = null;
-    wasHarmful = false; tickets = []; ticketSeq = 1; isGuest = false;
-    Object.keys(wards).forEach(function(c){ wards[c].stressTicks = 0; });
-    document.getElementById('mobileInput').value = '';
-    document.getElementById('pushBanner').classList.remove('show');
-    document.getElementById('guestTag').classList.add('mb-hidden');
-    reportState = {step:1, category:null, ward:null};
-    showScreen('screen-login');
-  }
-
-  // ---------------- LOGIN ----------------
-  document.getElementById('sendOtpBtn').onclick = function(){
-    var v = document.getElementById('mobileInput').value.trim();
-    var err = document.getElementById('loginError');
-    if(!/^[6-9]\d{9}$/.test(v)){
-      err.textContent = 'Enter a valid 10-digit mobile number.';
-      return;
-    }
-    err.textContent = '';
-    mobileNumber = v;
-    isGuest = false;
-    document.getElementById('otpSentTo').textContent = 'Enter the 6-digit code sent to +91 ' + v.slice(0,5) + 'XXXXX';
-    buildOtpBoxes();
-    showScreen('screen-otp');
-  };
-
-  function buildOtpBoxes(){
-    var wrap = document.getElementById('otpBoxes');
-    wrap.innerHTML = '';
-    for(var i=0;i<6;i++){
-      var inp = document.createElement('input');
-      inp.className = 'mb-otp-box'; inp.maxLength=1; inp.inputMode='numeric';
-      inp.addEventListener('input', function(e){
-        if(e.target.value && e.target.nextElementSibling){ e.target.nextElementSibling.focus(); }
-      });
-      wrap.appendChild(inp);
-    }
-    setTimeout(function(){ wrap.children[0].focus(); }, 50);
-  }
-
-  document.getElementById('verifyBtn').onclick = function(){
-    var boxes = document.getElementById('otpBoxes').children;
-    var code = '';
-    for(var i=0;i<boxes.length;i++) code += boxes[i].value;
-    var err = document.getElementById('otpError');
-    if(code.length < 6){ err.textContent = 'Enter all 6 digits.'; return; }
-    err.textContent = '';
-    populateWardSelect();
-    showScreen('screen-location');
-  };
-  document.getElementById('guestBtn').onclick = function(){
-    isGuest = true;
-    mobileNumber = '';
-    populateWardSelect();
-    showScreen('screen-location');
-  };
-  document.getElementById('backToLoginBtn').onclick = function(){ showScreen('screen-login'); };
-
-  // ---------------- LOCATION ----------------
-  function populateWardSelect(){
-    var sel = document.getElementById('wardSelect');
-    sel.innerHTML = '<option value="">Choose your ward…</option>';
-    var codes = Object.keys(NAMES).sort(function(a,b){ return NAMES[a].localeCompare(NAMES[b]); });
-    codes.forEach(function(code){
-      var opt = document.createElement('option');
-      opt.value = code; opt.textContent = NAMES[code] + ' (Ward ' + code + ')';
-      sel.appendChild(opt);
-    });
-  }
-
-  function nearestWard(lat, lng){
-    var best = null, bestD = Infinity;
-    Object.keys(COORDS).forEach(function(code){
-      var c = COORDS[code];
-      var d = Math.pow(c[0]-lat,2) + Math.pow(c[1]-lng,2);
-      if(d < bestD){ bestD = d; best = code; }
-    });
-    return best;
-  }
-
-  document.getElementById('detectBtn').onclick = function(){
-    var status = document.getElementById('detectStatus');
-    if(!navigator.geolocation){
-      status.textContent = 'Location services unavailable here — please select manually below.';
-      return;
-    }
-    status.textContent = 'Detecting your location…';
-    navigator.geolocation.getCurrentPosition(function(pos){
-      var code = nearestWard(pos.coords.latitude, pos.coords.longitude);
-      document.getElementById('wardSelect').value = code;
-      status.textContent = 'Detected: ' + NAMES[code] + ' (Ward ' + code + ')';
-    }, function(){
-      status.textContent = 'Couldn\'t get a location fix — please select your ward manually below.';
-    }, {timeout:6000});
-  };
-
-  document.getElementById('continueBtn').onclick = function(){
-    var sel = document.getElementById('wardSelect');
-    if(!sel.value){ document.getElementById('detectStatus').textContent = 'Select a ward to continue.'; return; }
-    userWard = sel.value;
-    document.getElementById('wardChipNav').textContent = userWard + ' \u25BE';
-    document.getElementById('guestTag').classList.toggle('mb-hidden', !isGuest);
-    showScreen('screen-app');
-    boot();
-  };
-
-  // ---------------- ticket logic ----------------
-  function createTicket(wardCode, triggerType){
-    var t = {
-      id: 'MB-' + (1000+ticketSeq++), ward: wardCode, trigger: triggerType,
-      aqiAt: wards[wardCode].aqi, status: 'TICKET_RAISED', bmcRef: null,
-      history: [{status:'TICKET_RAISED', time:fmtTime(), note: triggerType==='AUTO_STRESS' ? 'Auto-generated: AQI sustained above 200 for 3+ hrs' : 'Filed from citizen report'}]
-    };
-    tickets.unshift(t);
-    renderTickets();
-    return t;
-  }
-  function advanceTicket(t){
-    if(t.status==='TICKET_RAISED'){
-      t.status='SENT_TO_WARD_DESK';
-      t.bmcRef = 'MCGM-' + Math.floor(100000+Math.random()*899999);
-      t.history.push({status:'SENT_TO_WARD_DESK', time:fmtTime(), note:'Auto-escalated to Ward Desk after 6hr threshold. Ref '+t.bmcRef});
-    } else if(t.status==='SENT_TO_WARD_DESK'){
-      t.status='IN_PROGRESS';
-      t.history.push({status:'IN_PROGRESS', time:fmtTime(), note:'Field officer assigned'});
-    } else if(t.status==='IN_PROGRESS'){
-      if(wards[t.ward].aqi < 100){
-        t.status='CLOSED_SAFE';
-        t.history.push({status:'CLOSED_SAFE', time:fmtTime(), note:'AQI naturally decreased below 100'});
-      } else {
-        t.status='ACTION_TAKEN';
-        t.history.push({status:'ACTION_TAKEN', time:fmtTime(), note:'Water sprinklers activated, mitigation photo logged', photo:true});
-      }
-    } else if(t.status==='ACTION_TAKEN'){
-      t.status='CLOSED_SAFE';
-      t.history.push({status:'CLOSED_SAFE', time:fmtTime(), note:'AQI naturally decreased below 100'});
-    }
-  }
-
-  // ---------------- tick loop ----------------
-  function tick(){
-    var maxAqi = 0;
-    Object.keys(wards).forEach(function(code){
-      var w = wards[code];
-      var delta = (Math.random()-0.48) * 22;
-      w.aqi = Math.max(25, Math.min(400, Math.round(w.aqi + delta)));
-      w.hist.push(w.aqi); if(w.hist.length>16) w.hist.shift();
-      maxAqi = Math.max(maxAqi, w.aqi);
-      if(w.aqi >= 201){ w.stressTicks++; } else { w.stressTicks = 0; }
-      // Automatic stress tickets are only ever raised for the signed-in user's own pinned ward —
-      // other wards still show as stressed on the map (flag dot) but won't self-file tickets.
-      if(code === userWard){
-        if(w.stressTicks === 3){ createTicket(code, 'AUTO_STRESS'); toast('Ticket auto-drafted for your ward: ' + code); }
-        if(w.stressTicks === 6){
-          var existing = tickets.find(function(t){return t.ward===code && t.status==='TICKET_RAISED';});
-          if(existing){ advanceTicket(existing); toast('Ticket ' + existing.id + ' escalated to BMC'); renderTickets(); }
-        }
-      }
-    });
-
-    // Harmful-level (201+) push alert for the user's own location — fires once per crossing
-    var uw = wards[userWard];
-    if(uw.aqi >= 201 && !wasHarmful){
-      showPushAlert('Harmful air quality detected in ' + uw.name + ' (Ward ' + uw.code + ') — AQI ' + uw.aqi + '. Wear an N95 mask and limit outdoor time.');
-      wasHarmful = true;
-    } else if(uw.aqi < 201){
-      wasHarmful = false;
-    }
-
-    if(Math.random() < 0.12) windStalled = !windStalled;
-    document.getElementById('ribbon').classList.toggle('stalled', windStalled);
-
-    tickets.forEach(function(t){ if(t.status!=='CLOSED_SAFE' && Math.random() < 0.10){ advanceTicket(t); } });
-
-    var grap = maxAqi >= 300 ? 'GRAP STAGE IV' : maxAqi >= 201 ? 'GRAP STAGE III' : maxAqi >= 151 ? 'GRAP STAGE II' : 'GRAP STAGE I';
-    document.getElementById('grapBadge').textContent = grap;
-
-    renderHero();
-    renderMap();
-    if(selectedWard) renderWardDetail(selectedWard);
-    renderTickets();
-    if(openTicketId) renderTimeline(openTicketId);
-  }
-
-  // ---------------- render: hero ----------------
-  function renderHero(){
-    var w = wards[userWard];
-    var band = bandFor(w.aqi);
-    var hero = document.getElementById('heroCard');
-    hero.style.background = 'linear-gradient(135deg, ' + band.hex + ', ' + band.hex + 'CC)';
-    document.getElementById('heroWardName').textContent = w.name + ' (Ward ' + w.code + ')';
-    document.getElementById('heroAqi').textContent = w.aqi;
-    document.getElementById('heroBand').textContent = band.name;
-
-    var maskBox = document.getElementById('heroMask');
-    var maskText = document.getElementById('heroMaskText');
-    if(w.aqi >= 201){
-      maskBox.classList.remove('mb-hidden');
-      maskText.textContent = 'Harmful air quality — wear an N95 mask outdoors and limit time outside.';
-    } else if(w.aqi >= 151){
-      maskBox.classList.remove('mb-hidden');
-      maskText.textContent = 'Unhealthy for sensitive groups — wear a mask outdoors today.';
-    } else {
-      maskBox.classList.add('mb-hidden');
-    }
-  }
-
-  // ---------------- render: map ----------------
-  function renderMap(){
-    var grid = document.getElementById('mapGrid');
-    grid.innerHTML = '';
-    ROWS.forEach(function(row){
-      var rowEl = document.createElement('div'); rowEl.className='mb-row';
-      row.forEach(function(code){
-        var w = wards[code]; var band = bandFor(w.aqi);
-        var el = document.createElement('div');
-        el.className = 'mb-ward' + (code===userWard ? ' mine' : '');
-        el.style.background = band.color;
-        var flag = w.stressTicks >= 1 ? '<div class="flag"></div>' : '';
-        el.innerHTML = '<div class="code">'+code+'</div><div class="val">'+w.aqi+'</div>' + flag;
-        el.onclick = function(){ selectedWard = code; renderWardDetail(code); };
-        rowEl.appendChild(el);
-      });
-      grid.appendChild(rowEl);
-    });
-  }
-
-  function renderWardDetail(code){
-    var w = wards[code]; var band = bandFor(w.aqi);
-    var prev = w.hist.length>1 ? w.hist[w.hist.length-2] : w.aqi;
-    var arrow = w.aqi>prev ? '&#8593;' : (w.aqi<prev ? '&#8595;' : '&#8594;');
-    var cause = CAUSES[code] || CAUSES['default'];
-    var stressNote = w.stressTicks>0 ? '<div class="mb-chip" style="border-color:var(--unhealthy); color:var(--unhealthy);">Sustained '+w.stressTicks+' cycle(s) above 200</div>' : '';
-    document.getElementById('wardDetail').innerHTML =
-      '<div class="mb-sheet">' +
-        '<div class="mb-sheet-head">' +
-          '<div><div class="mb-sheet-title">'+w.name+' &middot; Ward '+code+'</div><div class="mb-sheet-sub">Dominant pollutant: PM2.5</div></div>' +
-          '<div class="mb-aqi-big" style="color:'+band.color+'">'+w.aqi+' '+arrow+'</div>' +
-        '</div>' +
-        '<div class="mb-chip">'+band.name+'</div>' +
-        '<div class="mb-chip">Probable cause: '+cause+'</div>' +
-        stressNote +
-        '<div><button class="mb-btn accent" style="margin-top:12px;" id="reportHereBtn">Report a violation here</button></div>' +
-      '</div>';
-    document.getElementById('reportHereBtn').onclick = function(){
-      reportState = {step:1, category:null, ward:code};
-      switchTab('report'); renderReportFlow();
-    };
-  }
-
-  // ---------------- render: tickets ----------------
-  function renderTickets(){
-    var list = document.getElementById('ticketList');
-    if(tickets.length===0){
-      list.innerHTML = '<div class="mb-empty">No tickets yet. When a ward stays "Unhealthy" for a sustained period, a ticket auto-generates here — or file a citizen report from the Report tab.</div>';
-      return;
-    }
-    list.innerHTML = '';
-    tickets.forEach(function(t){
-      var w = wards[t.ward];
-      var card = document.createElement('div'); card.className = 'mb-ticket-card';
-      card.innerHTML =
-        '<div class="mb-ticket-row">' +
-          '<div><div class="mb-ticket-ward">'+t.id+' &middot; '+t.ward+'</div>' +
-          '<div class="mb-tl-meta">'+(t.trigger==='AUTO_STRESS'?'Automatic escalation':'Citizen report')+(t.bmcRef ? ' &middot; '+t.bmcRef : '')+'</div></div>' +
-          '<div class="mb-status-pill st-'+t.status+'">'+t.status.replace(/_/g,' ')+'</div>' +
-        '</div>';
-      card.onclick = function(){ openTicketId = t.id; renderTimeline(t.id); };
-      list.appendChild(card);
-    });
-  }
-
-  function renderTimeline(ticketId){
-    var t = tickets.find(function(x){return x.id===ticketId;});
-    if(!t) return;
-    var steps = ['TICKET_RAISED','SENT_TO_WARD_DESK','IN_PROGRESS','ACTION_TAKEN','CLOSED_SAFE'];
-    var html = '<div class="mb-sheet"><div class="mb-sheet-title">'+t.id+' — '+wards[t.ward].name+'</div>' +
-      '<div class="mb-tl-meta">AQI at trigger: '+t.aqiAt+'</div><div class="mb-timeline">';
-    steps.forEach(function(s){
-      var entry = t.history.find(function(h){return h.status===s;});
-      var pending = !entry;
-      html += '<div class="mb-tl-node '+(pending?'pending':'')+'"><div class="mb-tl-dot"></div>' +
-        '<div><div class="mb-tl-title">'+s.replace(/_/g,' ')+'</div>' +
-        (entry ? '<div class="mb-tl-meta">'+entry.time+'</div><div class="mb-tl-note">'+entry.note+'</div>' : '<div class="mb-tl-meta">pending</div>') +
-        (entry && entry.photo ? '<div class="mb-photo-proof">Field officer photo evidence attached</div>' : '') +
-        '</div></div>';
-    });
-    html += '</div></div>';
-    document.getElementById('ticketTimeline').innerHTML = html;
-  }
-
-  // ---------------- report flow ----------------
-  var CATEGORIES = [
-    {id:'MISSING_LED', icon:'&#128204;', label:'Missing LED / sensor at site'},
-    {id:'OPEN_BURNING', icon:'&#128293;', label:'Open garbage burning'},
-    {id:'INDUSTRIAL', icon:'&#127981;', label:'Heavy industrial smoke'}
-  ];
-  function updateStepBar(){
-    ['stepBar1','stepBar2','stepBar3'].forEach(function(id,i){
-      document.getElementById(id).classList.toggle('done', reportState.step > i);
-    });
-  }
-  function renderReportFlow(){
-    var el = document.getElementById('reportFlow');
-    if(isGuest){
-      document.getElementById('stepBar1').parentElement.classList.add('mb-hidden');
-      el.innerHTML = '<div class="mb-empty" style="padding:40px 16px;">' +
-        '<div style="font-size:26px; margin-bottom:8px;">&#128274;</div>' +
-        '<div style="font-weight:600; color:var(--ink); margin-bottom:4px;">Sign in to file a report</div>' +
-        'Citizen reports need a verified mobile number so field officers can follow up and to keep the system spam-free.' +
-        '<div style="margin-top:14px;"><button class="mb-btn accent" id="guestSignInBtn" style="width:auto; padding:10px 18px;">Sign in now</button></div>' +
-        '</div>';
-      document.getElementById('guestSignInBtn').onclick = function(){ logout(); };
-      return;
-    }
-    document.getElementById('stepBar1').parentElement.classList.remove('mb-hidden');
-    updateStepBar();
-    var el = document.getElementById('reportFlow');
-    if(reportState.step===1){
-      var wardNote = reportState.ward ? ('<div class="mb-chip">Location: '+wards[reportState.ward].name+' ('+reportState.ward+')</div>') : '<div class="mb-chip">Location: '+wards[userWard].name+' ('+userWard+')</div>';
-      el.innerHTML = '<div class="mb-section-label">Tap 1 of 3 — What are you reporting?</div>' + wardNote + '<div class="mb-cat-grid" id="catGrid"></div>';
-      var grid = document.getElementById('catGrid');
-      CATEGORIES.forEach(function(c){
-        var card = document.createElement('div'); card.className = 'mb-cat-card';
-        card.innerHTML = '<div class="mb-cat-icon">'+c.icon+'</div><div class="mb-cat-label">'+c.label+'</div>';
-        card.onclick = function(){
-          reportState.category = c;
-          if(!reportState.ward) reportState.ward = userWard;
-          reportState.step = 2; renderReportFlow();
-        };
-        grid.appendChild(card);
-      });
-    } else if(reportState.step===2){
-      el.innerHTML = '<div class="mb-section-label">Tap 2 of 3 — Capture evidence</div>' +
-        '<div class="mb-capture-box"><div style="font-size:26px;">&#128247;</div><div style="font-size:11px; font-family:\'IBM Plex Mono\',monospace;">Capturing geotagged photo…</div></div>' +
-        '<div class="mb-verify-row" style="margin-top:10px;"><span id="vGeo" class="ok">&#10003; Geotag verified</span><span id="vTime" class="ok">&#10003; Timestamp verified</span></div>' +
-        '<button class="mb-btn" id="toStep3" style="display:none; margin-top:14px;">Continue</button>';
-      setTimeout(function(){ document.getElementById('vGeo').classList.add('show'); }, 500);
-      setTimeout(function(){
-        document.getElementById('vTime').classList.add('show');
-        var btn = document.getElementById('toStep3'); btn.style.display='block';
-        btn.onclick = function(){ reportState.step=3; renderReportFlow(); };
-      }, 1000);
-    } else if(reportState.step===3){
-      var w = wards[reportState.ward];
-      el.innerHTML = '<div class="mb-section-label">Tap 3 of 3 — Confirm &amp; submit</div>' +
-        '<div class="mb-chip">'+reportState.category.label+'</div>' +
-        '<div class="mb-chip">'+w.name+' ('+reportState.ward+')</div>' +
-        '<div class="mb-confirm-thumb">Photo evidence &middot; geotag + timestamp attached</div>' +
-        '<button class="mb-btn accent" id="submitBtn" style="margin-top:14px;">Submit report</button>' +
-        '<button class="mb-btn secondary" id="cancelBtn">Start over</button>';
-      document.getElementById('submitBtn').onclick = function(){
-        var t = createTicket(reportState.ward, 'CITIZEN_REPORT');
-        toast('Report submitted — linked to ' + t.id);
-        reportState = {step:1, category:null, ward:null};
-        renderReportFlow();
-        switchTab('tickets'); openTicketId = t.id; renderTimeline(t.id);
-      };
-      document.getElementById('cancelBtn').onclick = function(){ reportState = {step:1, category:null, ward:null}; renderReportFlow(); };
-    }
-  }
-
-  // ---------------- ribbon ----------------
-  function buildRibbon(){
-    var strip = document.getElementById('ribbonStrip');
-    var html = '';
-    for(var i=0;i<16;i++){ html += '<span>&#10132;</span>'; }
-    strip.innerHTML = html;
-  }
-
-  // ---------------- tabs ----------------
-  function switchTab(name){
-    document.querySelectorAll('.mb-navitem').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')===name); });
-    ['heatmap','tickets','report'].forEach(function(p){ document.getElementById('panel-'+p).classList.toggle('mb-hidden', p!==name); });
-  }
-  document.querySelectorAll('.mb-navitem').forEach(function(t){ t.addEventListener('click', function(){ switchTab(t.getAttribute('data-tab')); }); });
-  document.getElementById('wardChipNav').onclick = function(){ populateWardSelect(); document.getElementById('wardSelect').value = userWard; showScreen('screen-location'); };
-  document.getElementById('logoutBtn').onclick = function(){ logout(); };
-
-  var booted = false;
-  function boot(){
-    if(booted) return; booted = true;
-    wasHarmful = wards[userWard].aqi >= 201;
-    buildRibbon();
-    renderHero();
-    renderMap();
-    renderTickets();
-    renderReportFlow();
-    tickInterval = setInterval(tick, 4000);
-  }
-
-})();
-</script>
+  <!-- Modular Application Scripts Loaded in Strict Dependency Order -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/workflow.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/ai-assistant.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/operations.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

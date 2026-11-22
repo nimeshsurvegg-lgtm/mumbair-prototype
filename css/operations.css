@@ -1,0 +1,228 @@
+/* ==============================================================================
+   MumbAIR — Operations CSS (Municipal Command Center, Incident Queue & Field Ops)
+   ============================================================================== */
+
+/* Authority Login Card */
+.auth-card-wrapper {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  max-width: 480px;
+  width: 100%;
+  padding: 36px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.bmc-emblem-badge {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.auth-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+}
+
+.auth-sub {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+
+.auth-badge-notice {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+/* Demo Evaluator Quick Persona Switcher in Login Screen */
+.demo-evaluator-box {
+  margin-top: 24px;
+  padding: 14px;
+  background: #F8FAFC;
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+}
+
+.eval-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  margin-bottom: 8px;
+}
+
+.eval-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.eval-chip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.eval-chip:hover {
+  border-color: var(--brand-teal);
+  color: var(--brand-teal-dark);
+}
+
+.eval-chip.active {
+  background: var(--ink-primary);
+  color: #fff;
+  border-color: var(--ink-primary);
+}
+
+.auth-footer-link {
+  text-align: center;
+  margin-top: 18px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  font-size: 0.8125rem;
+  color: var(--brand-teal);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+/* Municipal Command Grid & Cards */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-card.alert { border-left: 4px solid var(--color-danger); }
+.metric-card.warning { border-left: 4px solid var(--color-warning); }
+.metric-card.success { border-left: 4px solid var(--color-success); }
+.metric-card.info { border-left: 4px solid var(--color-info); }
+
+.metric-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.metric-val {
+  font-family: var(--font-mono);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  margin: 6px 0;
+}
+
+.metric-sub {
+  font-size: 0.6875rem;
+  color: var(--ink-light);
+}
+
+/* Field Tasks Cards */
+.field-task-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-xs);
+}
+
+.field-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.task-id-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: #F1F5F9;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.task-priority-pill {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.priority-urgent { background: #FEE2E2; color: #DC2626; }
+.priority-high { background: #FFEDD5; color: #C2410C; }
+.priority-medium { background: #FEF3C7; color: #B45309; }
+.priority-low { background: #F0FDF4; color: #15803D; }
+
+/* Operational Tables */
+.operations-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.operations-table th {
+  background: var(--bg-subtle);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.operations-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+.operations-table tr:hover td {
+  background: #F8FAFC;
+}

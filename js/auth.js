@@ -1,7 +1,8 @@
 /* ==============================================================================
-   MumbAIR — Authentication & Session Authority Layer
-   Strictly separates Public Citizen Sessions (Guest/Registered) and Protected
-   Municipal Authority Sessions (Field Officer, Ward Officer, Dept Head, Admin)
+   MumbAIR — Authentication & Session Authority Layer (RBAC Hardened)
+   Strictly separates Public Citizen Sessions and Municipal Authority Sessions.
+   Enforces Scope Boundaries: Citizen Own-Only, Field Officer Assigned-Only,
+   Ward Officer Ward-Only, Dept Head Dept-Only.
    ============================================================================== */
 
 window.MumbAIR = window.MumbAIR || {};
@@ -12,17 +13,17 @@ window.MumbAIR.AUTH = (function(){
   var CONFIG = window.MumbAIR.CONFIG;
   var STORAGE = window.MumbAIR.STORAGE;
 
-  var AUTH_STORAGE_KEY = 'mumbair_auth_session_v3';
+  var AUTH_STORAGE_KEY = 'mumbair_auth_session_v4';
 
   // Default Session State
   var sessionState = {
     isCitizenLoggedIn: false,
     citizenUser: {
-      id: 'guest_citizen',
-      name: 'Mumbai Citizen',
-      phone: '',
-      email: '',
-      isGuest: true,
+      id: 'user_cit_1',
+      name: 'Aarav Patil',
+      phone: '+91 98200 41200',
+      email: 'aarav.patil@mumbai.gov.in.demo',
+      isGuest: false,
       pinnedWards: ['M/E', 'A', 'K/W']
     },
     isAuthorityLoggedIn: false,
@@ -32,27 +33,33 @@ window.MumbAIR.AUTH = (function(){
   function loadAuthSession(){
     try {
       var saved = localStorage.getItem(AUTH_STORAGE_KEY);
+      if(!saved){
+        // Check v3 migration
+        var v3 = localStorage.getItem('mumbair_auth_session_v3');
+        if(v3) saved = v3;
+      }
       if(saved){
         var parsed = JSON.parse(saved);
         if(parsed && typeof parsed === 'object'){
           sessionState.isCitizenLoggedIn = !!parsed.isCitizenLoggedIn;
-          if(parsed.citizenUser) sessionState.citizenUser = parsed.citizenUser;
+          if(parsed.citizenUser && typeof parsed.citizenUser === 'object') {
+            sessionState.citizenUser = parsed.citizenUser;
+          }
           sessionState.isAuthorityLoggedIn = !!parsed.isAuthorityLoggedIn;
           sessionState.authorityUser = parsed.authorityUser || null;
         }
       }
     } catch(e) {
-      console.warn('Could not load auth session, using default guest session:', e);
+      console.warn('Auth session parse error:', e);
     }
   }
 
   function saveAuthSession(){
     try {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sessionState));
-    } catch(e) {}
+    } catch(e){}
   }
 
-  // Load session on startup
   loadAuthSession();
 
   /* ===========================================================================
@@ -69,10 +76,11 @@ window.MumbAIR.AUTH = (function(){
 
   function loginCitizen(name, phoneOrEmail){
     sessionState.isCitizenLoggedIn = true;
+    var isAarav = (name && name.toLowerCase().indexOf('aarav') !== -1) || (phoneOrEmail && phoneOrEmail.indexOf('4120') !== -1);
     sessionState.citizenUser = {
-      id: 'cit_' + Date.now(),
+      id: isAarav ? 'user_cit_1' : ('cit_' + Date.now().toString(36)),
       name: name || 'Citizen User',
-      phone: phoneOrEmail || '',
+      phone: phoneOrEmail || '+91 98200 41200',
       email: phoneOrEmail && phoneOrEmail.indexOf('@') !== -1 ? phoneOrEmail : '',
       isGuest: false,
       pinnedWards: sessionState.citizenUser.pinnedWards || ['M/E']
@@ -119,48 +127,35 @@ window.MumbAIR.AUTH = (function(){
     return sessionState.authorityUser;
   }
 
-  function loginAuthorityWithRole(roleKey){
-    var demoOfficer = CONFIG.DEMO_USERS.find(function(u){ return u.role === roleKey; });
-    if(!demoOfficer){
-      demoOfficer = CONFIG.DEMO_USERS[1]; // Field Officer default
-    }
+  /**
+   * Authenticate Municipal Authority Officer
+   * Enforces verified account matching against verified roster
+   */
+  function loginAuthority(officerIdentifier, password, department){
+    var term = String(officerIdentifier || '').toLowerCase().trim();
+    var demoUsers = (CONFIG && CONFIG.DEMO_USERS) || [];
 
-    sessionState.isAuthorityLoggedIn = true;
-    sessionState.authorityUser = {
-      id: demoOfficer.id,
-      name: demoOfficer.name,
-      role: demoOfficer.role,
-      roleLabel: CONFIG.ROLES[demoOfficer.role].label,
-      ward: demoOfficer.ward,
-      department: demoOfficer.department,
-      badge: demoOfficer.badge,
-      email: demoOfficer.email,
-      authenticatedAt: Date.now()
-    };
-
-    saveAuthSession();
-    return sessionState.authorityUser;
-  }
-
-  function loginAuthority(officerId, password, department){
-    // Match against verified demo accounts or authenticate officer
-    var matched = CONFIG.DEMO_USERS.find(function(u){
-      return (u.email && u.email.toLowerCase() === officerId.toLowerCase().trim()) ||
-             (u.badge && u.badge.toLowerCase() === officerId.toLowerCase().trim()) ||
-             (u.name && u.name.toLowerCase().indexOf(officerId.toLowerCase().trim()) !== -1);
+    // Match by email, badge ID, or exact name in verified roster
+    var matched = demoUsers.find(function(u){
+      return (u.email && u.email.toLowerCase() === term) ||
+             (u.badge && u.badge.toLowerCase() === term) ||
+             (u.id && u.id.toLowerCase() === term) ||
+             (u.name && u.name.toLowerCase().indexOf(term) !== -1);
     });
 
     if(!matched){
-      // Default to field officer for presentation robustness if typed custom name
-      matched = {
-        id: 'officer_' + Date.now(),
-        name: officerId.indexOf('@') !== -1 ? officerId.split('@')[0] : officerId,
-        role: 'FIELD_OFFICER',
-        ward: 'M/E',
-        department: department || 'SWM',
-        badge: 'BMC-AUTH-' + Math.floor(1000 + Math.random() * 9000),
-        email: officerId
-      };
+      // Check storage roster
+      var state = STORAGE.loadState();
+      var officers = state.officers || [];
+      matched = officers.find(function(u){
+        return (u.email && u.email.toLowerCase() === term) ||
+               (u.badge && u.badge.toLowerCase() === term) ||
+               (u.id && u.id.toLowerCase() === term);
+      });
+    }
+
+    if(!matched){
+      return { success: false, error: 'Officer credential not recognized in municipal directory. Please check email/badge.' };
     }
 
     sessionState.isAuthorityLoggedIn = true;
@@ -168,16 +163,43 @@ window.MumbAIR.AUTH = (function(){
       id: matched.id,
       name: matched.name,
       role: matched.role,
-      roleLabel: CONFIG.ROLES[matched.role].label,
-      ward: matched.ward,
-      department: department || matched.department,
+      roleLabel: (CONFIG.ROLES[matched.role] ? CONFIG.ROLES[matched.role].label : matched.role),
+      ward: matched.ward || 'M/E',
+      department: department || matched.department || 'SWM',
       badge: matched.badge || 'BMC-OFFICER',
       email: matched.email,
       authenticatedAt: Date.now()
     };
 
     saveAuthSession();
-    return sessionState.authorityUser;
+    return { success: true, user: sessionState.authorityUser };
+  }
+
+  /**
+   * Authenticate demo account explicitly by user ID
+   */
+  function loginAuthorityDemoUser(userId){
+    var demoUsers = (CONFIG && CONFIG.DEMO_USERS) || [];
+    var matched = demoUsers.find(function(u){ return u.id === userId; });
+    if(!matched){
+      return { success: false, error: 'Demo account not found' };
+    }
+
+    sessionState.isAuthorityLoggedIn = true;
+    sessionState.authorityUser = {
+      id: matched.id,
+      name: matched.name,
+      role: matched.role,
+      roleLabel: (CONFIG.ROLES[matched.role] ? CONFIG.ROLES[matched.role].label : matched.role),
+      ward: matched.ward,
+      department: matched.department,
+      badge: matched.badge,
+      email: matched.email,
+      authenticatedAt: Date.now()
+    };
+
+    saveAuthSession();
+    return { success: true, user: sessionState.authorityUser };
   }
 
   function logoutAuthority(){
@@ -186,12 +208,62 @@ window.MumbAIR.AUTH = (function(){
     saveAuthSession();
   }
 
+  /**
+   * Check whether current authority user has general permission for a role
+   */
   function hasPermission(requiredRole){
     if(!sessionState.isAuthorityLoggedIn || !sessionState.authorityUser) return false;
     var userRole = sessionState.authorityUser.role;
-    if(userRole === 'SUPER_ADMIN') return true;
+
+    // Super Admin does NOT have universal permission for routine case approval (separation of duties)
+    if(requiredRole === 'APPROVE_RESOLUTION'){
+      return (userRole === 'WARD_OFFICER' || userRole === 'DEPARTMENT_HEAD' || userRole === 'CITY_ADMIN');
+    }
+
+    if(userRole === 'CITY_ADMIN') return true;
+    if(userRole === 'SUPER_ADMIN' && requiredRole === 'SUPER_ADMIN') return true;
     if(requiredRole === userRole) return true;
     return false;
+  }
+
+  /**
+   * Fine-grained Access Control: Can user view this complaint dossier?
+   */
+  function canUserViewComplaint(complaint, user){
+    if(!complaint) return false;
+    user = user || getCurrentUser();
+    if(!user) return false;
+
+    // Citizen can ONLY see their own complaint or basic public card
+    if(!sessionState.isAuthorityLoggedIn){
+      if(user.isGuest) return false;
+      return (complaint.citizenId === user.id || (complaint.citizenContact && user.phone && complaint.citizenContact.indexOf(user.phone.slice(-4)) !== -1));
+    }
+
+    // Authority permissions
+    var role = user.role;
+    if(role === 'CITY_ADMIN' || role === 'SUPER_ADMIN') return true;
+    if(role === 'WARD_OFFICER'){
+      return (user.ward === 'ALL' || complaint.ward === user.ward);
+    }
+    if(role === 'DEPARTMENT_HEAD'){
+      return (user.department === 'ALL' || complaint.department === user.department);
+    }
+    if(role === 'FIELD_OFFICER'){
+      // Field officer can only view details of complaints assigned to them
+      return (complaint.assignedOfficerId === user.id || complaint.assignedOfficer === user.name);
+    }
+    return false;
+  }
+
+  /**
+   * Fine-grained Access Control: Can user export city ledger?
+   */
+  function canExportCityLedger(user){
+    user = user || getAuthorityUser();
+    if(!user) return false;
+    // Field Officers and Ward Officers CANNOT export entire city ledger
+    return (user.role === 'CITY_ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'DEPARTMENT_HEAD');
   }
 
   function getCurrentUser(){
@@ -208,9 +280,11 @@ window.MumbAIR.AUTH = (function(){
 
     isAuthorityAuthenticated: isAuthorityAuthenticated,
     getAuthorityUser: getAuthorityUser,
-    loginAuthorityWithRole: loginAuthorityWithRole,
     loginAuthority: loginAuthority,
+    loginAuthorityDemoUser: loginAuthorityDemoUser,
     logoutAuthority: logoutAuthority,
-    hasPermission: hasPermission
+    hasPermission: hasPermission,
+    canUserViewComplaint: canUserViewComplaint,
+    canExportCityLedger: canExportCityLedger
   };
 })();

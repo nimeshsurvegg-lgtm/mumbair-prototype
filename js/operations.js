@@ -139,16 +139,14 @@ window.MumbAIR.OPERATIONS = (function(){
     if(scopeEl) {
       scopeEl.textContent = 'Ward ' + (user.ward || 'ALL') + ' \u00B7 ' + (user.department || 'OPS');
     }
-    if(roleSelect){
-      roleSelect.value = user.role;
-      roleSelect.onchange = function(){
-        var newRole = roleSelect.value;
-        AUTH.loginAuthorityWithRole(newRole);
-        if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
-          window.MumbAIR.APP.showToast('Switched to ' + CONFIG.ROLES[newRole].label, '⚡');
-        }
-        initAuthorityShell();
-      };
+    var roleBadgeEl = document.getElementById('opsActiveRoleBadge');
+    if(roleBadgeEl){
+      roleBadgeEl.textContent = (CONFIG.ROLES[user.role] ? CONFIG.ROLES[user.role].label : user.role);
+    }
+    var roleIconEl = document.getElementById('opsRoleIcon');
+    if(roleIconEl){
+      var icons = { FIELD_OFFICER: '⚡', WARD_OFFICER: '🏛️', DEPARTMENT_HEAD: '🏢', CITY_ADMIN: '🌆', SUPER_ADMIN: '🔒' };
+      roleIconEl.textContent = icons[user.role] || '👤';
     }
 
     // 2. Bind Sidebar Toggle
@@ -289,6 +287,32 @@ window.MumbAIR.OPERATIONS = (function(){
 
     // Clear contextual actions
     if(actionsContainer) actionsContainer.innerHTML = '';
+
+    // Deep-Link & Direct Module Authorization Guard (Prevents navigation bypass)
+    var role = user.role;
+    if(role === 'FIELD_OFFICER'){
+      var allowedFieldModules = ['command', 'inbox', 'inspections', 'ops-map', 'assistant'];
+      if(allowedFieldModules.indexOf(moduleId) === -1){
+        container.innerHTML =
+          '<div style="padding:48px 24px; text-align:center;">' +
+            '<div style="font-size:36px; margin-bottom:12px;">🔒</div>' +
+            '<div style="font-weight:800; font-size:16px; color:#F8FAFC; margin-bottom:6px;">Access Restricted to Field Operations</div>' +
+            '<div style="font-size:13px; color:#94A3B8; max-width:480px; margin:0 auto 16px;">Field Officers are restricted to assigned inspection queues, field reports, and operational mapping. Supervisory management requires Ward Officer or City Administrator credentials.</div>' +
+            '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.OPERATIONS.switchModule(\'inspections\')">Return to Assigned Queue</button>' +
+          '</div>';
+        return;
+      }
+    }
+    if(moduleId === 'system' && role !== 'SUPER_ADMIN'){
+      container.innerHTML =
+        '<div style="padding:48px 24px; text-align:center;">' +
+          '<div style="font-size:36px; margin-bottom:12px;">🔒</div>' +
+          '<div style="font-weight:800; font-size:16px; color:#F8FAFC; margin-bottom:6px;">Restricted System Administration Node</div>' +
+          '<div style="font-size:13px; color:#94A3B8; max-width:480px; margin:0 auto 16px;">This module manages cryptographic keys, schema integrity, and system configuration. Requires Super Admin role.</div>' +
+          '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.OPERATIONS.switchModule(\'command\')">Return to Command Center</button>' +
+        '</div>';
+      return;
+    }
 
     // Update breadcrumbs
     if(breadcrumbs){
@@ -1514,25 +1538,116 @@ window.MumbAIR.OPERATIONS = (function(){
   }
 
   function approveResolutionAction(complaintId){
-    var notes = prompt('Enter supervisory sign-off notes (optional):', 'Field mitigation verified compliant with BMC clean air standards.');
-    var currentUser = getCurrentUser();
-    var res = WORKFLOW.verifyResolution(complaintId, currentUser, true, notes);
-    if(res.success){
-      window.MumbAIR.APP.showToast('Case ' + complaintId + ' certified and closed!', '✅');
-      renderModule('verification');
-    }
+    openVerificationModal(complaintId);
   }
 
   function rejectResolutionAction(complaintId){
-    var reason = prompt('Enter documented reason for resolution rejection (Required):', 'Inadequate perimeter dust barrier; misting guns not operating during follow-up.');
-    if(!reason) return;
+    openVerificationModal(complaintId);
+  }
+
+  function openVerificationModal(complaintId){
+    var state = STORAGE.loadState();
+    var complaint = (state.reports || []).find(function(c){ return c.id === complaintId; });
+    if(!complaint) return;
+
+    var modal = document.getElementById('modalVerification');
+    var modalContent = document.getElementById('opsVerificationModalContent');
+    if(!modal || !modalContent) return;
 
     var currentUser = getCurrentUser();
-    var res = WORKFLOW.verifyResolution(complaintId, currentUser, false, null, reason);
-    if(res.success){
-      window.MumbAIR.APP.showToast('Resolution rejected. Re-inspection mandated for ' + complaintId, '⚠️');
-      renderModule('verification');
+    var isSelf = (complaint.assignedOfficerId === currentUser.id) ||
+                 (complaint.resolution && complaint.resolution.submittedById === currentUser.id) ||
+                 (complaint.resolution && complaint.resolution.submittedBy === currentUser.name);
+
+    var isSupervisor = (currentUser.role === 'WARD_OFFICER' || currentUser.role === 'DEPARTMENT_HEAD' || currentUser.role === 'CITY_ADMIN');
+
+    var safeId = UTILS.escapeHtml(complaint.id);
+    var safeTitle = UTILS.escapeHtml(complaint.title);
+    var safeWard = UTILS.escapeHtml(complaint.ward);
+    var safeSummary = complaint.resolution ? UTILS.escapeHtml(complaint.resolution.summary) : 'No summary provided';
+    var safeSubmitter = complaint.resolution ? UTILS.escapeHtml(complaint.resolution.submittedBy) : 'Field Officer';
+
+    var html =
+      '<div class="ops-modal-header">' +
+        '<div class="ops-modal-title">⚖️ Quality Review &amp; Resolution Certification</div>' +
+        '<button class="ops-modal-close" onclick="window.MumbAIR.OPERATIONS.closeVerificationModal()">✕</button>' +
+      '</div>' +
+      '<div class="ops-modal-body">' +
+        '<div style="font-weight:700; font-size:14px; color:#F8FAFC; margin-bottom:4px;">Case #' + safeId + ' &middot; ' + safeTitle + '</div>' +
+        '<div style="font-size:12px; color:#94A3B8; margin-bottom:12px;">Ward ' + safeWard + ' &middot; Submitter: ' + safeSubmitter + '</div>' +
+
+        '<div class="case-section" style="background:rgba(255,255,255,0.04); padding:12px; border-radius:6px; margin-bottom:14px;">' +
+          '<div style="font-size:11px; text-transform:uppercase; color:#38BDF8; font-weight:700;">Field Officer Mitigation Summary</div>' +
+          '<div style="font-size:13px; color:#E2E8F0; margin-top:4px; line-height:1.4;">' + safeSummary + '</div>' +
+        '</div>' +
+
+        (isSelf
+          ? '<div style="background:#7F1D1D; border:1px solid #DC2626; color:#FEE2E2; padding:10px 12px; border-radius:6px; font-size:12.5px; margin-bottom:14px;">' +
+              '<strong>⚠️ FOUR-EYES INTEGRITY RULE:</strong> You are the assigned inspecting officer who submitted this resolution. Municipal policy strictly forbids self-approval. This case must be certified by an independent supervisor.' +
+            '</div>'
+          : (!isSupervisor
+              ? '<div style="background:#7F1D1D; border:1px solid #DC2626; color:#FEE2E2; padding:10px 12px; border-radius:6px; font-size:12.5px; margin-bottom:14px;">' +
+                  '<strong>⚠️ UNAUTHORIZED:</strong> Only Ward Officers, Department Heads, and City Administrators possess supervisory certification authority.' +
+                '</div>'
+              : '')
+        ) +
+
+        '<div class="form-group">' +
+          '<label class="form-label">Supervisor Review Assessment Notes (Mandatory for Approval or Rejection)</label>' +
+          '<textarea id="textVerificationNotes" class="form-textarea" rows="3" placeholder="Enter findings of independent verification, compliance with BMC standards, or specific deficiencies..."></textarea>' +
+        '</div>' +
+
+        '<div id="verificationErrorAlert" style="display:none; background:#7F1D1D; color:#FEE2E2; padding:8px 10px; border-radius:4px; font-size:12px; margin-bottom:10px;"></div>' +
+
+        '<div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">' +
+          '<button class="btn btn-sm btn-outline-light" onclick="window.MumbAIR.OPERATIONS.closeVerificationModal()">Cancel</button>' +
+          '<button class="btn btn-sm btn-danger" ' + (isSelf || !isSupervisor ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '') + ' onclick="window.MumbAIR.OPERATIONS.submitVerificationDecision(\'' + safeId + '\', false)">✕ Reject &amp; Re-inspect</button>' +
+          '<button class="btn btn-sm btn-accent" ' + (isSelf || !isSupervisor ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '') + ' onclick="window.MumbAIR.OPERATIONS.submitVerificationDecision(\'' + safeId + '\', true)">✓ Approve &amp; Certify Resolution</button>' +
+        '</div>' +
+      '</div>';
+
+    modalContent.innerHTML = html;
+    modal.classList.remove('hidden');
+  }
+
+  function closeVerificationModal(){
+    var modal = document.getElementById('modalVerification');
+    if(modal) modal.classList.add('hidden');
+  }
+
+  function submitVerificationDecision(complaintId, isApproved){
+    var notesEl = document.getElementById('textVerificationNotes');
+    var notes = notesEl ? notesEl.value.trim() : '';
+    var errEl = document.getElementById('verificationErrorAlert');
+
+    if(!notes || notes.length < 5){
+      if(errEl){
+        errEl.textContent = 'Detailed review notes (minimum 5 characters) are required for this decision.';
+        errEl.style.display = 'block';
+      }
+      return;
     }
+
+    var currentUser = getCurrentUser();
+    var res = WORKFLOW.verifyResolution(complaintId, currentUser, isApproved, isApproved ? notes : null, isApproved ? null : notes);
+
+    if(!res.success){
+      if(errEl){
+        errEl.textContent = res.error || 'Verification failed.';
+        errEl.style.display = 'block';
+      }
+      if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+        window.MumbAIR.APP.showToast(res.error, '❌');
+      }
+      return;
+    }
+
+    closeVerificationModal();
+    closeCaseDetail();
+    if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+      window.MumbAIR.APP.showToast(isApproved ? 'Case ' + complaintId + ' certified resolved!' : 'Case ' + complaintId + ' returned for re-inspection.', isApproved ? '✅' : '⚠️');
+    }
+    renderModule(opsState.activeModule || 'command');
   }
 
   /* ===========================================================================
@@ -1746,10 +1861,21 @@ window.MumbAIR.OPERATIONS = (function(){
     if(!modal || !modalContent) return;
 
     var currentUser = getCurrentUser();
+    if(!AUTH.canUserViewComplaint(complaint, currentUser)){
+      if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+        window.MumbAIR.APP.showToast('Access Denied: You do not have authorization to view dossier #' + complaintId, '🔒');
+      }
+      return;
+    }
+
     var sla = WORKFLOW.calculateSla(complaint);
     var slaCls = sla.status === 'BREACHED' ? 'sla-breached' : (sla.status === 'DUE_SOON' ? 'sla-due-soon' : 'sla-on-track');
     var isFieldOfficer = currentUser.role === 'FIELD_OFFICER';
-    var isSupervisor = currentUser.role === 'WARD_OFFICER' || currentUser.role === 'DEPARTMENT_HEAD' || currentUser.role === 'CITY_ADMIN' || currentUser.role === 'SUPER_ADMIN';
+    var isSupervisor = (currentUser.role === 'WARD_OFFICER' || currentUser.role === 'DEPARTMENT_HEAD' || currentUser.role === 'CITY_ADMIN');
+
+    var maskedPhone = (currentUser.role === 'CITY_ADMIN' || currentUser.role === 'SUPER_ADMIN')
+      ? (complaint.citizenContact || 'None')
+      : (complaint.citizenContact ? String(complaint.citizenContact).replace(/(\d{2})\d{4}(\d{4})/, '$1****$2') : 'Protected (Citizen Privacy)');
 
     var html =
       '<div class="ops-modal-header">' +
@@ -1771,7 +1897,7 @@ window.MumbAIR.OPERATIONS = (function(){
               '<div class="case-meta-row"><span class="case-meta-label">Administrative Ward:</span><span class="case-meta-value">Ward ' + complaint.ward + '</span></div>' +
               '<div class="case-meta-row"><span class="case-meta-label">Coordinates:</span><span class="case-meta-value" style="font-family:var(--font-mono);">' + (complaint.latitude ? complaint.latitude.toFixed(4) + ', ' + complaint.longitude.toFixed(4) : 'N/A') + '</span></div>' +
               '<div class="case-meta-row"><span class="case-meta-label">Submitted At:</span><span class="case-meta-value">' + UTILS.formatDateTime(complaint.createdAt) + '</span></div>' +
-              '<div class="case-meta-row"><span class="case-meta-label">Citizen Contact:</span><span class="case-meta-value">' + (complaint.citizenContact || 'Masked') + '</span></div>' +
+              '<div class="case-meta-row"><span class="case-meta-label">Citizen Contact:</span><span class="case-meta-value">' + UTILS.escapeHtml(maskedPhone) + '</span></div>' +
             '</div>' +
 
             // Photographic Proof Review
@@ -2076,42 +2202,65 @@ window.MumbAIR.OPERATIONS = (function(){
      =========================================================================== */
 
   function exportCityCsv(){
-    var state = STORAGE.loadState();
-    var rows = [
-      ['Complaint ID', 'Ward', 'Category', 'Priority', 'Status', 'Title', 'Address', 'Assigned Officer', 'Submitted Date']
-    ];
+    var user = getCurrentUser();
+    if(!AUTH.canExportCityLedger(user)){
+      if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+        window.MumbAIR.APP.showToast('Access Restricted: Master city export requires City Admin or Dept Head privileges.', '🔒');
+      }
+      return;
+    }
 
-    (state.reports || []).forEach(function(r){
-      rows.push([
+    var state = STORAGE.loadState();
+    var headers = ['Complaint ID', 'Ward', 'Category', 'Priority', 'Status', 'Title', 'Address', 'Assigned Officer', 'Submitted Date'];
+    var rows = (state.reports || []).map(function(r){
+      return [
         r.id,
         r.ward,
         r.category,
         r.priority || 'MEDIUM',
         r.status,
-        '"' + (r.title || '').replace(/"/g, '""') + '"',
-        '"' + (r.addressText || '').replace(/"/g, '""') + '"',
+        r.title,
+        r.addressText,
         r.assignedOfficer || 'Unassigned',
         r.createdAt
-      ]);
+      ];
     });
 
-    downloadCsvBlob(rows, 'MCGM_MumbAIR_Full_Ledger_' + new Date().toISOString().slice(0, 10) + '.csv');
+    UTILS.downloadCsvBlob(headers, rows, 'MCGM_MumbAIR_Full_Ledger_' + new Date().toISOString().slice(0, 10) + '.csv');
+    if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+      window.MumbAIR.APP.showToast('Master city ledger exported safely.', '📥');
+    }
   }
 
   function exportFilteredInboxCsv(){
-    exportCityCsv();
-  }
+    var user = getCurrentUser();
+    var state = STORAGE.loadState();
+    var visibleReports = filterReports(state.reports || []);
 
-  function downloadCsvBlob(rows, filename){
-    var csvContent = 'data:text/csv;charset=utf-8,' + rows.map(function(e){ return e.join(','); }).join('\n');
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.MumbAIR.APP.showToast('Dataset exported to ' + filename, '📥');
+    // Enforce role-based viewing scope
+    visibleReports = visibleReports.filter(function(r){
+      return AUTH.canUserViewComplaint(r, user);
+    });
+
+    var headers = ['Complaint ID', 'Ward', 'Category', 'Priority', 'Status', 'Title', 'Address', 'Assigned Officer', 'Submitted Date'];
+    var rows = visibleReports.map(function(r){
+      return [
+        r.id,
+        r.ward,
+        r.category,
+        r.priority || 'MEDIUM',
+        r.status,
+        r.title,
+        r.addressText,
+        r.assignedOfficer || 'Unassigned',
+        r.createdAt
+      ];
+    });
+
+    UTILS.downloadCsvBlob(headers, rows, 'MCGM_Filtered_Inbox_' + new Date().toISOString().slice(0, 10) + '.csv');
+    if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
+      window.MumbAIR.APP.showToast('Filtered records exported (' + rows.length + ' cases).', '📥');
+    }
   }
 
   return {

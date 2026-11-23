@@ -255,31 +255,24 @@ window.MumbAIR.APP = (function(){
   }
 
   function computeAllWardsAqi(airData){
-    var basePm25 = (airData && airData.current && airData.current.pm2_5) ? airData.current.pm2_5 : 85;
-    var basePm10 = (airData && airData.current && airData.current.pm10) ? airData.current.pm10 : 142;
-    var baseNo2 = (airData && airData.current && airData.current.nitrogen_dioxide) ? airData.current.nitrogen_dioxide : 44;
+    var basePm25 = (airData && airData.current && airData.current.pm2_5 !== undefined) ? airData.current.pm2_5 : 85;
+    var basePm10 = (airData && airData.current && airData.current.pm10 !== undefined) ? airData.current.pm10 : 160;
+    var baseNo2 = (airData && airData.current && airData.current.nitrogen_dioxide !== undefined) ? airData.current.nitrogen_dioxide : 42;
+    var baseSo2 = (airData && airData.current && airData.current.sulphur_dioxide !== undefined) ? airData.current.sulphur_dioxide : 22;
+    var baseCo = (airData && airData.current && airData.current.carbon_monoxide !== undefined) ? airData.current.carbon_monoxide : 1.3;
+    var baseO3 = (airData && airData.current && airData.current.ozone !== undefined) ? airData.current.ozone : 28;
 
     appState.wardAqiMap = {};
 
     CONFIG.WARDS_DATA.forEach(function(w){
-      // Ward emission coefficient
-      var factor = 1.0;
-      if(w.code === 'M/E') factor = 1.45; // Chembur / Mahul refineries
-      else if(w.code === 'M/W') factor = 1.35; // Deonar landfill
-      else if(w.code === 'L') factor = 1.30;   // Kurla congestion
-      else if(w.code === 'G/S') factor = 1.25; // Worli construction
-      else if(w.code === 'H/E') factor = 1.20; // BKC transit
-      else if(w.code === 'D') factor = 0.75;   // Malabar Hill coast
-      else if(w.code === 'A') factor = 0.85;   // Colaba marine breeze
-
-      var wardPm25 = Math.round(basePm25 * factor);
-      var wardPm10 = Math.round(basePm10 * factor);
-      var wardNo2 = Math.round(baseNo2 * factor);
-
+      // Calculate authentic CPCB NAQI without arbitrary factor distortion
       var aqiResult = UTILS.calculateIndianAqi({
-        pm25: wardPm25,
-        pm10: wardPm10,
-        no2: wardNo2
+        pm25: basePm25,
+        pm10: basePm10,
+        no2: baseNo2,
+        so2: baseSo2,
+        co: baseCo,
+        o3: baseO3
       });
 
       appState.wardAqiMap[w.code] = {
@@ -290,9 +283,14 @@ window.MumbAIR.APP = (function(){
         category: aqiResult.category,
         color: aqiResult.color,
         dominant: aqiResult.dominant,
-        pm25: wardPm25,
-        pm10: wardPm10,
-        no2: wardNo2
+        dominantName: aqiResult.dominantName,
+        isOfficial: aqiResult.isOfficial,
+        pm25: basePm25,
+        pm10: basePm10,
+        no2: baseNo2,
+        so2: baseSo2,
+        co: baseCo,
+        o3: baseO3
       };
     });
   }
@@ -909,15 +907,18 @@ window.MumbAIR.APP = (function(){
       };
     }
 
-    // Evaluator Persona Chips (1-click presentation tester)
+    // Evaluator Persona Chips (Authenticates verified demo officer account)
     document.querySelectorAll('.eval-chip').forEach(function(chip){
       chip.onclick = function(){
         document.querySelectorAll('.eval-chip').forEach(function(c){ c.classList.remove('active'); });
         chip.classList.add('active');
         var role = chip.getAttribute('data-role');
-        AUTH.loginAuthorityWithRole(role);
-        showAuthorityDashboard();
-        showToast('Logged in as ' + CONFIG.ROLES[role].label, '⚡');
+        var demoOfficer = CONFIG.DEMO_USERS.find(function(u){ return u.role === role; });
+        if(demoOfficer){
+          AUTH.loginAuthorityDemoUser(demoOfficer.id);
+          showAuthorityDashboard();
+          showToast('Authenticated as ' + demoOfficer.name + ' (' + (CONFIG.ROLES[role] ? CONFIG.ROLES[role].label : role) + ')', '🔒');
+        }
       };
     });
 

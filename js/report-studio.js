@@ -427,18 +427,24 @@ window.MumbAIR.REPORT_STUDIO = (function(){
   }
 
   /**
-   * CSV Export Handler
+   * CSV Export Handler (Formula Injection Protected & Role Scoped)
    */
   function exportCsv(){
     var type = currentReportConfig.type;
     var state = STORAGE.loadState();
     var reports = state.reports || [];
 
-    var headers = ['Report_ID', 'Ward', 'Category', 'Status', 'Priority', 'Assigned_Officer', 'Submitted_At', 'Address'];
-    var rows = [headers];
+    // Filter by user authorization scope
+    var currentUser = (window.MumbAIR.AUTH && window.MumbAIR.AUTH.getCurrentUser) ? window.MumbAIR.AUTH.getCurrentUser() : null;
+    if(currentUser && currentUser.role === 'FIELD_OFFICER'){
+      reports = reports.filter(function(r){ return r.assignedOfficerId === currentUser.id; });
+    } else if(currentUser && currentUser.role === 'WARD_OFFICER' && currentUser.ward !== 'ALL'){
+      reports = reports.filter(function(r){ return r.ward === currentUser.ward; });
+    }
 
-    reports.forEach(function(r){
-      rows.push([
+    var headers = ['Report_ID', 'Ward', 'Category', 'Status', 'Priority', 'Assigned_Officer', 'Submitted_At', 'Address'];
+    var rows = reports.map(function(r){
+      return [
         r.id,
         r.ward,
         r.category,
@@ -446,21 +452,14 @@ window.MumbAIR.REPORT_STUDIO = (function(){
         r.priority || 'MEDIUM',
         r.assignedOfficer || 'Unassigned',
         r.createdAt,
-        '"' + (r.addressText || '').replace(/"/g, '""') + '"'
-      ]);
+        r.addressText || ''
+      ];
     });
 
-    var csvContent = 'data:text/csv;charset=utf-8,' + rows.map(function(e){ return e.join(','); }).join('\n');
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'MumbAIR_Report_' + type + '_' + Date.now() + '.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    UTILS.downloadCsvBlob(headers, rows, 'MumbAIR_Report_' + type + '_' + Date.now() + '.csv');
 
     if(window.MumbAIR.APP && window.MumbAIR.APP.showToast){
-      window.MumbAIR.APP.showToast('CSV Export generated successfully', '📥');
+      window.MumbAIR.APP.showToast('CSV Export generated with formula injection protection', '📥');
     }
   }
 

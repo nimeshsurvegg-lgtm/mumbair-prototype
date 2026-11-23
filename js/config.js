@@ -7,21 +7,22 @@ window.MumbAIR = window.MumbAIR || {};
 window.MumbAIR.CONFIG = {
   APP_NAME: 'MumbAIR',
   TAGLINE: 'Understand the air. Change the city.',
-  VERSION: '3.5.0-smart-city',
+  VERSION: '4.0.0-audit-hardened',
+  SCHEMA_VERSION: 4,
   ORGANIZATION: 'Brihanmumbai Municipal Corporation (BMC / MCGM) Operations',
   DEFAULT_COORDS: { lat: 19.0760, lng: 72.8777 },
   API_CACHE_TTL_MS: 15 * 60 * 1000,
-  STORAGE_KEY: 'mumbair_state_v3',
+  STORAGE_KEY: 'mumbair_state_v4',
   DUPLICATE_RADIUS_KM: 1.5,
 
   // Role Hierarchy & Permissions
   ROLES: {
-    CITIZEN: { id: 'CITIZEN', label: 'Citizen', homeTab: 'tab-overview', canModerate: false },
-    FIELD_OFFICER: { id: 'FIELD_OFFICER', label: 'Field Operations Officer', homeTab: 'tab-field-ops', canModerate: true },
-    WARD_OFFICER: { id: 'WARD_OFFICER', label: 'Ward Executive Officer', homeTab: 'tab-ward-command', canModerate: true },
-    DEPARTMENT_HEAD: { id: 'DEPARTMENT_HEAD', label: 'Department Head', homeTab: 'tab-dept-command', canModerate: true },
-    CITY_ADMIN: { id: 'CITY_ADMIN', label: 'City Operations Administrator', homeTab: 'tab-city-command', canModerate: true },
-    SUPER_ADMIN: { id: 'SUPER_ADMIN', label: 'Super Administrator', homeTab: 'tab-system-admin', canModerate: true }
+    CITIZEN: { id: 'CITIZEN', label: 'Citizen', homeTab: 'tab-overview', canModerate: false, scope: 'OWN_ONLY' },
+    FIELD_OFFICER: { id: 'FIELD_OFFICER', label: 'Field Operations Officer', homeTab: 'tab-field-ops', canModerate: false, scope: 'ASSIGNED_ONLY' },
+    WARD_OFFICER: { id: 'WARD_OFFICER', label: 'Ward Executive Officer', homeTab: 'tab-ward-command', canModerate: true, scope: 'WARD_ONLY' },
+    DEPARTMENT_HEAD: { id: 'DEPARTMENT_HEAD', label: 'Department Head', homeTab: 'tab-dept-command', canModerate: true, scope: 'DEPT_ONLY' },
+    CITY_ADMIN: { id: 'CITY_ADMIN', label: 'City Operations Administrator', homeTab: 'tab-city-command', canModerate: true, scope: 'CITY_WIDE' },
+    SUPER_ADMIN: { id: 'SUPER_ADMIN', label: 'Super Administrator', homeTab: 'tab-system-admin', canModerate: false, scope: 'SYSTEM_ADMIN' }
   },
 
   // Pre-configured Verified Demo Accounts for Presentation
@@ -62,23 +63,91 @@ window.MumbAIR.CONFIG = {
     LOW:    { ackHours: 12, inspectHours: 36, resolveHours: 72, label: 'Standard (72 Hours)' }
   },
 
-  // Full Complaint Lifecycle States
+  // Full Centralized Complaint Lifecycle States & Valid Transitions
   STATUS_LIFECYCLE: {
-    SUBMITTED: { label: 'Submitted', next: ['UNDER_REVIEW', 'REJECTED', 'DUPLICATE'] },
-    UNDER_REVIEW: { label: 'Under Review', next: ['VERIFIED', 'REASSIGNED', 'REJECTED'] },
-    VERIFIED: { label: 'Verified', next: ['ASSIGNED', 'REJECTED'] },
-    ASSIGNED: { label: 'Assigned to Officer', next: ['IN_PROGRESS', 'REASSIGNED'] },
-    IN_PROGRESS: { label: 'Field Investigation', next: ['ACTION_TAKEN', 'ON_HOLD', 'ESCALATED'] },
-    ACTION_TAKEN: { label: 'Mitigation Action Taken', next: ['RESOLUTION_SUBMITTED'] },
-    RESOLUTION_SUBMITTED: { label: 'Resolution Awaiting Verification', next: ['RESOLVED', 'REOPENED'] },
-    RESOLVED: { label: 'Resolved', next: ['CLOSED', 'REOPENED'] },
-    CLOSED: { label: 'Closed Safe', next: ['REOPENED'] },
-    REOPENED: { label: 'Reopened by Citizen', next: ['UNDER_REVIEW', 'ASSIGNED'] },
-    REJECTED: { label: 'Rejected (Invalid)', next: [] },
-    DUPLICATE: { label: 'Merged Duplicate', next: [] }
+    SUBMITTED: {
+      label: 'Submitted',
+      next: ['UNDER_REVIEW', 'VERIFIED', 'ASSIGNED', 'REJECTED', 'DUPLICATE'],
+      requiresReason: false
+    },
+    UNDER_REVIEW: {
+      label: 'Under Review',
+      next: ['VERIFIED', 'ASSIGNED', 'ON_HOLD', 'REJECTED', 'DUPLICATE'],
+      requiresReason: false
+    },
+    VERIFIED: {
+      label: 'Verified',
+      next: ['ASSIGNED', 'ON_HOLD', 'ESCALATED', 'REJECTED', 'DUPLICATE'],
+      requiresReason: false
+    },
+    ASSIGNED: {
+      label: 'Assigned to Officer',
+      next: ['IN_PROGRESS', 'REASSIGNED', 'ON_HOLD', 'ESCALATED'],
+      requiresReason: false
+    },
+    IN_PROGRESS: {
+      label: 'Field Investigation',
+      next: ['INSPECTION_COMPLETED', 'RESOLUTION_SUBMITTED', 'REASSIGNED', 'ON_HOLD', 'ESCALATED'],
+      requiresReason: false
+    },
+    INSPECTION_COMPLETED: {
+      label: 'Inspection Completed',
+      next: ['RESOLUTION_SUBMITTED', 'ON_HOLD', 'ESCALATED'],
+      requiresReason: false
+    },
+    RESOLUTION_SUBMITTED: {
+      label: 'Resolution Awaiting Review',
+      next: ['RESOLUTION_REVIEW', 'RESOLVED', 'IN_PROGRESS'],
+      requiresReason: false
+    },
+    RESOLUTION_REVIEW: {
+      label: 'Resolution Under Review',
+      next: ['RESOLVED', 'IN_PROGRESS'],
+      requiresReason: false
+    },
+    ON_HOLD: {
+      label: 'On Hold (Dependency)',
+      next: ['SUBMITTED', 'UNDER_REVIEW', 'VERIFIED', 'ASSIGNED', 'IN_PROGRESS', 'ESCALATED'],
+      requiresReason: true
+    },
+    ESCALATED: {
+      label: 'Escalated Tier-2',
+      next: ['ASSIGNED', 'IN_PROGRESS', 'RESOLUTION_SUBMITTED', 'RESOLVED'],
+      requiresReason: true
+    },
+    REASSIGNED: {
+      label: 'Reassigned',
+      next: ['ASSIGNED', 'IN_PROGRESS'],
+      requiresReason: true
+    },
+    REOPENED: {
+      label: 'Reopened by Citizen',
+      next: ['UNDER_REVIEW', 'ASSIGNED', 'IN_PROGRESS'],
+      requiresReason: true
+    },
+    RESOLVED: {
+      label: 'Resolved & Mitigated',
+      next: ['CLOSED', 'REOPENED'],
+      requiresReason: false
+    },
+    REJECTED: {
+      label: 'Rejected (Invalid / Non-Jurisdiction)',
+      next: ['REOPENED'],
+      requiresReason: true
+    },
+    DUPLICATE: {
+      label: 'Merged Duplicate',
+      next: [],
+      requiresReason: true
+    },
+    CLOSED: {
+      label: 'Closed Safe',
+      next: ['REOPENED'],
+      requiresReason: false
+    }
   },
 
-  // CPCB Standard Breakpoints
+  // Official Central Pollution Control Board (CPCB) Standard Breakpoints (India National AQI)
   CPCB_BREAKPOINTS: {
     PM25: [
       { bpLow: 0,   bpHigh: 30,  iLow: 0,   iHigh: 50,  category: 'Good',          color: '#16A34A' },
@@ -103,6 +172,38 @@ window.MumbAIR.CONFIG = {
       { bpLow: 181, bpHigh: 280, iLow: 201, iHigh: 300, category: 'Poor',          color: '#EA580C' },
       { bpLow: 281, bpHigh: 400, iLow: 301, iHigh: 400, category: 'Very Poor',     color: '#DC2626' },
       { bpLow: 401, bpHigh: 500, iLow: 401, iHigh: 500, category: 'Severe',        color: '#7F1D1D' }
+    ],
+    SO2: [
+      { bpLow: 0,   bpHigh: 40,  iLow: 0,   iHigh: 50,  category: 'Good',          color: '#16A34A' },
+      { bpLow: 41,  bpHigh: 80,  iLow: 51,  iHigh: 100, category: 'Satisfactory',  color: '#65A30D' },
+      { bpLow: 81,  bpHigh: 380, iLow: 101, iHigh: 200, category: 'Moderate',      color: '#CA8A04' },
+      { bpLow: 381, bpHigh: 800, iLow: 201, iHigh: 300, category: 'Poor',          color: '#EA580C' },
+      { bpLow: 801, bpHigh: 1600, iLow: 301, iHigh: 400, category: 'Very Poor',    color: '#DC2626' },
+      { bpLow: 1601, bpHigh: 2000, iLow: 401, iHigh: 500, category: 'Severe',      color: '#7F1D1D' }
+    ],
+    CO: [ // 8-hr avg in mg/m³
+      { bpLow: 0,   bpHigh: 1.0,  iLow: 0,   iHigh: 50,  category: 'Good',         color: '#16A34A' },
+      { bpLow: 1.1, bpHigh: 2.0,  iLow: 51,  iHigh: 100, category: 'Satisfactory', color: '#65A30D' },
+      { bpLow: 2.1, bpHigh: 10.0, iLow: 101, iHigh: 200, category: 'Moderate',     color: '#CA8A04' },
+      { bpLow: 10.1, bpHigh: 17.0, iLow: 201, iHigh: 300, category: 'Poor',        color: '#EA580C' },
+      { bpLow: 17.1, bpHigh: 34.0, iLow: 301, iHigh: 400, category: 'Very Poor',   color: '#DC2626' },
+      { bpLow: 34.1, bpHigh: 50.0, iLow: 401, iHigh: 500, category: 'Severe',      color: '#7F1D1D' }
+    ],
+    O3: [ // 8-hr avg in µg/m³
+      { bpLow: 0,   bpHigh: 50,  iLow: 0,   iHigh: 50,  category: 'Good',          color: '#16A34A' },
+      { bpLow: 51,  bpHigh: 100, iLow: 51,  iHigh: 100, category: 'Satisfactory',  color: '#65A30D' },
+      { bpLow: 101, bpHigh: 168, iLow: 101, iHigh: 200, category: 'Moderate',      color: '#CA8A04' },
+      { bpLow: 169, bpHigh: 208, iLow: 201, iHigh: 300, category: 'Poor',          color: '#EA580C' },
+      { bpLow: 209, bpHigh: 748, iLow: 301, iHigh: 400, category: 'Very Poor',     color: '#DC2626' },
+      { bpLow: 749, bpHigh: 1000, iLow: 401, iHigh: 500, category: 'Severe',       color: '#7F1D1D' }
+    ],
+    NH3: [ // 24-hr avg in µg/m³
+      { bpLow: 0,    bpHigh: 200,  iLow: 0,   iHigh: 50,  category: 'Good',         color: '#16A34A' },
+      { bpLow: 201,  bpHigh: 400,  iLow: 51,  iHigh: 100, category: 'Satisfactory', color: '#65A30D' },
+      { bpLow: 401,  bpHigh: 800,  iLow: 101, iHigh: 200, category: 'Moderate',     color: '#CA8A04' },
+      { bpLow: 801,  bpHigh: 1200, iLow: 201, iHigh: 300, category: 'Poor',        color: '#EA580C' },
+      { bpLow: 1201, bpHigh: 1800, iLow: 301, iHigh: 400, category: 'Very Poor',   color: '#DC2626' },
+      { bpLow: 1801, bpHigh: 2500, iLow: 401, iHigh: 500, category: 'Severe',      color: '#7F1D1D' }
     ]
   },
 

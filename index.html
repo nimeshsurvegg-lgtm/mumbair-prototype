@@ -841,16 +841,10 @@
         </div>
 
         <div class="ops-topbar-right">
-          <!-- Quick Evaluator Persona Switcher -->
-          <div class="ops-persona-selector">
-            <label for="opsRoleSwitcher">Role:</label>
-            <select id="opsRoleSwitcher" class="ops-role-select">
-              <option value="FIELD_OFFICER">⚡ Field Officer</option>
-              <option value="WARD_OFFICER">🏛️ Ward Officer</option>
-              <option value="DEPARTMENT_HEAD">🏢 Dept Head</option>
-              <option value="CITY_ADMIN">🌆 City Admin</option>
-              <option value="SUPER_ADMIN">🔒 Super Admin</option>
-            </select>
+          <!-- Verified Operational Role Indicator (Role manipulation removed from ordinary sessions) -->
+          <div class="ops-verified-role-pill" id="opsRoleIndicator" title="Verified Operational Role">
+            <span class="role-icon" id="opsRoleIcon">⚡</span>
+            <span class="role-text" id="opsActiveRoleBadge">Field Officer</span>
           </div>
 
           <!-- Live Officer Profile Pill -->

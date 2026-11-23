@@ -1,7 +1,6 @@
 /* ==============================================================================
-   MumbAIR — Storage Layer (Local Persistence, Comprehensive State & Model Seeds)
-   Unified state engine connecting Citizens, Field Officers, Ward Execs,
-   Department Heads, City Administrators and System Super-Admins
+   MumbAIR — Storage Layer (Atomic Persistence, Schema v4, Integrity & Concurrency)
+   Single source of truth for Citizens, Municipal Officers, and Operational State
    ============================================================================== */
 
 window.MumbAIR = window.MumbAIR || {};
@@ -9,7 +8,9 @@ window.MumbAIR = window.MumbAIR || {};
 window.MumbAIR.STORAGE = (function(){
   'use strict';
 
-  var STORAGE_KEY = (window.MumbAIR.CONFIG && window.MumbAIR.CONFIG.STORAGE_KEY) || 'mumbair_state_v3';
+  var SCHEMA_VERSION = 4;
+  var STORAGE_KEY = (window.MumbAIR.CONFIG && window.MumbAIR.CONFIG.STORAGE_KEY) || 'mumbair_state_v4';
+  var LEGACY_KEY_V3 = 'mumbair_state_v3';
   var memoryFallback = {};
 
   function isLocalStorageAvailable(){
@@ -25,25 +26,33 @@ window.MumbAIR.STORAGE = (function(){
 
   var hasStorage = isLocalStorageAvailable();
 
-  function getItem(key){
+  function rawGetItem(key){
     if(hasStorage){
       try {
         var val = localStorage.getItem(key);
         return val ? JSON.parse(val) : null;
       } catch(e) {
-        console.warn('Storage read error, using fallback:', e);
-        return memoryFallback[key] || null;
+        console.warn('Storage parse error for key ' + key + ':', e);
+        // Corruption recovery: backup corrupted content
+        try {
+          var corruptedVal = localStorage.getItem(key);
+          if(corruptedVal){
+            localStorage.setItem(key + '_corrupted_' + Date.now(), corruptedVal);
+            console.warn('Backed up corrupted state and reset to clean initial state.');
+          }
+        } catch(bakErr){}
+        return null;
       }
     }
     return memoryFallback[key] || null;
   }
 
-  function setItem(key, val){
+  function rawSetItem(key, val){
     if(hasStorage){
       try {
         localStorage.setItem(key, JSON.stringify(val));
       } catch(e) {
-        console.warn('Storage write error, using fallback:', e);
+        console.warn('Storage write error (quota exceeded or restricted):', e);
         memoryFallback[key] = val;
       }
     } else {
@@ -53,10 +62,10 @@ window.MumbAIR.STORAGE = (function(){
 
   // Generate anonymous persistent voter fingerprint
   function getOrCreateVoterFingerprint(){
-    var fp = getItem('mb_voter_fingerprint');
+    var fp = rawGetItem('mb_voter_fingerprint');
     if(!fp){
       fp = 'voter_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      setItem('mb_voter_fingerprint', fp);
+      rawSetItem('mb_voter_fingerprint', fp);
     }
     return fp;
   }
@@ -79,6 +88,8 @@ window.MumbAIR.STORAGE = (function(){
         status: 'RESOLUTION_SUBMITTED',
         upvotes: 38,
         department: 'APC',
+        citizenId: 'user_cit_1',
+        citizenName: 'Aarav Patil',
         assignedOfficerId: 'user_fld_1',
         assignedOfficer: 'Officer Sanjay Shinde',
         assignedBadge: 'BMC-FO-4412',
@@ -89,6 +100,8 @@ window.MumbAIR.STORAGE = (function(){
         resolution: {
           summary: 'Deployed industrial misting cannons along perimeter fence-line. Issued formal show-cause compliance notice to plant manager under Section 31A of Air Act.',
           submittedAt: new Date(now - 1000 * 60 * 45).toISOString(),
+          submittedBy: 'Officer Sanjay Shinde',
+          submittedById: 'user_fld_1',
           beforePhoto: 'Evidence Photo 1 (Plume)',
           afterPhoto: 'Verification Photo (Mitigated)'
         },
@@ -99,7 +112,7 @@ window.MumbAIR.STORAGE = (function(){
         timeline: [
           { status: 'SUBMITTED', time: '6h ago', actor: 'Citizen (Aarav Patil)', note: 'Citizen report filed with geotagged photo evidence.' },
           { status: 'VERIFIED', time: '5h ago', actor: 'Dr. Priya Kamble (Ward Officer)', note: 'Complaint verified against CPCB monitoring exceedance.' },
-          { status: 'ASSIGNED', time: '4h ago', actor: 'Dr. Priya Kamble (Ward Officer)', note: 'Assigned to Officer Sanjay Shinde (BMC-FO-4412). Mandatory 6h SLA clock started.' },
+          { status: 'ASSIGNED', time: '4h ago', actor: 'Dr. Priya Kamble (Ward Officer)', note: 'Assigned to Officer Sanjay Shinde (BMC-FO-4412). Mandatory 12h SLA clock started.' },
           { status: 'IN_PROGRESS', time: '3h ago', actor: 'Officer Sanjay Shinde (Field Officer)', note: 'Inspector arrived at Mahul gate. Stack opacity measurement initiated.' },
           { status: 'RESOLUTION_SUBMITTED', time: '45m ago', actor: 'Officer Sanjay Shinde (Field Officer)', note: 'Mitigation completed. Formal show-cause issued. Awaiting supervisor sign-off.' }
         ]
@@ -118,6 +131,8 @@ window.MumbAIR.STORAGE = (function(){
         status: 'IN_PROGRESS',
         upvotes: 29,
         department: 'SWM',
+        citizenId: 'user_cit_2',
+        citizenName: 'Farhan Qureshi',
         assignedOfficerId: 'user_fld_5',
         assignedOfficer: 'Officer Deepika Joshi',
         assignedBadge: 'BMC-FO-7312',
@@ -147,16 +162,24 @@ window.MumbAIR.STORAGE = (function(){
         status: 'RESOLVED',
         upvotes: 19,
         department: 'BUILDING',
+        citizenId: 'user_cit_1',
+        citizenName: 'Aarav Patil',
         assignedOfficerId: 'user_fld_2',
         assignedOfficer: 'Officer Rahul Mane',
         assignedBadge: 'BMC-FO-5120',
         createdAt: new Date(now - 1000 * 60 * 60 * 28).toISOString(),
         updatedAt: new Date(now - 1000 * 60 * 60 * 4).toISOString(),
+        resolvedAt: new Date(now - 1000 * 60 * 60 * 4).toISOString(),
         citizenContact: '+91 91****3312',
         resolution: {
           summary: 'Developer installed continuous 25-ft geotextile green barrier sheets and installed continuous mist cannon. Fine of ₹50,000 levied.',
           submittedAt: new Date(now - 1000 * 60 * 60 * 6).toISOString(),
-          approvedBy: 'Rajesh Varma (Ward Officer)'
+          submittedBy: 'Officer Rahul Mane',
+          submittedById: 'user_fld_2',
+          approvedBy: 'Rajesh Varma (Ward Officer)',
+          approvedById: 'user_wrd_2',
+          approvedAt: new Date(now - 1000 * 60 * 60 * 4).toISOString(),
+          reviewNotes: 'Verified on-ground. Green barriers compliant with BMC guidelines.'
         },
         internalNotes: [
           { id: 'n1', author: 'Rajesh Varma', role: 'WARD_OFFICER', text: 'Resolution verified on ground. Dust suppression operating at full pressure.', timestamp: new Date(now - 1000 * 60 * 60 * 4).toISOString() }
@@ -164,7 +187,7 @@ window.MumbAIR.STORAGE = (function(){
         timeline: [
           { status: 'SUBMITTED', time: '28h ago', actor: 'Citizen', note: 'Citizen report filed with photo evidence.' },
           { status: 'ASSIGNED', time: '26h ago', actor: 'Rajesh Varma (Ward Officer)', note: 'Assigned to Officer Rahul Mane (BMC-FO-5120).' },
-          { status: 'IN_PROGRESS', time: '22h ago', actor: 'Officer Rahul Mane', note: 'Notice issued under Mumbai Clean Air Guidelines 2024.' },
+          { status: 'IN_PROGRESS', time: '22h ago', actor: 'Officer Rahul Mane', note: 'Notice issued under Mumbai Clean Air Guidelines.' },
           { status: 'RESOLUTION_SUBMITTED', time: '6h ago', actor: 'Officer Rahul Mane', note: 'Barriers erected, fine levied. Proof attached.' },
           { status: 'RESOLVED', time: '4h ago', actor: 'Rajesh Varma (Ward Officer)', note: 'Supervisor verified compliance. Case closed clean.' }
         ]
@@ -183,6 +206,8 @@ window.MumbAIR.STORAGE = (function(){
         status: 'SUBMITTED',
         upvotes: 14,
         department: 'SWM',
+        citizenId: 'user_cit_3',
+        citizenName: 'Sunil Shrestha',
         assignedOfficerId: null,
         assignedOfficer: null,
         assignedBadge: null,
@@ -208,6 +233,8 @@ window.MumbAIR.STORAGE = (function(){
         status: 'ASSIGNED',
         upvotes: 11,
         department: 'ROADS',
+        citizenId: 'user_cit_4',
+        citizenName: 'Pooja Shah',
         assignedOfficerId: 'user_fld_4',
         assignedOfficer: 'Officer Sunil Rane',
         assignedBadge: 'BMC-FO-6214',
@@ -221,269 +248,10 @@ window.MumbAIR.STORAGE = (function(){
           { status: 'SUBMITTED', time: '3h ago', actor: 'Citizen (Pooja Shah)', note: 'Complaint logged via citizen portal.' },
           { status: 'ASSIGNED', time: '2h ago', actor: 'Manoj Tawde (Dept Head)', note: 'Assigned to Officer Sunil Rane (BMC-FO-6214).' }
         ]
-      },
-      {
-        id: 'MB-1006',
-        ward: 'K/W',
-        category: 'CONSTRUCTION_DUST',
-        title: 'Absence of perimeter misting guns on Link Road flyover demolition',
-        description: 'Concrete jackhammers operating with zero water sprinklers; dust plume clouding visibility across Andheri West intersection.',
-        latitude: 19.1250,
-        longitude: 72.8250,
-        addressText: 'Link Road Junction, Andheri West, Ward K/W',
-        aqiAtTrigger: 231,
-        priority: 'URGENT',
-        status: 'SUBMITTED',
-        upvotes: 22,
-        department: 'BUILDING',
-        assignedOfficerId: null,
-        assignedOfficer: null,
-        assignedBadge: null,
-        createdAt: new Date(now - 1000 * 60 * 45).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 45).toISOString(),
-        citizenContact: '+91 93****4411',
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '45m ago', actor: 'Citizen (Kavita Merchant)', note: 'Geotagged photographic report submitted.' }
-        ]
-      },
-      {
-        id: 'MB-1007',
-        ward: 'A',
-        category: 'VEHICLE_POLLUTION',
-        title: 'Maritime diesel auxiliary genset exhaust in Colaba harbor',
-        description: 'Bunker fuel auxiliary generator operating continuously with heavy dark soot drifting over residential buildings near Sassoon Dock.',
-        latitude: 18.9180,
-        longitude: 72.8280,
-        addressText: 'Near Sassoon Dock Road, Colaba, Ward A',
-        aqiAtTrigger: 174,
-        priority: 'HIGH',
-        status: 'UNDER_REVIEW',
-        upvotes: 16,
-        department: 'ROADS',
-        assignedOfficerId: null,
-        assignedOfficer: null,
-        assignedBadge: null,
-        createdAt: new Date(now - 1000 * 60 * 60 * 4).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 60 * 2).toISOString(),
-        citizenContact: '+91 98****7720',
-        internalNotes: [
-          { id: 'n1', author: 'Tariq Khan', role: 'WARD_OFFICER', text: 'Cross-checking with Mumbai Port Authority jurisdiction boundary.', timestamp: new Date(now - 1000 * 60 * 60 * 2).toISOString() }
-        ],
-        timeline: [
-          { status: 'SUBMITTED', time: '4h ago', actor: 'Citizen (Homi Bhabha Soc)', note: 'Complaint registered.' },
-          { status: 'UNDER_REVIEW', time: '2h ago', actor: 'Tariq Khan (Ward Officer)', note: 'Under technical review for maritime emissions protocol.' }
-        ]
-      },
-      {
-        id: 'MB-1008',
-        ward: 'M/E',
-        category: 'INDUSTRIAL_EMISSIONS',
-        title: 'Chemical mercaptan odor spike along BPCL flare perimeter',
-        description: 'Persistent rotten-egg sulfur stench reported by multiple residents in Chembur Camp. Automated sensor showing SO2 surge.',
-        latitude: 19.0410,
-        longitude: 72.8910,
-        addressText: 'Maravali Village / Refineries Road, Chembur, Ward M/E',
-        aqiAtTrigger: 289,
-        priority: 'URGENT',
-        status: 'ESCALATED',
-        upvotes: 42,
-        department: 'APC',
-        assignedOfficerId: 'user_fld_3',
-        assignedOfficer: 'Officer Anita Patil',
-        assignedBadge: 'BMC-FO-3891',
-        createdAt: new Date(now - 1000 * 60 * 60 * 18).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 60 * 1).toISOString(),
-        citizenContact: '+91 98****5534',
-        internalNotes: [
-          { id: 'n1', author: 'Vikram Deshmukh', role: 'DEPARTMENT_HEAD', text: 'SLA exceeded 12h threshold. Escalated to Level 2: Inter-agency MPCB inspection squad requested.', timestamp: new Date(now - 1000 * 60 * 60 * 1).toISOString() }
-        ],
-        timeline: [
-          { status: 'SUBMITTED', time: '18h ago', actor: 'Citizen (Deepak Rao)', note: 'Complaint filed.' },
-          { status: 'ASSIGNED', time: '16h ago', actor: 'Dr. Priya Kamble', note: 'Assigned to Officer Anita Patil.' },
-          { status: 'IN_PROGRESS', time: '14h ago', actor: 'Officer Anita Patil', note: 'Field air sampling vial collected.' },
-          { status: 'ESCALATED', time: '1h ago', actor: 'Vikram Deshmukh (Dept Head)', note: 'Escalated due to multi-ward impact and refinery jurisdiction.' }
-        ]
-      },
-      {
-        id: 'MB-1009',
-        ward: 'F/N',
-        category: 'OPEN_BURNING',
-        title: 'Dry garden pruning waste set on fire near railway fence',
-        description: 'Park pruning waste piled and ignited beside railway boundary wall near King\'s Circle flyover. Smoke entering local clinics.',
-        latitude: 19.0320,
-        longitude: 72.8580,
-        addressText: 'King\'s Circle Central Railway Border, Matunga, Ward F/N',
-        aqiAtTrigger: 168,
-        priority: 'LOW',
-        status: 'IN_PROGRESS',
-        upvotes: 8,
-        department: 'SWM',
-        assignedOfficerId: 'user_fld_1',
-        assignedOfficer: 'Officer Sanjay Shinde',
-        assignedBadge: 'BMC-FO-4412',
-        createdAt: new Date(now - 1000 * 60 * 60 * 2).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 30).toISOString(),
-        citizenContact: '+91 97****0012',
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '2h ago', actor: 'Citizen', note: 'Reported with photo.' },
-          { status: 'ASSIGNED', time: '90m ago', actor: 'K. R. Rao (Dept Head)', note: 'Assigned to Officer Sanjay Shinde.' },
-          { status: 'IN_PROGRESS', time: '30m ago', actor: 'Officer Sanjay Shinde', note: 'Field crew arrived with water sprayer.' }
-        ]
-      },
-      {
-        id: 'MB-1010',
-        ward: 'P/N',
-        category: 'CONSTRUCTION_DUST',
-        title: 'Uncovered sand transit dumpers spilling dust along SV Road',
-        description: 'Fleet of heavy tipper trucks transporting loose sand without tarpaulins creating dense particulate haze on Link Road Malad.',
-        latitude: 19.1860,
-        longitude: 72.8480,
-        addressText: 'SV Road, Malad West, Ward P/N',
-        aqiAtTrigger: 202,
-        priority: 'MEDIUM',
-        status: 'RESOLUTION_SUBMITTED',
-        upvotes: 18,
-        department: 'BUILDING',
-        assignedOfficerId: 'user_fld_2',
-        assignedOfficer: 'Officer Rahul Mane',
-        assignedBadge: 'BMC-FO-5120',
-        createdAt: new Date(now - 1000 * 60 * 60 * 7).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 40).toISOString(),
-        citizenContact: '+91 98****8811',
-        resolution: {
-          summary: 'Intercepted 3 transit tippers at Malad checkpost. Fined ₹25,000 each and mandated sealed waterproof tarpaulin covers before release.',
-          submittedAt: new Date(now - 1000 * 60 * 40).toISOString()
-        },
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '7h ago', actor: 'Citizen (Bhavin Shah)', note: 'Complaint logged.' },
-          { status: 'ASSIGNED', time: '5h ago', actor: 'Anita Joshi (Dept Head)', note: 'Assigned to Officer Rahul Mane.' },
-          { status: 'IN_PROGRESS', time: '3h ago', actor: 'Officer Rahul Mane', note: 'Intercept squad stationed at junction.' },
-          { status: 'RESOLUTION_SUBMITTED', time: '40m ago', actor: 'Officer Rahul Mane', note: 'Challan issued. Tarpaulins enforced. Proof submitted.' }
-        ]
-      },
-      {
-        id: 'MB-1011',
-        ward: 'G/S',
-        category: 'SENSOR_ISSUE',
-        title: 'Worli CAAQMS ambient monitor telemetry data flatline',
-        description: 'Continuous ambient station telemetry reporting identical 45 µg/m³ PM10 reading for past 18 hours. Suspected intake filter obstruction.',
-        latitude: 19.0140,
-        longitude: 72.8150,
-        addressText: 'Worli Dairy CAAQMS Station, Worli, Ward G/S',
-        aqiAtTrigger: 105,
-        priority: 'LOW',
-        status: 'ASSIGNED',
-        upvotes: 6,
-        department: 'APC',
-        assignedOfficerId: 'user_fld_3',
-        assignedOfficer: 'Officer Anita Patil',
-        assignedBadge: 'BMC-FO-3891',
-        createdAt: new Date(now - 1000 * 60 * 60 * 12).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 60 * 10).toISOString(),
-        citizenContact: '+91 99****3322',
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '12h ago', actor: 'System Auto-Monitor', note: 'Sensor data anomaly detected by platform telemetry audit.' },
-          { status: 'ASSIGNED', time: '10h ago', actor: 'Vikram Deshmukh (Dept Head)', note: 'Assigned to Officer Anita Patil for physical tape and sensor calibration.' }
-        ]
-      },
-      {
-        id: 'MB-1012',
-        ward: 'L',
-        category: 'SMOKE_LANDFILL',
-        title: 'Unauthorized scrap tire incineration along Kurla siding',
-        description: 'Dense black toxic rubber smoke drifting across residential chawls and Kurla railway yard.',
-        latitude: 19.0680,
-        longitude: 72.8790,
-        addressText: 'Kurla Railway Yard Siding, Ward L',
-        aqiAtTrigger: 265,
-        priority: 'URGENT',
-        status: 'SUBMITTED',
-        upvotes: 31,
-        department: 'SWM',
-        assignedOfficerId: null,
-        assignedOfficer: null,
-        assignedBadge: null,
-        createdAt: new Date(now - 1000 * 60 * 25).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 25).toISOString(),
-        citizenContact: '+91 98****9988',
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '25m ago', actor: 'Citizen (Imran Khan)', note: 'Urgent citizen alert with video/photo evidence. Critical hotspot area.' }
-        ]
-      },
-      {
-        id: 'MB-1013',
-        ward: 'M/W',
-        category: 'OPEN_BURNING',
-        title: 'Dry municipal garden waste burning near Govandi playground',
-        description: 'Municipal sweepers accumulated leaves and burned in open pile beside children\'s playground.',
-        latitude: 19.0520,
-        longitude: 72.9090,
-        addressText: 'Govandi Station Road, Ward M/W',
-        aqiAtTrigger: 189,
-        priority: 'LOW',
-        status: 'RESOLVED',
-        upvotes: 15,
-        department: 'SWM',
-        assignedOfficerId: 'user_fld_5',
-        assignedOfficer: 'Officer Deepika Joshi',
-        assignedBadge: 'BMC-FO-7312',
-        createdAt: new Date(now - 1000 * 60 * 60 * 36).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 60 * 12).toISOString(),
-        citizenContact: '+91 97****4433',
-        resolution: {
-          summary: 'Fire quenched with sand and water. Sweeping staff given formal warning; organic composting pit established at ward nursery.',
-          submittedAt: new Date(now - 1000 * 60 * 60 * 14).toISOString(),
-          approvedBy: 'Dr. Priya Kamble'
-        },
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '36h ago', actor: 'Citizen', note: 'Reported with photo.' },
-          { status: 'ASSIGNED', time: '34h ago', actor: 'K. R. Rao (Dept Head)', note: 'Assigned to Officer Deepika Joshi.' },
-          { status: 'IN_PROGRESS', time: '30h ago', actor: 'Officer Deepika Joshi', note: 'Water tanker deployed.' },
-          { status: 'RESOLVED', time: '12h ago', actor: 'Dr. Priya Kamble', note: 'Compliance verified.' }
-        ]
-      },
-      {
-        id: 'MB-1014',
-        ward: 'A',
-        category: 'CONSTRUCTION_DUST',
-        title: 'Heritage facade dry stone cutting without wet suppression',
-        description: 'Commercial bank renovation cutting sandstone blocks dry on pavement, engulfing pedestrians in crystalline silica dust.',
-        latitude: 18.9320,
-        longitude: 72.8340,
-        addressText: 'Horniman Circle, Fort, Ward A',
-        aqiAtTrigger: 162,
-        priority: 'MEDIUM',
-        status: 'CLOSED',
-        upvotes: 9,
-        department: 'BUILDING',
-        assignedOfficerId: 'user_fld_4',
-        assignedOfficer: 'Officer Sunil Rane',
-        assignedBadge: 'BMC-FO-6214',
-        createdAt: new Date(now - 1000 * 60 * 60 * 48).toISOString(),
-        updatedAt: new Date(now - 1000 * 60 * 60 * 20).toISOString(),
-        citizenContact: '+91 98****1100',
-        resolution: {
-          summary: 'Wet-saw cutting attachments installed. Dust extractor vacuum deployed. Work enclosed in polythene shroud.',
-          submittedAt: new Date(now - 1000 * 60 * 60 * 22).toISOString(),
-          approvedBy: 'Tariq Khan (Ward Officer)'
-        },
-        internalNotes: [],
-        timeline: [
-          { status: 'SUBMITTED', time: '48h ago', actor: 'Citizen', note: 'Report logged.' },
-          { status: 'RESOLVED', time: '20h ago', actor: 'Tariq Khan', note: 'Verified compliant.' },
-          { status: 'CLOSED', time: '20h ago', actor: 'System', note: 'Citizen confirmed satisfaction.' }
-        ]
       }
     ];
   }
 
-  // Pre-configured Verified Municipal Officers Roster
   function getInitialOfficersSeed(){
     return [
       { id: 'user_fld_1', name: 'Officer Sanjay Shinde', role: 'FIELD_OFFICER', ward: 'M/E', department: 'SWM', badge: 'BMC-FO-4412', email: 'sanjay.shinde@mcgm.gov.in.demo', phone: '+91 98200 44120', skills: ['Waste Fire Suppression', 'Open Burning Enforcement', 'Composting Audits'], availability: 'AVAILABLE' },
@@ -502,7 +270,6 @@ window.MumbAIR.STORAGE = (function(){
     ];
   }
 
-  // Pre-configured Verified Environmental Equipment Fleet
   function getInitialResourcesSeed(){
     return [
       { id: 'EQ-201', name: 'Anti-Smog Misting Cannon Alpha (Truck-Mounted)', type: 'MIST_CANNON', ward: 'M/E', department: 'APC', status: 'DEPLOYED', location: 'Mahul Oil Corridor', operator: 'Squad A (BMC)', capacity: '5000L / 60m throw' },
@@ -510,13 +277,10 @@ window.MumbAIR.STORAGE = (function(){
       { id: 'EQ-203', name: 'Mechanical Vacuum Sweeper Titan #4', type: 'ROAD_SWEEPER', ward: 'L', department: 'ROADS', status: 'AVAILABLE', location: 'Kurla Depot', operator: 'Driver Ramesh', capacity: 'PM10 regenerative suction' },
       { id: 'EQ-204', name: 'High-Pressure Water Jetting Tanker WT-12', type: 'WATER_TANKER', ward: 'M/W', department: 'SWM', status: 'DEPLOYED', location: 'Deonar East Gate', operator: 'Driver Ganesh', capacity: '10000L slurry suppression' },
       { id: 'EQ-205', name: 'Portable Optical Aerosol Laser Spectrometer (DustTrak)', type: 'SENSOR_UNIT', ward: 'M/E', department: 'APC', status: 'DEPLOYED', location: 'Chembur Camp Squad', operator: 'Officer Anita Patil', capacity: 'Real-time PM1/PM2.5/PM10' },
-      { id: 'EQ-206', name: 'Aerial Environmental Surveillance Drone Squad 1', type: 'DRONE_SQUAD', ward: 'ALL', department: 'APC', status: 'AVAILABLE', location: 'BMC HQ Hangar', operator: 'Pilot R. K. Nair', capacity: 'Thermal IR + optical zoom 4K' },
-      { id: 'EQ-207', name: 'High-Velocity Anti-Smog Gun Delta', type: 'MIST_CANNON', ward: 'K/W', department: 'BUILDING', status: 'AVAILABLE', location: 'Andheri West Yard', operator: 'Squad D (BMC)', capacity: '4000L / 50m throw' },
-      { id: 'EQ-208', name: 'Mechanical Vacuum Sweeper Titan #2', type: 'ROAD_SWEEPER', ward: 'A', department: 'ROADS', status: 'MAINTENANCE', location: 'Byculla Workshop', operator: 'Maintenance Team', capacity: 'Under scheduled PM filter service' }
+      { id: 'EQ-206', name: 'Aerial Environmental Surveillance Drone Squad 1', type: 'DRONE_SQUAD', ward: 'ALL', department: 'APC', status: 'AVAILABLE', location: 'BMC HQ Hangar', operator: 'Pilot R. K. Nair', capacity: 'Thermal IR + optical zoom 4K' }
     ];
   }
 
-  // Pre-configured Verified Public Environmental Advisories
   function getInitialAdvisoriesSeed(){
     var now = Date.now();
     return [
@@ -549,7 +313,6 @@ window.MumbAIR.STORAGE = (function(){
     ];
   }
 
-  // Initial audit entries
   function getInitialAuditLogsSeed(){
     var now = Date.now();
     return [
@@ -578,7 +341,7 @@ window.MumbAIR.STORAGE = (function(){
         actorName: 'Dr. Priya Kamble',
         actorRole: 'WARD_OFFICER',
         recordId: 'MB-1001',
-        notes: 'Dispatched to Officer Sanjay Shinde with 6h SLA clock.'
+        notes: 'Dispatched to Officer Sanjay Shinde with 12h SLA clock.'
       },
       {
         id: 'AUD-seed-4',
@@ -592,35 +355,115 @@ window.MumbAIR.STORAGE = (function(){
     ];
   }
 
+  function getInitialNotificationsSeed(){
+    var now = Date.now();
+    return [
+      {
+        id: 'notif_1',
+        title: 'GRAP Stage II Enforcement Alert',
+        message: 'Continuous misting and mechanised road sweeping deployed across eastern corridor.',
+        time: '25m ago',
+        createdAt: new Date(now - 25 * 60 * 1000).toISOString(),
+        read: false,
+        type: 'ALERT',
+        targetRole: 'ALL',
+        targetWard: 'ALL'
+      },
+      {
+        id: 'notif_2',
+        title: 'Mitigation Completed for MB-1003',
+        message: 'Ward G/S inspection squad verified 25-ft dust barriers installed on Senapati Bapat Marg.',
+        time: '2h ago',
+        createdAt: new Date(now - 2 * 3600 * 1000).toISOString(),
+        read: false,
+        type: 'SUCCESS',
+        targetRole: 'CITIZEN',
+        targetCitizenId: 'user_cit_1',
+        linkId: 'MB-1003'
+      },
+      {
+        id: 'notif_3',
+        title: 'New Case Assigned: MB-1001',
+        message: 'Industrial plume violation assigned to Officer Sanjay Shinde (Ward M/E).',
+        time: '4h ago',
+        createdAt: new Date(now - 4 * 3600 * 1000).toISOString(),
+        read: false,
+        type: 'ASSIGNMENT',
+        targetRole: 'FIELD_OFFICER',
+        targetUserId: 'user_fld_1',
+        linkId: 'MB-1001'
+      }
+    ];
+  }
+
   // Load complete state from persistent storage or initialize defaults
   function loadState(){
-    var saved = getItem(STORAGE_KEY) || {};
+    var saved = rawGetItem(STORAGE_KEY);
+
+    // Schema migration check from v3
+    if(!saved){
+      var v3 = rawGetItem(LEGACY_KEY_V3);
+      if(v3 && typeof v3 === 'object'){
+        saved = v3;
+        saved.schemaVersion = SCHEMA_VERSION;
+        saved._initialized = true;
+        rawSetItem(STORAGE_KEY, saved);
+      }
+    }
+
+    saved = saved || {};
+
+    // Fix state reseeding when data is intentionally empty:
+    // Only seed when _initialized is not true AND the array is missing.
+    var isInitialized = !!saved._initialized;
+
     var reports = saved.reports;
-    if(!Array.isArray(reports) || reports.length === 0){
+    if(!isInitialized && (!Array.isArray(reports) || reports.length === 0)){
       reports = getInitialReportsSeed();
+    } else if(!Array.isArray(reports)){
+      reports = [];
     }
 
     var officers = saved.officers;
-    if(!Array.isArray(officers) || officers.length === 0){
+    if(!isInitialized && (!Array.isArray(officers) || officers.length === 0)){
       officers = getInitialOfficersSeed();
+    } else if(!Array.isArray(officers)){
+      officers = [];
     }
 
     var resources = saved.resources;
-    if(!Array.isArray(resources) || resources.length === 0){
+    if(!isInitialized && (!Array.isArray(resources) || resources.length === 0)){
       resources = getInitialResourcesSeed();
+    } else if(!Array.isArray(resources)){
+      resources = [];
     }
 
     var advisories = saved.advisories;
-    if(!Array.isArray(advisories) || advisories.length === 0){
+    if(!isInitialized && (!Array.isArray(advisories) || advisories.length === 0)){
       advisories = getInitialAdvisoriesSeed();
+    } else if(!Array.isArray(advisories)){
+      advisories = [];
     }
 
     var auditLogs = saved.auditLogs;
-    if(!Array.isArray(auditLogs) || auditLogs.length === 0){
+    if(!isInitialized && (!Array.isArray(auditLogs) || auditLogs.length === 0)){
       auditLogs = getInitialAuditLogsSeed();
+    } else if(!Array.isArray(auditLogs)){
+      auditLogs = [];
+    }
+
+    var notifications = saved.notifications;
+    if(!isInitialized && (!Array.isArray(notifications) || notifications.length === 0)){
+      notifications = getInitialNotificationsSeed();
+    } else if(!Array.isArray(notifications)){
+      notifications = [];
     }
 
     return {
+      schemaVersion: SCHEMA_VERSION,
+      _initialized: true,
+      _seq: saved._seq || 1,
+      _lastSavedAt: saved._lastSavedAt || new Date().toISOString(),
       user: saved.user || {
         mobile: '',
         isGuest: true,
@@ -629,8 +472,8 @@ window.MumbAIR.STORAGE = (function(){
         voterFingerprint: getOrCreateVoterFingerprint()
       },
       settings: saved.settings || {
-        scale: 'IN', // 'IN' (CPCB NAQI) or 'US' (US EPA AQI)
-        lang: 'en',  // 'en' or 'mr'
+        scale: 'IN', // 'IN' (CPCB NAQI)
+        lang: 'en',
         audio: true
       },
       reports: reports,
@@ -638,31 +481,100 @@ window.MumbAIR.STORAGE = (function(){
       resources: resources,
       advisories: advisories,
       auditLogs: auditLogs,
-      userVotes: saved.userVotes || [],
+      notifications: notifications,
+      userVotes: Array.isArray(saved.userVotes) ? saved.userVotes : [],
       cachedApi: saved.cachedApi || null
     };
   }
 
   function saveState(stateObj){
-    setItem(STORAGE_KEY, stateObj);
+    if(!stateObj || typeof stateObj !== 'object') return false;
+    stateObj.schemaVersion = SCHEMA_VERSION;
+    stateObj._initialized = true;
+    stateObj._seq = (stateObj._seq || 0) + 1;
+    stateObj._lastSavedAt = new Date().toISOString();
+    rawSetItem(STORAGE_KEY, stateObj);
+
+    // Notify listeners in current window
+    if(typeof window !== 'undefined' && typeof window.dispatchEvent === 'function'){
+      try {
+        window.dispatchEvent(new CustomEvent('mumbair:state-changed', {
+          detail: { seq: stateObj._seq, timestamp: stateObj._lastSavedAt }
+        }));
+      } catch(e){}
+    }
+    return true;
+  }
+
+  /**
+   * ATOMIC STATE MUTATION TRANSACTION
+   * 1. Loads latest fresh state from storage
+   * 2. Executes mutator(freshState)
+   * 3. Validates return value (aborts if { success: false })
+   * 4. Persists the complete updated state ONCE
+   * 5. Returns the exact result
+   */
+  function atomicUpdate(mutatorFn){
+    if(typeof mutatorFn !== 'function'){
+      return { success: false, error: 'Mutator function required' };
+    }
+
+    // Always fetch fresh state to prevent stale-write race conditions
+    var freshState = loadState();
+    var result;
+    try {
+      result = mutatorFn(freshState);
+    } catch(err) {
+      console.error('Error in atomic transaction mutator:', err);
+      return { success: false, error: 'Transaction aborted due to internal error: ' + err.message };
+    }
+
+    if(result && result.success === false){
+      // Transaction explicitly rejected by business rules; do not persist
+      return result;
+    }
+
+    var saved = saveState(freshState);
+    if(!saved){
+      return { success: false, error: 'Storage write failed' };
+    }
+
+    return result || { success: true };
   }
 
   function resetAll(){
     if(hasStorage){
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_KEY_V3);
     }
     memoryFallback = {};
   }
 
+  // Cross-Tab Synchronization Listener
+  if(typeof window !== 'undefined' && window.addEventListener){
+    window.addEventListener('storage', function(event){
+      if(event.key === STORAGE_KEY){
+        try {
+          window.dispatchEvent(new CustomEvent('mumbair:state-synced', {
+            detail: { key: event.key, newValue: event.newValue }
+          }));
+        } catch(e){}
+      }
+    });
+  }
+
   return {
+    SCHEMA_VERSION: SCHEMA_VERSION,
     loadState: loadState,
     saveState: saveState,
+    atomicUpdate: atomicUpdate,
     resetAll: resetAll,
     getOrCreateVoterFingerprint: getOrCreateVoterFingerprint,
     getInitialReportsSeed: getInitialReportsSeed,
     getInitialOfficersSeed: getInitialOfficersSeed,
     getInitialResourcesSeed: getInitialResourcesSeed,
     getInitialAdvisoriesSeed: getInitialAdvisoriesSeed,
-    getInitialAuditLogsSeed: getInitialAuditLogsSeed
+    getInitialAuditLogsSeed: getInitialAuditLogsSeed,
+    getInitialNotificationsSeed: getInitialNotificationsSeed
   };
 })();

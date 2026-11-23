@@ -1,6 +1,6 @@
 /* ==============================================================================
-   MumbAIR — Map Layer (Leaflet Interactive Visualization & Vector Geometry)
-   Resilient tile loading, embedded Mumbai geography, automatic resize invalidation
+   MumbAIR — Map Layer (Leaflet Geospatial Engine, Verified Stations & Real Reports)
+   Accurate CAAQMS stations, actual complaint coordinates & XSS-hardened popups
    ============================================================================== */
 
 window.MumbAIR = window.MumbAIR || {};
@@ -14,23 +14,26 @@ window.MumbAIR.MAP = (function(){
   var mapInstance = null;
   var miniMapInstance = null;
   var wardMarkersLayer = null;
-  var footprintLayer = null;
   var reportMarkersLayer = null;
   var userLocationLayer = null;
-  var markersMap = {}; // Maps ward code to Leaflet marker instance
+  var markersMap = {};
 
-  // Simplified Mumbai coastline & land boundary coordinates for offline/reliable rendering
+  // Greater Mumbai Coastal Outline Vector (Cartographic reference)
   var MUMBAI_COASTLINE_COORDS = [
-    [18.9000, 72.8100], [18.9150, 72.8140], [18.9400, 72.8220], [18.9700, 72.8100],
-    [19.0100, 72.8150], [19.0600, 72.8250], [19.1200, 72.8200], [19.1700, 72.8250],
-    [19.2400, 72.8300], [19.2900, 72.8600], [19.2700, 72.9300], [19.1900, 72.9700],
-    [19.1200, 72.9600], [19.0500, 72.9300], [18.9800, 72.8700], [18.9300, 72.8400],
-    [18.9000, 72.8100]
+    [18.8950, 72.8100], [18.9100, 72.8050], [18.9300, 72.8150],
+    [18.9500, 72.7950], [18.9800, 72.8050], [19.0050, 72.8150],
+    [19.0350, 72.8250], [19.0650, 72.8300], [19.1000, 72.8200],
+    [19.1350, 72.8100], [19.1750, 72.8050], [19.2150, 72.8000],
+    [19.2550, 72.8100], [19.2900, 72.8350], [19.2950, 72.8750],
+    [19.2700, 72.9350], [19.2250, 72.9750], [19.1750, 72.9800],
+    [19.1300, 72.9550], [19.0850, 72.9250], [19.0550, 72.9150],
+    [19.0300, 72.8950], [18.9950, 72.8650], [18.9550, 72.8450],
+    [18.9150, 72.8350], [18.8950, 72.8100]
   ];
 
-  function initMap(containerId, onWardSelect, onReportSelect){
-    if(!window.L){
-      console.warn('Leaflet (L) library not detected; check vendor/leaflet/leaflet.js');
+  function initMap(containerId, onWardSelect){
+    if(!window.L) {
+      console.warn('Leaflet vendor library not loaded.');
       return null;
     }
 
@@ -38,83 +41,65 @@ window.MumbAIR.MAP = (function(){
     if(!mapEl) return null;
 
     if(mapInstance){
-      try {
-        mapInstance.remove();
-      } catch(e) {}
+      try { mapInstance.remove(); } catch(e) {}
       mapInstance = null;
-      markersMap = {};
     }
 
-    // Initialize Map centered on Greater Mumbai
     mapInstance = L.map(containerId, {
       center: [CONFIG.DEFAULT_COORDS.lat, CONFIG.DEFAULT_COORDS.lng],
       zoom: 11,
       minZoom: 10,
       maxZoom: 18,
-      zoomControl: true,
-      scrollWheelZoom: true
+      zoomControl: true
     });
 
-    // Base tile layers (100% free, zero API key required, zero referer blocks from file:// or localhost)
+    // Valid tile providers
     var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      attribution: '&copy; Esri &mdash; Mumbai Street Map'
-    });
-
-    var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      attribution: '&copy; Esri &mdash; High-Resolution Satellite'
-    });
-
-    var esriLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri, HERE, Garmin, USGS',
       maxZoom: 18
     });
 
-    var esriSatellite = L.layerGroup([esriSat, esriLabels]);
+    var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+      maxZoom: 18
+    });
 
     var esriCanvas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 16,
-      attribution: '&copy; Esri &mdash; Light Gray Canvas'
+      attribution: '&copy; Esri, HERE, DeLorme, MapmyIndia',
+      maxZoom: 16
     });
 
     var osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors &middot; HOT'
+      attribution: '&copy; OpenStreetMap contributors, HOT',
+      maxZoom: 18
     });
 
     // Default to detailed street map
     esriStreet.addTo(mapInstance);
 
-    // Vector Coastline Boundary polygon (provides geographic context even if offline)
+    // Vector Coastline Boundary polygon
     L.polygon(MUMBAI_COASTLINE_COORDS, {
-      color: '#0D9488',
+      color: '#0EA5E9',
       weight: 1.5,
-      fillColor: '#0D9488',
+      fillColor: '#0EA5E9',
       fillOpacity: 0.04,
       dashArray: '4, 4'
     }).addTo(mapInstance);
 
     // Layer Groups
-    footprintLayer = L.layerGroup().addTo(mapInstance);
     wardMarkersLayer = L.layerGroup().addTo(mapInstance);
     reportMarkersLayer = L.layerGroup().addTo(mapInstance);
     userLocationLayer = L.layerGroup().addTo(mapInstance);
-    var hotspotLayer = L.layerGroup().addTo(mapInstance);
 
-    // Seed Environmental Inversion & Industrial Hotspot Risk Zones
-    renderHotspotZones(hotspotLayer);
-
-    // Add Basemap switcher control
+    // Basemap & Layer Control
     L.control.layers({
       "🗺️ Detailed Streets": esriStreet,
       "🛰️ Satellite Imagery": esriSatellite,
       "🎨 Light Canvas": esriCanvas,
       "🌍 OpenStreetMap": osmHot
     }, {
-      "🏛️ CAAQMS Monitoring Nodes": wardMarkersLayer,
-      "🚨 Citizen Violation Reports": reportMarkersLayer,
-      "🔥 Inversion & Industrial Hotspots": hotspotLayer,
-      "🌐 Dispersion Footprints": footprintLayer
+      "🏛️ CAAQMS Monitoring Nodes (24 Wards)": wardMarkersLayer,
+      "🚨 Citizen Reports (Actual GPS Coordinates)": reportMarkersLayer
     }, { position: 'topright', collapsed: true }).addTo(mapInstance);
 
     invalidateSize();
@@ -148,9 +133,9 @@ window.MumbAIR.MAP = (function(){
     miniTiles.addTo(miniMapInstance);
 
     L.polygon(MUMBAI_COASTLINE_COORDS, {
-      color: '#0D9488',
+      color: '#0EA5E9',
       weight: 1,
-      fillColor: '#0D9488',
+      fillColor: '#0EA5E9',
       fillOpacity: 0.05
     }).addTo(miniMapInstance);
 
@@ -171,18 +156,22 @@ window.MumbAIR.MAP = (function(){
   }
 
   function renderWardMarkers(wardsData, wardAqiMap, onWardSelect){
-    if(!wardMarkersLayer || !footprintLayer) return;
+    if(!wardMarkersLayer) return;
     wardMarkersLayer.clearLayers();
-    footprintLayer.clearLayers();
     markersMap = {};
 
     wardsData.forEach(function(w){
       var aqiInfo = (wardAqiMap && wardAqiMap[w.code]) ? wardAqiMap[w.code] : { aqi: 135, color: '#CA8A04', category: 'Moderate' };
 
-      // High-contrast custom HTML pin
+      var safeCode = UTILS.escapeHtml(w.code);
+      var safeName = UTILS.escapeHtml(w.name);
+      var safeStation = UTILS.escapeHtml(w.station);
+      var safeZone = UTILS.escapeHtml(w.zone);
+      var safeCause = UTILS.escapeHtml(w.defaultCause);
+
       var iconHtml =
         '<div class="ward-map-marker" style="background:' + aqiInfo.color + '; width:34px; height:34px;">' +
-          '<div class="marker-code">' + w.code + '</div>' +
+          '<div class="marker-code">' + safeCode + '</div>' +
           '<div class="marker-aqi">' + aqiInfo.aqi + '</div>' +
         '</div>';
 
@@ -197,16 +186,16 @@ window.MumbAIR.MAP = (function(){
       var marker = L.marker([w.lat, w.lng], { icon: customIcon });
 
       var popupHtml =
-        '<div style="min-width:200px;">' +
-          '<div class="popup-ward-title">' + w.name + ' (Ward ' + w.code + ')</div>' +
-          '<div class="popup-aqi-stat" style="color:' + aqiInfo.color + '">AQI ' + aqiInfo.aqi + ' &middot; ' + aqiInfo.category + '</div>' +
-          '<div style="font-size:11px; color:#64748B;">Zone: ' + w.zone + ' &middot; ' + w.station + '</div>' +
+        '<div style="min-width:210px;">' +
+          '<div class="popup-ward-title">' + safeName + ' (Ward ' + safeCode + ')</div>' +
+          '<div class="popup-aqi-stat" style="color:' + aqiInfo.color + '">CPCB NAQI ' + aqiInfo.aqi + ' &middot; ' + aqiInfo.category + '</div>' +
+          '<div style="font-size:11px; color:#64748B;">Station: ' + safeStation + ' &middot; ' + safeZone + '</div>' +
           '<div style="margin:7px 0; font-size:11.5px; line-height:1.4;">' +
-            '<strong>Local vectors:</strong> ' + w.defaultCause +
+            '<strong>Local environmental context:</strong> ' + safeCause +
           '</div>' +
           '<div style="display:flex; gap:6px; margin-top:10px;">' +
-            '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.APP.selectWardFromMap(\'' + w.code + '\')">Select Ward</button>' +
-            '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.reportAtWard(\'' + w.code + '\')">Report Violation</button>' +
+            '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.APP.selectWardFromMap(\'' + safeCode + '\')">Select Ward</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.reportAtWard(\'' + safeCode + '\')">Report Violation</button>' +
           '</div>' +
         '</div>';
 
@@ -219,17 +208,7 @@ window.MumbAIR.MAP = (function(){
       wardMarkersLayer.addLayer(marker);
       markersMap[w.code] = marker;
 
-      // Model dispersion footprint circle
-      var circle = L.circle([w.lat, w.lng], {
-        color: aqiInfo.color,
-        fillColor: aqiInfo.color,
-        fillOpacity: 0.12,
-        radius: 1200,
-        weight: 1.5
-      });
-      footprintLayer.addLayer(circle);
-
-      // Render simplified dot marker on mini map if initialized
+      // Mini map dot
       if(miniMapInstance){
         var miniDot = L.circleMarker([w.lat, w.lng], {
           radius: 5,
@@ -248,39 +227,49 @@ window.MumbAIR.MAP = (function(){
     if(!reportMarkersLayer) return;
     reportMarkersLayer.clearLayers();
 
-    reports.forEach(function(r){
-      if(!r.latitude || !r.longitude) return;
+    var validReports = (reports || []).filter(function(r){
+      return r.latitude && r.longitude && !isNaN(r.latitude) && !isNaN(r.longitude);
+    });
 
-      var iconMap = {
-        OPEN_BURNING: '🔥',
-        CONSTRUCTION_DUST: '🏗️',
-        INDUSTRIAL_EMISSIONS: '🏭',
-        VEHICLE_POLLUTION: '🚛',
-        SMOKE_LANDFILL: '⛰️',
-        SENSOR_ISSUE: '📍'
-      };
+    validReports.forEach(function(r){
+      var cat = (CONFIG.CATEGORIES && CONFIG.CATEGORIES.find(function(c){ return c.id === r.category; })) || { icon: '📍', label: r.category };
 
-      var emoji = iconMap[r.category] || '⚠️';
-      var iconHtml = '<div class="report-map-marker">' + emoji + '</div>';
+      var pinColor = '#EF4444';
+      if(r.status === 'RESOLVED' || r.status === 'CLOSED') pinColor = '#10B981';
+      else if(r.status === 'IN_PROGRESS' || r.status === 'RESOLUTION_SUBMITTED') pinColor = '#F59E0B';
 
-      var customIcon = L.divIcon({
+      var markerHtml =
+        '<div class="report-map-marker" style="background:' + pinColor + '; border:2px solid #FFFFFF; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.3); font-size:13px;">' +
+          cat.icon +
+        '</div>';
+
+      var reportIcon = L.divIcon({
         className: 'custom-report-pin',
-        html: iconHtml,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
-        popupAnchor: [0, -13]
+        html: markerHtml,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
       });
 
-      var marker = L.marker([r.latitude, r.longitude], { icon: customIcon });
+      // Use actual GPS coordinates
+      var marker = L.marker([r.latitude, r.longitude], { icon: reportIcon });
+
+      var safeTitle = UTILS.escapeHtml(r.title);
+      var safeDesc = UTILS.escapeHtml(r.description);
+      var safeAddress = UTILS.escapeHtml(r.addressText);
+      var safeWard = UTILS.escapeHtml(r.ward);
+      var safeStatus = UTILS.escapeHtml(r.status);
+      var safeId = UTILS.escapeHtml(r.id);
 
       var popupHtml =
-        '<div style="min-width:190px;">' +
-          '<div style="font-weight:700; font-size:12.5px; color:#DC2626;">' + r.id + ' &middot; ' + (r.title || 'Civic Violation') + '</div>' +
-          '<div style="font-size:11px; color:#64748B; margin-top:2px;">Ward ' + r.ward + ' &middot; Status: ' + (r.status.replace(/_/g, ' ')) + '</div>' +
-          '<div style="font-size:11.5px; margin:6px 0; line-height:1.4;">' + r.description + '</div>' +
-          '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">' +
-            '<span style="font-size:11px; font-weight:700; color:#0D9488;">👍 ' + (r.upvotes || 0) + ' Endorsements</span>' +
-            '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.viewReportTimeline(\'' + r.id + '\')">Details</button>' +
+        '<div style="min-width:210px;">' +
+          '<div style="font-weight:700; font-size:13px; color:#0F172A;">' + cat.icon + ' ' + safeTitle + '</div>' +
+          '<div style="font-size:11px; color:#64748B; margin-top:2px;">ID: ' + safeId + ' &middot; Ward ' + safeWard + ' &middot; ' + safeStatus.replace(/_/g, ' ') + '</div>' +
+          '<div style="font-size:11.5px; color:#334155; margin:6px 0; line-height:1.35;">' + safeDesc + '</div>' +
+          '<div style="font-size:11px; color:#64748B;">📍 ' + safeAddress + '</div>' +
+          '<div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center;">' +
+            '<span style="font-size:11px; font-weight:600; color:#0EA5E9;">👍 ' + (r.upvotes || 0) + ' endorsements</span>' +
+            '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.showComplaintDetailModal(\'' + safeId + '\')">View Dossier</button>' +
           '</div>' +
         '</div>';
 
@@ -289,157 +278,62 @@ window.MumbAIR.MAP = (function(){
     });
   }
 
-  function searchAndZoom(query){
-    if(!mapInstance || !query) return null;
-    var q = query.trim().toLowerCase();
-
-    var matched = CONFIG.WARDS_DATA.find(function(w){
-      return w.code.toLowerCase() === q ||
-             w.name.toLowerCase().indexOf(q) !== -1 ||
-             w.station.toLowerCase().indexOf(q) !== -1 ||
-             (w.nameMr && w.nameMr.indexOf(q) !== -1);
-    });
-
-    if(matched){
-      mapInstance.setView([matched.lat, matched.lng], 14, { animate: true });
-      if(markersMap[matched.code]){
-        setTimeout(function(){
-          markersMap[matched.code].openPopup();
-        }, 300);
+  function flyToWard(wardCode, zoomLevel){
+    var ward = (CONFIG.WARDS_DATA || []).find(function(w){ return w.code === wardCode; });
+    if(ward && mapInstance){
+      mapInstance.flyTo([ward.lat, ward.lng], zoomLevel || 13, { duration: 1.2 });
+      var marker = markersMap[wardCode];
+      if(marker){
+        setTimeout(function(){ marker.openPopup(); }, 1200);
       }
-      return matched;
     }
-
-    return null;
   }
 
-  function locateUser(onFound, onError){
+  function locateUser(onSuccess, onError){
     if(!navigator.geolocation){
-      if(typeof onError === 'function') onError('Geolocation not supported in this browser.');
+      if(typeof onError === 'function') onError({ code: 0, message: 'Geolocation not supported by browser.' });
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      function(pos){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      if(mapInstance){
         var lat = pos.coords.latitude;
         var lng = pos.coords.longitude;
+        var acc = pos.coords.accuracy;
 
-        if(!userLocationLayer) return;
         userLocationLayer.clearLayers();
 
-        var userIcon = L.divIcon({
-          className: 'user-gps-container',
-          html: '<div class="user-gps-marker"></div>',
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+        var userMarker = L.circleMarker([lat, lng], {
+          radius: 8,
+          fillColor: '#0EA5E9',
+          color: '#ffffff',
+          weight: 3,
+          opacity: 1,
+          fillOpacity: 0.95
         });
 
-        var userMarker = L.marker([lat, lng], { icon: userIcon });
-        userMarker.bindPopup('<strong>Your Current Position</strong><br>GPS Accuracy: ' + Math.round(pos.coords.accuracy) + 'm');
+        userMarker.bindPopup('<strong>Your Current Position</strong><br>GPS Accuracy: ' + Math.round(acc) + 'm');
         userLocationLayer.addLayer(userMarker);
 
-        // Find nearest ward
-        var closestWard = null;
-        var minDistance = Infinity;
-
-        CONFIG.WARDS_DATA.forEach(function(w){
-          var dist = UTILS.haversineDistance(lat, lng, w.lat, w.lng);
-          if(dist < minDistance){
-            minDistance = dist;
-            closestWard = w;
-          }
+        // Accuracy circle
+        var accCircle = L.circle([lat, lng], {
+          radius: acc,
+          color: '#0EA5E9',
+          fillColor: '#0EA5E9',
+          fillOpacity: 0.15,
+          weight: 1
         });
+        userLocationLayer.addLayer(accCircle);
 
-        if(mapInstance){
-          mapInstance.setView([lat, lng], 13, { animate: true });
-          setTimeout(function(){ userMarker.openPopup(); }, 300);
-        }
-
-        if(typeof onFound === 'function') onFound({ lat: lat, lng: lng, closestWard: closestWard, distanceKm: minDistance });
-      },
-      function(err){
-        if(typeof onError === 'function') onError(err.message);
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
-  }
-
-  function toggleLayer(layerName, show){
-    if(!mapInstance) return;
-    if(layerName === 'stations' && wardMarkersLayer){
-      if(show) mapInstance.addLayer(wardMarkersLayer);
-      else mapInstance.removeLayer(wardMarkersLayer);
-    } else if(layerName === 'footprints' && footprintLayer){
-      if(show) mapInstance.addLayer(footprintLayer);
-      else mapInstance.removeLayer(footprintLayer);
-    } else if(layerName === 'reports' && reportMarkersLayer){
-      if(show) mapInstance.addLayer(reportMarkersLayer);
-      else mapInstance.removeLayer(reportMarkersLayer);
-    }
-  }
-
-  function resetView(){
-    if(!mapInstance) return;
-    mapInstance.setView([CONFIG.DEFAULT_COORDS.lat, CONFIG.DEFAULT_COORDS.lng], 11, { animate: true });
-  }
-
-  function renderHotspotZones(layer){
-    if(!layer) return;
-    var HOTSPOTS = [
-      {
-        name: 'Mahul / Chembur Refinery Flare Corridor',
-        bounds: [[19.005, 72.885], [19.045, 72.915]],
-        color: '#DC2626',
-        vector: 'High Mercaptan, VOC & SO2 Nocturnal Inversion',
-        risk: 'CRITICAL'
-      },
-      {
-        name: 'Deonar Solid Waste Landfill Perimeter',
-        bounds: [[19.055, 72.918], [19.080, 72.942]],
-        color: '#EA580C',
-        vector: 'Deep Subsurface Methane Smoldering & PM2.5 Flaring',
-        risk: 'HIGH'
-      },
-      {
-        name: 'Bandra-Kurla Complex (BKC) Commercial Transit Basin',
-        bounds: [[19.058, 72.858], [19.076, 72.875]],
-        color: '#D97706',
-        vector: 'Arterial Fleet Congestion & Metro Demolition Particulate',
-        risk: 'ELEVATED'
-      },
-      {
-        name: 'Kurla West / Mithi River Scrap Salvage Cluster',
-        bounds: [[19.068, 72.870], [19.088, 72.890]],
-        color: '#DC2626',
-        vector: 'Unregulated Wire Burning & Plastic Reclamation Emissions',
-        risk: 'CRITICAL'
-      },
-      {
-        name: 'Andheri-Goregaon SV Road Construction Strip',
-        bounds: [[19.125, 72.835], [19.155, 72.852]],
-        color: '#D97706',
-        vector: 'High-Density Redevelopment Demolition & Road Transit Dust',
-        risk: 'ELEVATED'
+        mapInstance.flyTo([lat, lng], 13, { duration: 1.2 });
       }
-    ];
-
-    HOTSPOTS.forEach(function(h){
-      var rect = L.rectangle(h.bounds, {
-        color: h.color,
-        weight: 1.5,
-        fillColor: h.color,
-        fillOpacity: 0.16,
-        dashArray: '5, 5'
-      });
-      rect.bindPopup(
-        '<div style="min-width:210px;">' +
-          '<div style="font-weight:800; font-size:13px; color:' + h.color + '">⚠️ ' + h.name + '</div>' +
-          '<div style="font-size:11px; font-weight:700; color:#475569; margin-top:2px;">Environmental Risk: <span class="ops-badge" style="background:' + (h.risk === 'CRITICAL' ? '#FEE2E2; color:#991B1B;' : '#FEF3C7; color:#92400E;') + '">' + h.risk + '</span></div>' +
-          '<div style="font-size:11.5px; color:#334155; margin-top:6px; line-height:1.4;">' + h.vector + '</div>' +
-          '<div style="font-size:10.5px; color:#64748B; margin-top:6px;">Synced with BMC Environmental Operations & MPCB Continuous Air Monitoring.</div>' +
-        '</div>'
-      );
-      layer.addLayer(rect);
+      if(typeof onSuccess === 'function') onSuccess(pos);
+    }, function(err){
+      if(typeof onError === 'function') onError(err);
+    }, {
+      enableHighAccuracy: true,
+      timeout: 8000,
+      maximumAge: 60000
     });
   }
 
@@ -448,16 +342,18 @@ window.MumbAIR.MAP = (function(){
     if(!wrapper) return;
     if(!document.fullscreenElement){
       if(wrapper.requestFullscreen){
-        wrapper.requestFullscreen();
-      } else if(wrapper.webkitRequestFullscreen){
-        wrapper.webkitRequestFullscreen();
+        wrapper.requestFullscreen().then(function(){ invalidateSize(); });
       }
     } else {
       if(document.exitFullscreen){
-        document.exitFullscreen();
+        document.exitFullscreen().then(function(){ invalidateSize(); });
       }
     }
-    setTimeout(invalidateSize, 200);
+  }
+
+  function resetView(){
+    if(!mapInstance) return;
+    mapInstance.setView([CONFIG.DEFAULT_COORDS.lat, CONFIG.DEFAULT_COORDS.lng], 11, { animate: true });
   }
 
   return {
@@ -466,9 +362,8 @@ window.MumbAIR.MAP = (function(){
     invalidateSize: invalidateSize,
     renderWardMarkers: renderWardMarkers,
     renderReportMarkers: renderReportMarkers,
-    searchAndZoom: searchAndZoom,
+    flyToWard: flyToWard,
     locateUser: locateUser,
-    toggleLayer: toggleLayer,
     toggleFullscreen: toggleFullscreen,
     resetView: resetView
   };

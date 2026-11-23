@@ -173,9 +173,9 @@ html, body {
 }
 
 .nav-link.active {
-  background: #FFFFFF;
+  background: var(--bg-surface, #FFFFFF);
   color: var(--brand-teal);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(13, 148, 136, 0.1);
+  box-shadow: 0 2px 8px rgba(9, 30, 51, 0.08), 0 0 0 1px rgba(9, 30, 51, 0.04);
   font-weight: 700;
 }
 
@@ -212,6 +212,7 @@ html, body {
 .icon-action-btn:hover {
   background: var(--bg-subtle);
   border-color: var(--border-medium);
+  color: var(--brand-teal);
 }
 
 .notif-count-pill {
@@ -229,12 +230,12 @@ html, body {
 
 /* Municipal Authority Button in Citizen Topbar - Never cut off */
 .btn-authority {
-  background: #0F172A;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   color: #F8FAFC !important;
-  border: 1px solid #334155;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
@@ -242,11 +243,14 @@ html, body {
   transition: all var(--transition-fast);
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 .btn-authority:hover {
-  background: #1E293B;
-  border-color: #475569;
+  background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
 }
 
 .badge-lock {

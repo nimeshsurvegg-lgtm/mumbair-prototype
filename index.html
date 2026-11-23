@@ -770,52 +770,113 @@
     <!-- Screen A: Authority Login View (When unauthenticated) -->
     <div id="authority-login-view" class="authority-login-screen">
       <div class="auth-card-wrapper">
+        <!-- Civic / Environmental Branding -->
         <div class="auth-header">
-          <div class="bmc-emblem-badge">🏛️</div>
-          <h2>Brihanmumbai Municipal Corporation</h2>
-          <p class="auth-sub">Environmental Operations Command (MCGM)</p>
-          <div class="auth-badge-notice">Demonstration &amp; Presentation Mode</div>
+          <div class="auth-brand-badge">
+            <span class="auth-crest-icon">🏛️</span>
+          </div>
+          <h2 class="auth-title">Brihanmumbai Municipal Corporation</h2>
+          <p class="auth-sub">Environmental Operations Command &middot; MCGM</p>
+          <div class="auth-divider"></div>
+          <div class="auth-badge-notice">
+            <span class="auth-demo-dot"></span> Demonstration &amp; Presentation Mode
+          </div>
         </div>
 
+        <!-- Login Form -->
         <form id="formAuthorityLogin" class="auth-form" onsubmit="return false;">
+          <div id="authLoginError" class="auth-error-banner hidden" role="alert"></div>
+
           <div class="form-group">
-            <label class="form-label">Officer Email / Service ID</label>
-            <input type="text" id="authOfficerId" class="form-input" placeholder="e.g. sanjay.shinde@mcgm.gov.in" value="sanjay.shinde@mcgm.gov.in.demo">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password / Security Key</label>
-            <input type="password" id="authPassword" class="form-input" value="••••••••" placeholder="Enter secure passphrase">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Assigned Department</label>
-            <select id="authDeptSelect" class="form-select">
-              <option value="SWM">Solid Waste Management (SWM)</option>
-              <option value="APC">Air Pollution Control &amp; Environment (APC)</option>
-              <option value="BUILDING">Construction &amp; Demolition (BDR)</option>
-              <option value="ROADS">Roads &amp; Traffic Infrastructure (RTI)</option>
-              <option value="ALL">All Departments (Command Center)</option>
-            </select>
+            <label class="form-label" for="authOfficerId">Officer Email / Service ID</label>
+            <div class="input-with-icon">
+              <span class="input-icon">👤</span>
+              <input type="text" id="authOfficerId" class="form-input auth-input" placeholder="e.g. sanjay.shinde@mcgm.gov.in" value="sanjay.shinde@mcgm.gov.in.demo" autocomplete="username">
+            </div>
           </div>
 
-          <button class="btn btn-primary btn-lg" id="btnSubmitAuthorityLogin" style="width:100%; margin-top:8px;">
-            🔒 Authenticate &amp; Enter Command Workspace
+          <div class="form-group">
+            <div class="label-row">
+              <label class="form-label" for="authPassword">Password / Security Key</label>
+              <span class="form-hint-text">Demo enabled</span>
+            </div>
+            <div class="input-with-icon">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="authPassword" class="form-input auth-input" value="••••••••" placeholder="Enter secure passphrase" autocomplete="current-password">
+              <button type="button" class="btn-toggle-pw" id="btnToggleAuthPw" title="Toggle password visibility">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="authDeptSelect">Assigned Department</label>
+            <div class="input-with-icon">
+              <span class="input-icon">🏢</span>
+              <select id="authDeptSelect" class="form-select auth-select">
+                <option value="SWM">Solid Waste Management (SWM)</option>
+                <option value="APC">Air Pollution Control &amp; Environment (APC)</option>
+                <option value="BUILDING">Construction &amp; Demolition (BDR)</option>
+                <option value="ROADS">Roads &amp; Traffic Infrastructure (RTI)</option>
+                <option value="ALL">All Departments (Command Center)</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-auth-submit" id="btnSubmitAuthorityLogin">
+            <span class="auth-btn-icon">🔒</span>
+            <span class="auth-btn-text">Authenticate &amp; Enter Command Workspace</span>
           </button>
         </form>
 
-        <!-- Evaluator Quick Switcher for Evaluation -->
+        <!-- Evaluator Quick Switcher for Evaluation (Clearly Separated Demo Section) -->
         <div class="demo-evaluator-box">
-          <div class="eval-title">🎯 Evaluator &amp; Demo Persona Quick Switcher:</div>
+          <div class="eval-box-header">
+            <div class="eval-title-wrap">
+              <span class="eval-tag">DEMO ONLY</span>
+              <span class="eval-title">Evaluator &amp; Persona Quick Switcher</span>
+            </div>
+            <span class="eval-help">Pre-configured accounts</span>
+          </div>
           <div class="eval-chips">
-            <button class="eval-chip active" data-role="FIELD_OFFICER" title="Login as Field Inspector Sanjay Shinde">⚡ Field Officer</button>
-            <button class="eval-chip" data-role="WARD_OFFICER" title="Login as Ward M/E Officer Dr. Priya Kamble">🏛️ Ward Officer</button>
-            <button class="eval-chip" data-role="DEPARTMENT_HEAD" title="Login as Dept Head Vikram Deshmukh">🏢 Dept Head</button>
-            <button class="eval-chip" data-role="CITY_ADMIN" title="Login as Municipal Commissioner Ops">🌆 City Admin</button>
-            <button class="eval-chip" data-role="SUPER_ADMIN" title="Login as Root System Administrator">🔒 Super Admin</button>
+            <button class="eval-chip active" data-role="FIELD_OFFICER" title="Login as Field Inspector Sanjay Shinde">
+              <span class="eval-chip-icon">⚡</span>
+              <span class="eval-chip-meta">
+                <span class="eval-chip-role">Field Officer</span>
+                <span class="eval-chip-name">Sanjay Shinde</span>
+              </span>
+            </button>
+            <button class="eval-chip" data-role="WARD_OFFICER" title="Login as Ward M/E Officer Dr. Priya Kamble">
+              <span class="eval-chip-icon">🏛️</span>
+              <span class="eval-chip-meta">
+                <span class="eval-chip-role">Ward Officer</span>
+                <span class="eval-chip-name">Dr. Priya Kamble</span>
+              </span>
+            </button>
+            <button class="eval-chip" data-role="DEPARTMENT_HEAD" title="Login as Dept Head Vikram Deshmukh">
+              <span class="eval-chip-icon">🏢</span>
+              <span class="eval-chip-meta">
+                <span class="eval-chip-role">Dept Head</span>
+                <span class="eval-chip-name">Vikram Deshmukh</span>
+              </span>
+            </button>
+            <button class="eval-chip" data-role="CITY_ADMIN" title="Login as Municipal Commissioner Ops">
+              <span class="eval-chip-icon">🌆</span>
+              <span class="eval-chip-meta">
+                <span class="eval-chip-role">City Admin</span>
+                <span class="eval-chip-name">Commissioner Ops</span>
+              </span>
+            </button>
+            <button class="eval-chip" data-role="SUPER_ADMIN" title="Login as Root System Administrator">
+              <span class="eval-chip-icon">🛡️</span>
+              <span class="eval-chip-meta">
+                <span class="eval-chip-role">Super Admin</span>
+                <span class="eval-chip-name">Root Admin</span>
+              </span>
+            </button>
           </div>
         </div>
 
         <div class="auth-footer-link">
-          <button class="btn-text" id="btnReturnToCitizenPortal">← Return to Public Citizen Portal</button>
+          <button class="btn-return-link" id="btnReturnToCitizenPortal">&larr; Return to Public Citizen Portal</button>
         </div>
       </div>
     </div>

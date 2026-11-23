@@ -92,11 +92,11 @@
    ============================================================================= */
 
 .aqi-hero-card {
-  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
-  border: 1px solid rgba(13, 148, 136, 0.18);
+  background: var(--bg-card-gradient, linear-gradient(180deg, #FFFFFF 0%, #F8FBFE 100%));
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 24px 26px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(13, 148, 136, 0.04);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -112,20 +112,24 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #0D9488, #06B6D4, #3B82F6);
+  background: var(--brand-gradient, linear-gradient(90deg, #0D9488, #06B6D4, #3B82F6));
 }
 
 .aqi-hero-card:hover {
-  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.1), 0 2px 8px rgba(13, 148, 136, 0.08);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-accent);
 }
 
 .card-eyebrow {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--brand-teal);
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .aqi-card-topbar {
@@ -308,11 +312,11 @@
    ============================================================================= */
 
 .weather-corridor-card {
-  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card-gradient, linear-gradient(180deg, #FFFFFF 0%, #F8FBFE 100%));
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 24px 26px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -332,7 +336,8 @@
 }
 
 .weather-corridor-card:hover {
-  box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-accent);
 }
 
 .weather-card-header .card-heading {
@@ -345,8 +350,8 @@
 .weather-tiles-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin: 12px 0 8px 0;
+  gap: 10px;
+  margin: 14px 0 8px 0;
 }
 
 .weather-tile {
@@ -356,12 +361,31 @@
   padding: 10px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  transition: all var(--transition-fast);
+}
+
+.weather-tile:hover {
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
 }
 
 .tile-icon {
-  font-size: 20px;
+  font-size: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
+
+.weather-tile:nth-child(1) .tile-icon { background: rgba(244, 63, 94, 0.12); }
+.weather-tile:nth-child(2) .tile-icon { background: rgba(2, 132, 199, 0.12); }
+.weather-tile:nth-child(3) .tile-icon { background: rgba(139, 92, 246, 0.12); }
+.weather-tile:nth-child(4) .tile-icon { background: rgba(245, 158, 11, 0.12); }
 
 .tile-meta {
   display: flex;
@@ -393,11 +417,11 @@
    ============================================================================= */
 
 .pollutant-strip-section {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card-gradient, var(--bg-surface));
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  box-shadow: var(--shadow-sm);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-card);
   margin-bottom: 22px;
 }
 
@@ -447,28 +471,24 @@
 }
 
 .pollutant-box {
-  background: #FFFFFF;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--bg-card-gradient, #FFFFFF);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-xs);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   min-width: 0;
   position: relative;
-}
-
-.pollutant-box:hover {
-  transform: translateY(-3px);
-  border-color: rgba(13, 148, 136, 0.35);
-  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
 }
 
 .pollutant-box:hover {
   transform: translateY(-2px);
   border-color: var(--brand-teal);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .pbox-top {
@@ -491,7 +511,11 @@
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 700;
-  color: var(--brand-teal-dark);
+  color: var(--brand-teal);
+  background: var(--brand-teal-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  letter-spacing: -0.01em;
 }
 
 .pbox-val-row {
@@ -546,14 +570,20 @@
    ============================================================================= */
 
 .home-map-feature-card {
-  background: #FFFFFF;
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card-gradient, #FFFFFF);
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   padding: 24px 26px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-card);
   margin-bottom: 22px;
   position: relative;
   overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.home-map-feature-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-accent);
 }
 
 .home-map-feature-card::before {
@@ -563,7 +593,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #10B981, #0D9488);
+  background: var(--brand-gradient, linear-gradient(90deg, #10B981, #0D9488));
 }
 
 .map-feature-header {
@@ -580,9 +610,9 @@
   height: 260px;
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-medium);
   position: relative;
-  background: #E2E8F0;
+  background: var(--bg-muted);
 }
 
 /* Home Quick Action Cards */
@@ -599,7 +629,7 @@
 }
 
 .quick-action-card {
-  background: var(--bg-surface);
+  background: var(--bg-card-gradient, var(--bg-surface));
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -614,6 +644,8 @@
 .quick-action-card:hover {
   transform: translateY(-2px);
   border-color: var(--brand-teal);
+  box-shadow: var(--shadow-card-hover);
+}
   box-shadow: var(--shadow-sm);
 }
 

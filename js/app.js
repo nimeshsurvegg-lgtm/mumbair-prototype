@@ -894,16 +894,70 @@ window.MumbAIR.APP = (function(){
     if(btnAuthPortal) btnAuthPortal.onclick = switchToAuthorityPortal;
     if(footerAuthLink) footerAuthLink.onclick = function(e){ e.preventDefault(); switchToAuthorityPortal(); };
 
-    // Authority Login Submission
+    // Password Visibility Toggle
+    var btnTogglePw = document.getElementById('btnToggleAuthPw');
+    var inputPw = document.getElementById('authPassword');
+    if(btnTogglePw && inputPw){
+      btnTogglePw.onclick = function(){
+        if(inputPw.type === 'password'){
+          inputPw.type = 'text';
+          btnTogglePw.textContent = '🙈';
+          btnTogglePw.title = 'Hide password';
+        } else {
+          inputPw.type = 'password';
+          btnTogglePw.textContent = '👁️';
+          btnTogglePw.title = 'Show password';
+        }
+      };
+    }
+
+    // Authority Login Submission with Validation & Loading State
     var btnAuthLogin = document.getElementById('btnSubmitAuthorityLogin');
+    var errorBanner = document.getElementById('authLoginError');
     if(btnAuthLogin){
       btnAuthLogin.onclick = function(){
-        var id = document.getElementById('authOfficerId').value.trim();
-        var pass = document.getElementById('authPassword').value;
-        var dept = document.getElementById('authDeptSelect').value;
-        AUTH.loginAuthority(id, pass, dept);
-        showAuthorityDashboard();
-        showToast('Authority session authenticated.', '🔒');
+        var idInput = document.getElementById('authOfficerId');
+        var id = idInput ? idInput.value.trim() : '';
+        var pass = inputPw ? inputPw.value : '';
+        var deptSelect = document.getElementById('authDeptSelect');
+        var dept = deptSelect ? deptSelect.value : 'SWM';
+
+        if(errorBanner) {
+          errorBanner.classList.add('hidden');
+          errorBanner.textContent = '';
+        }
+
+        if(!id){
+          if(errorBanner){
+            errorBanner.textContent = '⚠️ Please enter your municipal officer email or service ID.';
+            errorBanner.classList.remove('hidden');
+          }
+          if(idInput) idInput.focus();
+          return;
+        }
+
+        // Visual loading state
+        btnAuthLogin.disabled = true;
+        var originalBtnHtml = btnAuthLogin.innerHTML;
+        btnAuthLogin.innerHTML = '<span>⏳</span><span>Verifying Officer Credentials...</span>';
+
+        setTimeout(function(){
+          var res = AUTH.loginAuthority(id, pass, dept);
+          btnAuthLogin.disabled = false;
+          btnAuthLogin.innerHTML = originalBtnHtml;
+
+          if(res && res.success){
+            showAuthorityDashboard();
+            showToast('Authenticated as ' + res.user.name + ' (' + res.user.roleLabel + ')', '🔒');
+          } else {
+            var errMsg = (res && res.error) ? res.error : 'Officer credential not recognized. Please check your email or select a verified demo persona below.';
+            if(errorBanner){
+              errorBanner.textContent = '❌ ' + errMsg;
+              errorBanner.classList.remove('hidden');
+            }
+            showToast(errMsg, '❌');
+          }
+        }, 250);
       };
     }
 
@@ -915,6 +969,12 @@ window.MumbAIR.APP = (function(){
         var role = chip.getAttribute('data-role');
         var demoOfficer = CONFIG.DEMO_USERS.find(function(u){ return u.role === role; });
         if(demoOfficer){
+          var idInput = document.getElementById('authOfficerId');
+          var deptSelect = document.getElementById('authDeptSelect');
+          if(idInput) idInput.value = demoOfficer.email;
+          if(deptSelect) deptSelect.value = demoOfficer.department || 'ALL';
+          if(errorBanner) errorBanner.classList.add('hidden');
+
           AUTH.loginAuthorityDemoUser(demoOfficer.id);
           showAuthorityDashboard();
           showToast('Authenticated as ' + demoOfficer.name + ' (' + (CONFIG.ROLES[role] ? CONFIG.ROLES[role].label : role) + ')', '🔒');

@@ -7,144 +7,176 @@
 /* 1. MUMBAI ORIGINAL (Default Antigravity Palette) */
 :root, [data-theme="mumbai-original"] {
   --theme-id: "mumbai-original";
-  --bg-canvas: #F8FAFC;
+  --bg-canvas: #F6F9FC;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #F1F5F9;
-  --bg-muted: #E2E8F0;
+  --bg-subtle: #EEF4F9;
+  --bg-muted: #E0E8F0;
   --bg-glass: rgba(255, 255, 255, 0.88);
-  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #FAFCFD 100%);
+  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #F8FBFE 100%);
 
-  --ink-primary: #0F172A;
-  --ink-secondary: #334155;
-  --ink-muted: #64748B;
-  --ink-light: #94A3B8;
+  --ink-primary: #091E33;
+  --ink-secondary: #28415C;
+  --ink-muted: #5A738E;
+  --ink-light: #8EA2B6;
   --ink-white: #FFFFFF;
 
-  --border-subtle: rgba(15, 23, 42, 0.08);
-  --border-medium: rgba(15, 23, 42, 0.14);
-  --border-strong: rgba(15, 23, 42, 0.24);
+  --border-subtle: rgba(9, 30, 51, 0.07);
+  --border-medium: rgba(9, 30, 51, 0.13);
+  --border-strong: rgba(9, 30, 51, 0.22);
+  --border-accent: rgba(13, 148, 136, 0.25);
 
   --brand-teal: #0D9488;
   --brand-teal-dark: #0F766E;
-  --brand-teal-light: #CCFBF1;
-  --brand-teal-glow: rgba(13, 148, 136, 0.18);
+  --brand-teal-deep: #0B5C55;
+  --brand-teal-light: #E6FAF6;
+  --brand-teal-glow: rgba(13, 148, 136, 0.22);
   --brand-aqua: #06B6D4;
   --brand-amber: #F59E0B;
-  --brand-indigo: #6366F1;
+  --brand-indigo: #4F46E5;
+  --brand-sky: #0284C7;
 
-  --body-gradient: radial-gradient(circle at 50% -80px, #E0F2FE 0%, #F0FDFA 220px, #F8FAFC 480px, #F1F5F9 100%);
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --brand-gradient: linear-gradient(135deg, #0D9488 0%, #0284C7 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #0F766E 0%, #0369A1 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%);
+
+  --body-gradient: radial-gradient(130% 90% at 50% -15%, #E2F4FD 0%, #E8F8F5 28%, #F5FAF8 55%, #F8FAFC 80%, #F1F5F9 100%);
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --card-shadow: 0 4px 20px -2px rgba(9, 30, 51, 0.06), 0 1px 3px rgba(9, 30, 51, 0.04);
 }
 
 /* 2. COASTAL BREEZE (Marine Aqua, Sky Blue & Cool Sea Mist) */
 [data-theme="coastal-breeze"] {
   --theme-id: "coastal-breeze";
-  --bg-canvas: #F0F9FF;
+  --bg-canvas: #F0F7FF;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #E0F2FE;
-  --bg-muted: #BAE6FD;
+  --bg-subtle: #E0F0FE;
+  --bg-muted: #C7E4FD;
   --bg-glass: rgba(255, 255, 255, 0.90);
-  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #F8FBFE 100%);
 
-  --ink-primary: #0C4A6E;
-  --ink-secondary: #0369A1;
-  --ink-muted: #0284C7;
-  --ink-light: #7DD3FC;
+  --ink-primary: #072C4F;
+  --ink-secondary: #0E528A;
+  --ink-muted: #257CBF;
+  --ink-light: #77B4E5;
   --ink-white: #FFFFFF;
 
-  --border-subtle: rgba(2, 132, 199, 0.12);
-  --border-medium: rgba(2, 132, 199, 0.22);
-  --border-strong: rgba(2, 132, 199, 0.35);
+  --border-subtle: rgba(2, 132, 199, 0.10);
+  --border-medium: rgba(2, 132, 199, 0.20);
+  --border-strong: rgba(2, 132, 199, 0.32);
+  --border-accent: rgba(2, 132, 199, 0.35);
 
   --brand-teal: #0284C7;
   --brand-teal-dark: #0369A1;
+  --brand-teal-deep: #075985;
   --brand-teal-light: #E0F2FE;
-  --brand-teal-glow: rgba(2, 132, 199, 0.20);
-  --brand-aqua: #0EA5E9;
+  --brand-teal-glow: rgba(2, 132, 199, 0.24);
+  --brand-aqua: #06B6D4;
   --brand-amber: #F59E0B;
-  --brand-indigo: #3B82F6;
+  --brand-indigo: #2563EB;
+  --brand-sky: #38BDF8;
 
-  --body-gradient: radial-gradient(circle at 50% -60px, #BAE6FD 0%, #E0F2FE 240px, #F0F9FF 500px, #F8FAFC 100%);
-  --header-bg: rgba(240, 249, 255, 0.92);
-  --card-shadow: 0 4px 16px rgba(2, 132, 199, 0.08), 0 1px 3px rgba(2, 132, 199, 0.05);
+  --brand-gradient: linear-gradient(135deg, #0284C7 0%, #06B6D4 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #0369A1 0%, #0891B2 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+
+  --body-gradient: radial-gradient(130% 90% at 50% -15%, #BAE6FD 0%, #E0F2FE 30%, #F0F7FF 65%, #F8FAFC 100%);
+  --header-bg: rgba(240, 247, 255, 0.94);
+  --card-shadow: 0 4px 20px -2px rgba(2, 132, 199, 0.10), 0 1px 3px rgba(2, 132, 199, 0.05);
 }
 
 /* 3. FOREST & EARTH (Botanical Green, Eco Sage & Warm Earthy Surfaces) */
 [data-theme="forest-earth"] {
   --theme-id: "forest-earth";
-  --bg-canvas: #F4F7F4;
+  --bg-canvas: #F3F7F4;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #E8EFE8;
-  --bg-muted: #D1E0D1;
+  --bg-subtle: #E5EFE7;
+  --bg-muted: #CBE0CE;
   --bg-glass: rgba(255, 255, 255, 0.90);
   --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #F9FBF9 100%);
 
-  --ink-primary: #14351E;
-  --ink-secondary: #2D5A3A;
-  --ink-muted: #4F795C;
-  --ink-light: #8CA995;
+  --ink-primary: #0D2B17;
+  --ink-secondary: #1C4D2B;
+  --ink-muted: #3D754F;
+  --ink-light: #7FA88D;
   --ink-white: #FFFFFF;
 
-  --border-subtle: rgba(20, 53, 30, 0.10);
-  --border-medium: rgba(20, 53, 30, 0.18);
-  --border-strong: rgba(20, 53, 30, 0.28);
+  --border-subtle: rgba(22, 163, 74, 0.10);
+  --border-medium: rgba(22, 163, 74, 0.18);
+  --border-strong: rgba(22, 163, 74, 0.28);
+  --border-accent: rgba(22, 163, 74, 0.35);
 
-  --brand-teal: #15803D;
-  --brand-teal-dark: #166534;
+  --brand-teal: #16A34A;
+  --brand-teal-dark: #15803D;
+  --brand-teal-deep: #166534;
   --brand-teal-light: #DCFCE7;
-  --brand-teal-glow: rgba(21, 128, 61, 0.20);
+  --brand-teal-glow: rgba(22, 163, 74, 0.24);
   --brand-aqua: #059669;
   --brand-amber: #D97706;
   --brand-indigo: #0D9488;
+  --brand-sky: #10B981;
 
-  --body-gradient: radial-gradient(circle at 50% -60px, #DCFCE7 0%, #E8EFE8 240px, #F4F7F4 500px, #F9FBF9 100%);
-  --header-bg: rgba(244, 247, 244, 0.92);
-  --card-shadow: 0 4px 16px rgba(20, 53, 30, 0.07), 0 1px 3px rgba(20, 53, 30, 0.04);
+  --brand-gradient: linear-gradient(135deg, #16A34A 0%, #059669 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #15803D 0%, #047857 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+
+  --body-gradient: radial-gradient(130% 90% at 50% -15%, #DCFCE7 0%, #E8F5EB 30%, #F3F7F4 65%, #F8FAF8 100%);
+  --header-bg: rgba(243, 247, 244, 0.94);
+  --card-shadow: 0 4px 20px -2px rgba(22, 163, 74, 0.09), 0 1px 3px rgba(22, 163, 74, 0.04);
 }
 
 /* 4. SUNSET MUMBAI (Warm Coral, Golden Amber & Twilight Terracotta) */
 [data-theme="sunset-mumbai"] {
   --theme-id: "sunset-mumbai";
-  --bg-canvas: #FFF7ED;
+  --bg-canvas: #FFF8F3;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #FFEDD5;
-  --bg-muted: #FED7AA;
+  --bg-subtle: #FEEFE2;
+  --bg-muted: #FEDDC4;
   --bg-glass: rgba(255, 255, 255, 0.90);
-  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFFBF7 100%);
+  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFFBF8 100%);
 
-  --ink-primary: #431407;
-  --ink-secondary: #7C2D12;
-  --ink-muted: #9A3412;
-  --ink-light: #FDBA74;
+  --ink-primary: #341407;
+  --ink-secondary: #66240E;
+  --ink-muted: #9C411E;
+  --ink-light: #E28965;
   --ink-white: #FFFFFF;
 
-  --border-subtle: rgba(124, 45, 18, 0.10);
-  --border-medium: rgba(124, 45, 18, 0.20);
-  --border-strong: rgba(124, 45, 18, 0.30);
+  --border-subtle: rgba(234, 88, 12, 0.10);
+  --border-medium: rgba(234, 88, 12, 0.18);
+  --border-strong: rgba(234, 88, 12, 0.28);
+  --border-accent: rgba(234, 88, 12, 0.35);
 
   --brand-teal: #EA580C;
   --brand-teal-dark: #C2410C;
+  --brand-teal-deep: #9A3412;
   --brand-teal-light: #FFEDD5;
-  --brand-teal-glow: rgba(234, 88, 12, 0.20);
+  --brand-teal-glow: rgba(234, 88, 12, 0.24);
   --brand-aqua: #F59E0B;
   --brand-amber: #D97706;
   --brand-indigo: #E11D48;
+  --brand-sky: #FB923C;
 
-  --body-gradient: radial-gradient(circle at 50% -60px, #FFEDD5 0%, #FED7AA 180px, #FFF7ED 440px, #FFFFFF 100%);
-  --header-bg: rgba(255, 247, 237, 0.92);
-  --card-shadow: 0 4px 16px rgba(124, 45, 18, 0.07), 0 1px 3px rgba(124, 45, 18, 0.04);
+  --brand-gradient: linear-gradient(135deg, #EA580C 0%, #F59E0B 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #C2410C 0%, #D97706 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+
+  --body-gradient: radial-gradient(130% 90% at 50% -15%, #FFE7D4 0%, #FFF0E5 30%, #FFF8F3 65%, #FFFFFF 100%);
+  --header-bg: rgba(255, 248, 243, 0.94);
+  --card-shadow: 0 4px 20px -2px rgba(234, 88, 12, 0.09), 0 1px 3px rgba(234, 88, 12, 0.04);
 }
 
-/* 5. MIDNIGHT AIR (OLED High-Contrast Slate Dark Theme) */
+/* 5. MIDNIGHT AIR (OLED High-Contrast Space Cadet Dark Theme) */
 [data-theme="midnight-air"] {
   --theme-id: "midnight-air";
-  --bg-canvas: #090D16;
-  --bg-surface: #111827;
-  --bg-subtle: #1F2937;
-  --bg-muted: #374151;
-  --bg-glass: rgba(17, 24, 39, 0.88);
-  --bg-card-gradient: linear-gradient(180deg, #131C2E 0%, #0F172A 100%);
+  --bg-canvas: #080D18;
+  --bg-surface: #0F172A;
+  --bg-subtle: #1E293B;
+  --bg-muted: #334155;
+  --bg-glass: rgba(15, 23, 42, 0.90);
+  --bg-card-gradient: linear-gradient(180deg, #141E34 0%, #0F172A 100%);
 
   --ink-primary: #F8FAFC;
   --ink-secondary: #E2E8F0;
@@ -152,54 +184,70 @@
   --ink-light: #64748B;
   --ink-white: #FFFFFF;
 
-  --border-subtle: rgba(255, 255, 255, 0.09);
-  --border-medium: rgba(255, 255, 255, 0.16);
-  --border-strong: rgba(255, 255, 255, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-medium: rgba(255, 255, 255, 0.18);
+  --border-strong: rgba(255, 255, 255, 0.30);
+  --border-accent: rgba(34, 211, 238, 0.35);
 
   --brand-teal: #14B8A6;
   --brand-teal-dark: #0D9488;
-  --brand-teal-light: rgba(20, 184, 166, 0.15);
-  --brand-teal-glow: rgba(20, 184, 166, 0.30);
-  --brand-aqua: #22D3EE;
+  --brand-teal-deep: #097569;
+  --brand-teal-light: rgba(20, 184, 166, 0.18);
+  --brand-teal-glow: rgba(20, 184, 166, 0.35);
+  --brand-aqua: #00F2FE;
   --brand-amber: #FBBF24;
   --brand-indigo: #818CF8;
+  --brand-sky: #38BDF8;
 
-  --body-gradient: radial-gradient(circle at 50% -60px, #1E293B 0%, #0F172A 300px, #090D16 100%);
-  --header-bg: rgba(15, 23, 42, 0.94);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.40), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --brand-gradient: linear-gradient(135deg, #00F2FE 0%, #14B8A6 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #38BDF8 0%, #0D9488 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(0, 242, 254, 0.10) 0%, rgba(20, 184, 166, 0.10) 100%);
+
+  --body-gradient: radial-gradient(130% 90% at 50% -15%, #162442 0%, #0F172A 35%, #080D18 100%);
+  --header-bg: rgba(15, 23, 42, 0.95);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 /* 6. MINIMAL MONOCHROME (Crisp Editorial Grayscale & Stark Typography) */
 [data-theme="minimal-monochrome"] {
   --theme-id: "minimal-monochrome";
-  --bg-canvas: #FAFAFA;
+  --bg-canvas: #F7F7F8;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #F4F4F5;
-  --bg-muted: #E4E4E7;
-  --bg-glass: rgba(255, 255, 255, 0.92);
-  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #FBFBFB 100%);
+  --bg-subtle: #EFEFEF;
+  --bg-muted: #E0E0E2;
+  --bg-glass: rgba(255, 255, 255, 0.94);
+  --bg-card-gradient: linear-gradient(180deg, #FFFFFF 0%, #F9F9FA 100%);
 
-  --ink-primary: #18181B;
-  --ink-secondary: #27272A;
-  --ink-muted: #52525B;
-  --ink-light: #A1A1AA;
+  --ink-primary: #0A0A0A;
+  --ink-secondary: #262626;
+  --ink-muted: #525252;
+  --ink-light: #A3A3A3;
   --ink-white: #FFFFFF;
 
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-medium: rgba(0, 0, 0, 0.18);
   --border-strong: rgba(0, 0, 0, 0.32);
+  --border-accent: rgba(0, 0, 0, 0.40);
 
-  --brand-teal: #27272A;
-  --brand-teal-dark: #09090B;
+  --brand-teal: #171717;
+  --brand-teal-dark: #000000;
+  --brand-teal-deep: #000000;
   --brand-teal-light: #F4F4F5;
-  --brand-teal-glow: rgba(39, 39, 42, 0.15);
-  --brand-aqua: #3F3F46;
-  --brand-amber: #52525B;
-  --brand-indigo: #18181B;
+  --brand-teal-glow: rgba(0, 0, 0, 0.15);
+  --brand-aqua: #404040;
+  --brand-amber: #525252;
+  --brand-indigo: #171717;
+  --brand-sky: #262626;
 
-  --body-gradient: #FAFAFA;
-  --header-bg: rgba(255, 255, 255, 0.95);
-  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --brand-gradient: linear-gradient(135deg, #171717 0%, #404040 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #000000 0%, #262626 100%);
+  --brand-gradient-teal: linear-gradient(135deg, #171717 0%, #000000 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 0%, rgba(64, 64, 64, 0.05) 100%);
+
+  --body-gradient: #F7F7F8;
+  --header-bg: rgba(255, 255, 255, 0.96);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 /* ==============================================================================

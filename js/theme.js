@@ -17,8 +17,8 @@ window.MumbAIR.THEME = (function(){
       id: 'mumbai-original',
       name: 'Mumbai Original',
       subtitle: 'Antigravity Default',
-      desc: 'Deep marine teal, slate typography, warm off-white canvas and emerald accents.',
-      swatches: ['#0D9488', '#0F766E', '#F8FAFC', '#0F172A'],
+      desc: 'Deep marine teal, sky azure, luminous canvas, and rich oceanic slate typography.',
+      swatches: ['#0D9488', '#0284C7', '#F6F9FC', '#091E33'],
       isDefault: true
     },
     {
@@ -26,35 +26,35 @@ window.MumbAIR.THEME = (function(){
       name: 'Coastal Breeze',
       subtitle: 'Arabian Sea Tones',
       desc: 'Marine azure, sky cyan, fresh ocean mist and luminous light-blue surfaces.',
-      swatches: ['#0284C7', '#0EA5E9', '#F0F9FF', '#0C4A6E']
+      swatches: ['#0284C7', '#06B6D4', '#F0F7FF', '#072C4F']
     },
     {
       id: 'forest-earth',
       name: 'Forest & Earth',
       subtitle: 'Sanjay Gandhi Bio-Lung',
       desc: 'Botanical foliage green, eco sage, earthy tones and warm natural surfaces.',
-      swatches: ['#15803D', '#059669', '#F4F7F4', '#14351E']
+      swatches: ['#16A34A', '#059669', '#F3F7F4', '#0D2B17']
     },
     {
       id: 'sunset-mumbai',
       name: 'Sunset Mumbai',
       subtitle: 'Marine Drive Twilight',
       desc: 'Warm coral, golden amber, twilight terracotta and warm neutral cards.',
-      swatches: ['#EA580C', '#F59E0B', '#FFF7ED', '#431407']
+      swatches: ['#EA580C', '#F59E0B', '#FFF8F3', '#341407']
     },
     {
       id: 'midnight-air',
       name: 'Midnight Air',
       subtitle: 'High-Contrast Dark Mode',
-      desc: 'Deep slate OLED canvas, low-glare card surfaces, and neon cyan telemetry.',
-      swatches: ['#14B8A6', '#22D3EE', '#090D16', '#F8FAFC']
+      desc: 'Deep obsidian space canvas, glowing card surfaces, and neon cyan telemetry.',
+      swatches: ['#14B8A6', '#00F2FE', '#080D18', '#F8FAFC']
     },
     {
       id: 'minimal-monochrome',
       name: 'Minimal Monochrome',
       subtitle: 'Editorial Grayscale',
       desc: 'Crisp zinc and charcoal palette with stark high-contrast typography.',
-      swatches: ['#27272A', '#71717A', '#FAFAFA', '#18181B']
+      swatches: ['#171717', '#525252', '#F7F7F8', '#0A0A0A']
     }
   ];
 

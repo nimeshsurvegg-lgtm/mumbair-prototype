@@ -12,447 +12,745 @@
 > *Unified Environmental Surveillance & Municipal Governance Suite for the 24 Administrative Wards of Greater Mumbai (Brihanmumbai Municipal Corporation — BMC / MCGM)*
 
 </div>
-
 ---
 
-## 📖 Table of Contents
+## 📑 Table of Contents
 
-1. [Executive Summary & Purpose](#1-executive-summary--purpose)
-2. [Ecosystem Architecture (Citizen Portal vs. Authority Operations)](#2-ecosystem-architecture)
-3. [Technology Stack](#3-technology-stack)
-4. [Official CPCB National AQI (NAQI) Calculation Engine](#4-official-cpcb-national-aqi-naqi-calculation-engine)
-5. [Atmospheric Telemetry & Source Transparency](#5-atmospheric-telemetry--source-transparency)
-6. [Validated 16-State Complaint Lifecycle](#6-validated-16-state-complaint-lifecycle)
-7. [Role-Based Access Control (RBAC) & Scope Boundaries](#7-role-based-access-control-rbac--scope-boundaries)
-8. [Separation of Duties & Four-Eyes Verification](#8-separation-of-duties--four-eyes-verification)
-9. [SLA Calculation Engine & Deadline Enforcement](#9-sla-calculation-engine--deadline-enforcement)
-10. [Application Security & Injection Hardening (XSS / CWE-1236)](#10-application-security--injection-hardening)
-11. [Storage Architecture & Atomic State Transactions](#11-storage-architecture--atomic-state-transactions)
-12. [Geospatial Map Intelligence & Satellite Layers](#12-geospatial-map-intelligence--satellite-layers)
-13. [Desktop Header Responsiveness & Viewport Compatibility](#13-desktop-header-responsiveness--viewport-compatibility)
-14. [Adaptive Mobile Experience (360px – 768px)](#14-adaptive-mobile-experience)
-15. [Document & Report Studio (PDF / CSV Exports)](#15-document--report-studio)
-16. [Verified Mumbai News & Environmental Bulletins](#16-verified-mumbai-news--environmental-bulletins)
-17. [Automated Test Suite & Verification Instructions](#17-automated-test-suite--verification-instructions)
-18. [Project File Inventory](#18-project-file-inventory)
-19. [Local Setup & Startup Guide](#19-local-setup--startup-guide)
-20. [System Limitations & Operational Transparency](#20-system-limitations--operational-transparency)
+| # | Section | # | Section |
+|---|---|---|---|
+| 01 | [Executive Summary & Purpose](#1-executive-summary--purpose) | 11 | [Storage Architecture & Atomic Transactions](#11-storage-architecture--atomic-state-transactions) |
+| 02 | [Ecosystem Architecture](#2-ecosystem-architecture) | 12 | [Geospatial Map Intelligence](#12-geospatial-map-intelligence--satellite-layers) |
+| 03 | [Technology Stack](#3-technology-stack) | 13 | [Desktop Responsiveness](#13-desktop-header-responsiveness--viewport-compatibility) |
+| 04 | [Official CPCB NAQI Engine](#4-official-cpcb-national-aqi-naqi-calculation-engine) | 14 | [Adaptive Mobile Experience](#14-adaptive-mobile-experience) |
+| 05 | [Atmospheric Telemetry & Transparency](#5-atmospheric-telemetry--source-transparency) | 15 | [Document & Report Studio](#15-document--report-studio) |
+| 06 | [Complaint Lifecycle](#6-validated-16-state-complaint-lifecycle) | 16 | [Environmental Bulletins](#16-verified-mumbai-news--environmental-bulletins) |
+| 07 | [RBAC & Scope Boundaries](#7-role-based-access-control-rbac--scope-boundaries) | 17 | [Automated Test Suite](#17-automated-test-suite--verification-instructions) |
+| 08 | [Four-Eyes Verification](#8-separation-of-duties--four-eyes-verification) | 18 | [Project File Inventory](#18-project-file-inventory) |
+| 09 | [SLA Engine](#9-sla-calculation-engine--deadline-enforcement) | 19 | [Local Setup & Startup](#19-local-setup--startup-guide) |
+| 10 | [Application Security](#10-application-security--injection-hardening) | 20 | [Limitations & Transparency](#20-system-limitations--operational-transparency) |
 
 ---
 
 ## 1. Executive Summary & Purpose
 
-**MumbAIR** is a full-featured, scientifically grounded environmental intelligence and municipal operations platform purpose-built for the residents and municipal administration of Greater Mumbai.
+**MumbAIR** is a full-featured, scientifically grounded environmental intelligence and municipal operations platform purpose-built for residents and municipal administration across Greater Mumbai.
 
-Greater Mumbai faces intricate micro-climatic atmospheric challenges:
-- **Nocturnal Coastal Temperature Inversions:** Low-altitude trapping of pollutants during winter months.
-- **Heavy Redevelopment & Demolition:** Coarse dust ($\text{PM}_{10}$) from over 1,500 active infrastructure and high-rise construction sites.
-- **Refinery & Chemical Corridors:** Elevated sulphur dioxide ($\text{SO}_2$) and hydrocarbon flares in Chembur, Mahul, and Trombay (Ward M/E).
-- **Legacy Landfill Smoldering:** Subsurface methane combustion generating particulate smoke at Deonar and Mulund dumping grounds.
-- **Arterial Traffic Congestion:** Nitrogen dioxide ($\text{NO}_2$) and fine particulates ($\text{PM}_{2.5}$) along the Western and Eastern Express Highways.
+### Mumbai's Atmospheric Challenges
 
-MumbAIR connects public atmospheric awareness with verifiable municipal accountability. It gives citizens an honest, transparent view of the air they breathe while providing municipal officers with an auditable, four-eyes verified operations management platform.
+| Environmental Challenge | Impact & Context |
+|---|---|
+| 🌡️ **Nocturnal Coastal Temperature Inversions** | Low-altitude atmospheric conditions that can trap pollutants near the surface. |
+| 🏗️ **Heavy Redevelopment & Demolition** | Construction activity and demolition generate coarse particulate matter (PM₁₀) and fugitive dust. |
+| 🏭 **Refinery & Chemical Corridors** | Industrial emissions involving SO₂ and other pollutants around Chembur, Mahul and Trombay. |
+| 🔥 **Legacy Landfill Smoldering** | Smoke and particulate emissions associated with landfill fires and subsurface combustion at Deonar and Mulund dumping grounds. |
+| 🚗 **Arterial Traffic Congestion** | Road traffic contributes to NO₂ and particulate pollution along the Western and Eastern Express Highways. |
+
+MumbAIR bridges public atmospheric awareness and verifiable municipal accountability. It provides citizens with transparent air-quality information while equipping municipal authorities with a structured, auditable operations-management platform.
+
+### Core Operational Philosophy
+
+```text
+OBSERVE
+   ↓
+UNDERSTAND
+   ↓
+REPORT
+   ↓
+ASSIGN
+   ↓
+INVESTIGATE
+   ↓
+ACT
+   ↓
+VERIFY
+   ↓
+IMPROVE
+```
 
 ---
 
 ## 2. Ecosystem Architecture
 
-MumbAIR is partitioned into two distinct operational portals sharing a single synchronized state engine:
+MumbAIR is divided into two distinct operational portals sharing a synchronized state engine.
 
-### 🧑‍💼 Public Citizen Portal
-- **Real-Time AQI Hero Dashboard:** Apple Weather-inspired card with dynamic SVG arc gauge, official CPCB categorizations (0–500+ scale), and dominant pollutant detection ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{SO}_2$, $\text{CO}$, $\text{O}_3$).
-- **Surface Weather Telemetry:** Ambient temperature, relative humidity, wind velocity, and onshore Arabian Sea breeze direction ($290^\circ$ Westerly).
-- **6-Parameter Pollutant Breakdown:** Concentrations benchmarked against CPCB 24-hour National Ambient Air Quality Standards (NAAQS) with explicit CAMS model grid attribution.
-- **Interactive Map:** Leaflet-powered multi-basemap (Streets, Satellite, Light Canvas, OSM HOT) with 24 administrative ward pins, real CAAQMS stations, and geotagged community complaints.
-- **Civic Reporting Wizard:** 3-step complaint filing with 1.5 km Haversine duplicate collision prevention, automated ward routing, and photo watermarking.
-- **Complaint Tracking Feed:** Public endorsement upvoting, category filtering, and transparent 16-step lifecycle progression.
-- **Environmental Bulletin & Schemes:** Curated, verifiable updates from MCGM, MPCB, and CPCB with official circular links.
-- **Solutions Center:** Evidence-based citizen health guidance and municipal mitigation progress tracking.
-- **Appearance Customizer:** 6 professionally designed themes preserving immutable CPCB AQI severity colors.
-- **Report Studio:** One-click citizen complaint receipts with printable PDF formatting and CSV download.
+### 2.1 Citizen Portal
 
-### 🏛️ Municipal Operations Portal (`#authority`)
-- **Role-Based Authentication:** Authenticated access restricted to verified municipal demo personas (`FIELD_OFFICER`, `WARD_OFFICER`, `DEPARTMENT_HEAD`, `CITY_ADMIN`, `SUPER_ADMIN`).
-- **Command Center:** Real-time caseload KPIs (Active Caseload, In Field Investigation, SLA Breached, Certified Resolution Rate), Operational Attention triage panel, and Ward Operations Ledger.
-- **Complaint Inbox:** Central registry with multi-column filtering, priority overrides, and role-scoped CSV export.
-- **1-Click Dispatch & Assignment:** Assigns available field officers based on live workload, sets mandatory SLA resolution benchmarks (6h, 24h, 48h, 72h), and attaches supervisor directives.
-- **Field Inspection Engine:** Mobile-optimized checklist execution for on-ground officers, optical opacity checks, spot-fine notice triggers (MMC Act Section 368), and mitigation evidence submission.
-- **Separation of Duties (Four-Eyes Verification):** Dedicated verification modal blocking self-approvals by inspecting officers and requiring independent supervisory review notes.
-- **24 Administrative Wards & Departments Matrix:** Detailed workload and compliance scorecards across SWM, APC, BUILDING, ROADS, DRAINAGE, and HEALTH.
-- **Resource & Fleet Management:** Real-time tracking of anti-smog misting cannons, mobile CAAQMS vans, and mechanized sweepers.
-- **Ops AI Assistant:** Deterministic calculation queries for operational bottlenecks, recidivism clusters, and executive briefings.
-- **Audit Trail Ledger:** Immutable, append-only log of all triage, dispatch, inspection, and verification actions.
+| Module | Capabilities |
+|---|---|
+| 🌬️ **Real-Time AQI Dashboard** | Dynamic SVG gauge, CPCB categories, AQI scale and dominant pollutant detection. |
+| 🌦️ **Weather Telemetry** | Temperature, relative humidity, wind velocity and wind direction. |
+| 🧪 **Pollutant Analysis** | Six-parameter pollutant breakdown benchmarked against CPCB standards with CAMS model attribution. |
+| 🗺️ **Interactive Map** | Multiple basemaps, monitoring stations, administrative wards and geotagged complaints. |
+| 📸 **Civic Reporting Wizard** | Three-step complaint submission, GPS capture, duplicate detection and ward routing. |
+| 📋 **Complaint Tracking Feed** | Public complaint status, category filters, endorsement/upvoting and lifecycle transparency. |
+| 📰 **Environmental Bulletin** | Curated environmental updates and official circulars from MCGM, MPCB and CPCB. |
+| 🌱 **Solutions Center** | Evidence-based citizen guidance and municipal mitigation tracking. |
+| 🎨 **Appearance Customizer** | Six themes with CPCB AQI severity colors preserved. |
+| 📄 **Report Studio** | Complaint receipts, print-ready PDF reports and CSV downloads. |
+
+### 2.2 Municipal Operations Portal — `#authority`
+
+| Module | Capabilities |
+|---|---|
+| 🔐 **Role-Based Authentication** | Demo personas for Field Officer, Ward Officer, Department Head, City Admin and Super Admin. |
+| 🏛️ **Command Center** | Caseload KPIs, SLA breaches, operational triage and ward ledger. |
+| 📥 **Complaint Inbox** | Central registry, filtering, priority overrides and role-scoped exports. |
+| 🚚 **Dispatch & Assignment** | Officer assignment, workload-aware dispatch, SLA benchmarks and supervisor directives. |
+| 🔍 **Field Inspection Engine** | Mobile checklists, opacity checks, inspection notes, mitigation evidence and spot-fine notice triggers. |
+| ⚖️ **Four-Eyes Verification** | Independent resolution approval with self-approval restrictions. |
+| 🏙️ **Ward & Department Matrix** | Scorecards for 24 wards and civic departments. |
+| 🚛 **Resource & Fleet Management** | Anti-smog guns, mobile monitoring vans and mechanized sweepers. |
+| 🤖 **Ops AI Assistant** | Deterministic analysis of bottlenecks, repeat complaints and executive briefings. |
+| 🧾 **Audit Trail Ledger** | Append-oriented records of dispatch, inspection, verification and administrative actions. |
 
 ---
 
 ## 3. Technology Stack
 
-- **Frontend Architecture:** Vanilla JavaScript (ES6+), HTML5, CSS3. Zero-build architecture; runs directly in any modern browser without compilers or bundlers.
-- **Mapping Engine:** [Leaflet 1.9.4](https://leafletjs.com/) (bundled locally in `/vendor/leaflet/` for offline resilience).
-- **Basemap Tile Providers:**
-  - Esri World Street Map (`server.arcgisonline.com`)
-  - Esri World Imagery Satellite (`server.arcgisonline.com`)
-  - Esri World Light Gray Canvas (`server.arcgisonline.com`)
-  - OpenStreetMap Humanitarian (`tile.openstreetmap.fr/hot`)
-- **Data Visualization:** [Chart.js 4.4.1](https://www.chartjs.org/) (bundled locally in `/vendor/chartjs/`).
-- **Atmospheric Data Gateway:** [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) & Copernicus Atmosphere Monitoring Service (CAMS).
-- **Weather Telemetry Gateway:** Open-Meteo Weather Forecast API (ECMWF high-resolution model).
-- **State & Persistence:** Browser `localStorage` with reactive multi-dashboard synchronization (`mumbair_state_v4`, `mumbair_auth_session_v4`, `mumbair_theme_preference`).
-- **Database Schema (Production Ready):** PostgreSQL schema with Row-Level Security (RLS) located in `/supabase/schema.sql`.
+| Layer | Technology | Purpose |
+|---|---|---|
+| Frontend | HTML5, CSS3, Vanilla JavaScript (ES6+) | Zero-build application architecture |
+| Mapping | Leaflet 1.9.4 | Interactive geospatial intelligence |
+| Charts | Chart.js 4.4.1 | AQI trends, time-series and comparative analytics |
+| Atmospheric API | Open-Meteo Air Quality API | Pollutant telemetry |
+| Atmospheric Model | Copernicus CAMS | Model-based atmospheric estimates |
+| Weather API | Open-Meteo Weather Forecast API | Meteorological telemetry |
+| State Management | Browser `localStorage` | Demo persistence and synchronization |
+| Production Database | PostgreSQL | Relational storage architecture |
+| Database Security | PostgreSQL Row-Level Security (RLS) | Production access isolation |
+| Backend Demo Server | Node.js | Zero-dependency local HTTP server |
+| Testing | Node.js test runner | Automated algorithm and workflow validation |
+
+### External Services & Basemap Providers
+
+| Provider | Layer |
+|---|---|
+| Esri ArcGIS | World Street Map |
+| Esri ArcGIS | World Imagery Satellite |
+| Esri ArcGIS | World Light Gray Canvas |
+| OpenStreetMap HOT | Humanitarian basemap |
+| Open-Meteo | Air quality and weather telemetry |
+| Copernicus CAMS | Atmospheric model data |
+
+> **Architecture:** The application uses a zero-build frontend. No bundler, transpiler or framework compilation is required to run the demo.
 
 ---
 
 ## 4. Official CPCB National AQI (NAQI) Calculation Engine
 
-MumbAIR strictly adheres to the official **Central Pollution Control Board (CPCB)** National Air Quality Index calculation methodology:
+MumbAIR implements the Central Pollution Control Board (CPCB) National Air Quality Index methodology using pollutant-specific breakpoint interpolation.
 
-### Sub-Index Linear Interpolation Formula
-For any pollutant concentration $C_p$ falling within breakpoint range $[B_{\text{LO}}, B_{\text{HI}}]$ with sub-index range $[I_{\text{LO}}, I_{\text{HI}}]$:
+### 4.1 Sub-Index Linear Interpolation
 
-$$I_p = \left[ \frac{I_{\text{HI}} - I_{\text{LO}}}{B_{\text{HI}} - B_{\text{LO}}} \right] \cdot (C_p - B_{\text{LO}}) + I_{\text{LO}}$$
+For pollutant concentration \(C_p\) falling within the breakpoint interval \([B_{LO},B_{HI}]\), corresponding to the index interval \([I_{LO},I_{HI}]\):
 
-### Composite AQI
+$$
+I_p =
+\frac{I_{HI}-I_{LO}}{B_{HI}-B_{LO}}
+(C_p-B_{LO})+I_{LO}
+$$
 
-$$\text{AQI} = \max\left(I_{\text{PM2.5}}, I_{\text{PM10}}, I_{\text{NO2}}, I_{\text{SO2}}, I_{\text{CO}}, I_{\text{O3}}, I_{\text{NH3}}\right)$$
+### 4.2 Composite AQI
 
-### Official CPCB Breakpoints Matrix
+The overall AQI is determined by the maximum valid pollutant sub-index:
+
+$$
+AQI=\max(I_{PM2.5},I_{PM10},I_{NO2},I_{SO2},I_{CO},I_{O3},I_{NH3})
+$$
+
+### 4.3 CPCB AQI Categories
+
+| AQI Range | Category | Health Implication |
+|---:|---|---|
+| 0–50 | 🟢 Good | Minimal impact |
+| 51–100 | 🟡 Satisfactory | Minor breathing discomfort to sensitive individuals |
+| 101–200 | 🟠 Moderate | Discomfort among sensitive individuals |
+| 201–300 | 🔴 Poor | Breathing discomfort with prolonged exposure |
+| 301–400 | 🟣 Very Poor | Respiratory effects with prolonged exposure |
+| 401–500 | 🟤 Severe | Health effects even among healthy individuals; serious effects for vulnerable groups |
+
+### 4.4 Official CPCB Breakpoint Matrix
 
 | Pollutant | Good (0–50) | Satisfactory (51–100) | Moderate (101–200) | Poor (201–300) | Very Poor (301–400) | Severe (401–500) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$\text{PM}_{2.5}$** ($\mu\text{g/m}^3$) | 0 – 30 | 31 – 60 | 61 – 90 | 91 – 120 | 121 – 250 | 251 – 500 |
-| **$\text{PM}_{10}$** ($\mu\text{g/m}^3$) | 0 – 50 | 51 – 100 | 101 – 250 | 251 – 350 | 351 – 430 | 431 – 600 |
-| **$\text{NO}_2$** ($\mu\text{g/m}^3$) | 0 – 40 | 41 – 80 | 81 – 180 | 181 – 280 | 281 – 400 | 401 – 500 |
-| **$\text{SO}_2$** ($\mu\text{g/m}^3$) | 0 – 40 | 41 – 80 | 81 – 380 | 381 – 800 | 801 – 1600 | 1601 – 2000 |
-| **$\text{CO}$** ($\text{mg/m}^3$) | 0 – 1.0 | 1.1 – 2.0 | 2.1 – 10.0 | 10.1 – 17.0 | 17.1 – 34.0 | 34.1 – 50.0 |
-| **$\text{O}_3$** ($\mu\text{g/m}^3$) | 0 – 50 | 51 – 100 | 101 – 168 | 169 – 208 | 209 – 748 | 749 – 1000 |
-| **$\text{NH}_3$** ($\mu\text{g/m}^3$) | 0 – 200 | 201 – 400 | 401 – 800 | 801 – 1200 | 1201 – 1800 | 1801 – 2500 |
+|---|---:|---:|---:|---:|---:|---:|
+| **PM₂.₅ (µg/m³)** | 0–30 | 31–60 | 61–90 | 91–120 | 121–250 | 251–500 |
+| **PM₁₀ (µg/m³)** | 0–50 | 51–100 | 101–250 | 251–350 | 351–430 | 431–600 |
+| **NO₂ (µg/m³)** | 0–40 | 41–80 | 81–180 | 181–280 | 281–400 | 401–500 |
+| **SO₂ (µg/m³)** | 0–40 | 41–80 | 81–380 | 381–800 | 801–1600 | 1601–2000 |
+| **CO (mg/m³)** | 0–1.0 | 1.1–2.0 | 2.1–10.0 | 10.1–17.0 | 17.1–34.0 | 34.1–50.0 |
+| **O₃ (µg/m³)** | 0–50 | 51–100 | 101–168 | 169–208 | 209–748 | 749–1000 |
+| **NH₃ (µg/m³)** | 0–200 | 201–400 | 401–800 | 801–1200 | 1201–1800 | 1801–2500 |
 
-### Critical Engineering Safeguards
-1. **CO Unit Normalization:** Open-Meteo returns carbon monoxide in $\mu\text{g/m}^3$ (e.g., $1300\ \mu\text{g/m}^3$). CPCB breakpoints strictly evaluate CO in $\text{mg/m}^3$ ($1.3\ \text{mg/m}^3$). `UTILS.calcSubIndex` automatically detects values $> 50$ and divides by $1000$, eliminating massive artificial distortions.
-2. **CPCB 3-Parameter Mandate:** Under CPCB rules, an official AQI requires a minimum of **three measured parameters**, of which **at least one must be a particulate parameter** ($\text{PM}_{2.5}$ or $\text{PM}_{10}$). Datasets failing this test are flagged as `isOfficial: false` and rendered with an *"Indicative Only"* disclaimer.
-3. **No Fabricated Multipliers:** Eliminates arbitrary scaling factors (such as `currPm25 * 2.1`).
+### 4.5 Critical Engineering Safeguards
+
+| Safeguard | Implementation |
+|---|---|
+| **CO Unit Normalization** | Open-Meteo CO values in µg/m³ are normalized to mg/m³ where necessary before CPCB breakpoint evaluation. |
+| **CPCB 3-Parameter Mandate** | Official AQI requires at least three pollutant parameters, including at least one particulate pollutant (PM₂.₅ or PM₁₀). |
+| **Indicative AQI Handling** | Incomplete datasets are flagged `isOfficial: false` and shown with an Indicative Only disclaimer. |
+| **No Fabricated Multipliers** | Arbitrary pollutant scaling is prohibited. |
+| **Fractional Precision** | Interpolation is calculated before final rounding to minimize boundary inaccuracies. |
+| **Invalid Data Handling** | Missing and invalid pollutant data are handled without producing `NaN` AQI values. |
 
 ---
 
 ## 5. Atmospheric Telemetry & Source Transparency
 
-MumbAIR ensures honest and transparent data sourcing:
-- **Copernicus CAMS Model Grid:** Real-time pollutant readings are fetched from Open-Meteo's Copernicus Atmosphere Monitoring Service (CAMS) European atmospheric reanalysis grid ($\sim 11\text{ km}$ resolution). The UI clearly labels: `"Values from Copernicus CAMS model grid (~11km)"`.
-- **Station Baseline Distinctions:** Physical CAAQMS station coordinates (e.g., Mahul Petrochemical CAAQMS, Bandra Kurla Complex CAAQMS) are distinguished from model grid estimates.
-- **Offline Calibrated Fallback:** When internet access is disconnected, the system loads calibrated station baseline records and explicitly notifies the user: `"Simulated baseline (offline cache)"`.
-- **Coordinate-Specific Caching:** Telemetry cache keys are tied to exact geographic coordinates (`lat_lng`), preventing cross-ward data contamination when switching between locations.
+MumbAIR distinguishes model estimates from physical station measurements.
+
+| Data Source | Description | Classification |
+|---|---|---|
+| **Copernicus CAMS Grid** | Atmospheric pollutant estimates from an approximately 11 km model grid | Model-derived |
+| **CAAQMS Stations** | Physical coordinates of Continuous Ambient Air Quality Monitoring Stations | Station reference |
+| **Offline Baseline** | Calibrated fallback records used when internet connectivity is unavailable | Simulated baseline |
+
+### Data Transparency Principles
+
+- **Model Attribution:** Model-based values are explicitly labeled as originating from the Copernicus CAMS grid.
+- **Station Distinction:** Physical CAAQMS monitoring station locations are not misrepresented as model grid points.
+- **Offline Transparency:** Cached offline readings are identified as simulated baseline data.
+- **Coordinate-Specific Cache:** Cache keys use geographic coordinates to prevent cross-ward contamination.
+- **Source Traceability:** Users can distinguish measured station data from model-derived atmospheric estimates.
 
 ---
 
 ## 6. Validated 16-State Complaint Lifecycle
 
-Civic complaints transition through a centralized, strictly validated state machine defined in `CONFIG.STATUS_LIFECYCLE`:
+MumbAIR uses a centralized, validated complaint state machine governed by `CONFIG.STATUS_LIFECYCLE`.
 
-```text
-   ┌─────────────────────────────────────────────────────────────┐
-   │                        SUBMITTED                            │
-   └───────────────┬─────────────────────────────┬───────────────┘
-                   │                             │
-                   ▼                             ▼
-            UNDER_REVIEW                     DUPLICATE
-                   │                             │
-                   ▼                             ▼
-                VERIFIED                      (CLOSED)
-                   │
-                   ▼
-                ASSIGNED ◄────────┐
-                   │              │
-                   ▼              │
-              IN_PROGRESS         │ (REASSIGNED)
-                   │              │
-                   ▼              │
-          INSPECTION_COMPLETED    │
-                   │              │
-                   ▼              │
-         RESOLUTION_SUBMITTED ────┼─────────────┐
-                   │              │             │
-                   ▼              │             ▼
-           RESOLUTION_REVIEW ─────┘          ON_HOLD / ESCALATED
-                   │
-                   ▼
-                RESOLVED ◄──────────────────────┐
-                   │                            │
-                   ▼                            │ (REOPENED)
-                 CLOSED ────────────────────────┘
+### 6.1 Complaint Workflow
+
+```mermaid
+flowchart TD
+    A[SUBMITTED] --> B[UNDER_REVIEW]
+    A --> X[DUPLICATE]
+    A --> R[REJECTED]
+
+    B --> C[VERIFIED]
+    B --> X
+    B --> R
+
+    C --> D[ASSIGNED]
+    D --> E[IN_PROGRESS]
+    D --> F[REASSIGNED]
+    D --> H[ON_HOLD]
+
+    E --> I[INSPECTION_COMPLETED]
+    E --> J[ESCALATED]
+    E --> H
+
+    I --> K[RESOLUTION_SUBMITTED]
+    K --> L[RESOLUTION_REVIEW]
+    K --> F
+
+    L --> M[RESOLVED]
+    L --> R
+    L --> E
+
+    M --> N[CLOSED]
+    M --> O[REOPENED]
+    N --> O
+    O --> B
+    O --> D
+
+    X --> N
+    R --> O
+    H --> E
+    H --> D
+    J --> D
+    J --> E
+    F --> D
+    F --> E
 ```
 
-### Transition & Prerequisite Matrix
+### 6.2 Transition & Prerequisite Matrix
 
-| State | Legal Next States | Prerequisites / Mandatory Fields |
-| :--- | :--- | :--- |
-| `SUBMITTED` | `UNDER_REVIEW`, `DUPLICATE`, `REJECTED` | Valid GPS, citizen contact, category |
+| Current State | Legal Next States | Mandatory Prerequisites |
+|---|---|---|
+| `SUBMITTED` | `UNDER_REVIEW`, `DUPLICATE`, `REJECTED` | Valid GPS, citizen contact and category |
 | `UNDER_REVIEW` | `VERIFIED`, `REJECTED`, `DUPLICATE` | Preliminary ward officer triage notes |
 | `VERIFIED` | `ASSIGNED`, `REJECTED` | Ward verification sign-off |
-| `ASSIGNED` | `IN_PROGRESS`, `REASSIGNED`, `ON_HOLD` | Valid officer assignment ID and target SLA |
-| `IN_PROGRESS` | `INSPECTION_COMPLETED`, `ESCALATED`, `ON_HOLD` | Field officer checklist execution |
-| `INSPECTION_COMPLETED` | `RESOLUTION_SUBMITTED`, `ESCALATED` | Site inspection notes & optical opacity check |
-| `RESOLUTION_SUBMITTED` | `RESOLUTION_REVIEW`, `REASSIGNED` | Photographic proof of on-ground mitigation |
-| `RESOLUTION_REVIEW` | `RESOLVED`, `REJECTED`, `IN_PROGRESS` | Four-eyes supervisory review |
-| `ON_HOLD` | `IN_PROGRESS`, `ASSIGNED` | **Mandatory documented justification reason** |
-| `ESCALATED` | `ASSIGNED`, `IN_PROGRESS` | **Mandatory escalation reason and priority boost** |
-| `REASSIGNED` | `ASSIGNED`, `IN_PROGRESS` | **Mandatory reassignment transfer reason** |
-| `REOPENED` | `UNDER_REVIEW`, `ASSIGNED` | **Mandatory citizen/supervisor reopening reason** |
+| `ASSIGNED` | `IN_PROGRESS`, `REASSIGNED`, `ON_HOLD` | Valid officer ID and SLA |
+| `IN_PROGRESS` | `INSPECTION_COMPLETED`, `ESCALATED`, `ON_HOLD` | Field checklist execution |
+| `INSPECTION_COMPLETED` | `RESOLUTION_SUBMITTED`, `ESCALATED` | Inspection notes and opacity check |
+| `RESOLUTION_SUBMITTED` | `RESOLUTION_REVIEW`, `REASSIGNED` | Photographic mitigation evidence |
+| `RESOLUTION_REVIEW` | `RESOLVED`, `REJECTED`, `IN_PROGRESS` | Independent supervisory review |
+| `ON_HOLD` | `IN_PROGRESS`, `ASSIGNED` | Mandatory documented justification |
+| `ESCALATED` | `ASSIGNED`, `IN_PROGRESS` | Escalation reason and priority boost |
+| `REASSIGNED` | `ASSIGNED`, `IN_PROGRESS` | Transfer reason |
+| `REOPENED` | `UNDER_REVIEW`, `ASSIGNED` | Citizen/supervisor reopening reason |
 | `RESOLVED` | `CLOSED`, `REOPENED` | Approved resolution verification |
-| `REJECTED` | `REOPENED` | **Mandatory rejection reason** |
-| `DUPLICATE` | `CLOSED` | Target parent complaint ID link |
-| `CLOSED` | `REOPENED` | Final case archival |
+| `REJECTED` | `REOPENED` | Mandatory rejection reason |
+| `DUPLICATE` | `CLOSED` | Parent complaint ID |
+| `CLOSED` | `REOPENED` | Final archival record |
 
 ---
 
 ## 7. Role-Based Access Control (RBAC) & Scope Boundaries
 
-MumbAIR enforces strict scope boundaries across all user personas:
+MumbAIR enforces geographic and functional scope boundaries across all user personas.
 
-| Role Key | Role Name | Geographic & Functional Scope | Allowed Actions |
-| :--- | :--- | :--- | :--- |
-| `CITIZEN` | Public Citizen | `OWN_ONLY` (Own complaints) | File reports, track status, upvote public complaints, export personal receipt. |
-| `FIELD_OFFICER` | On-Ground Inspector | `ASSIGNED_ONLY` (Explicitly assigned cases) | View assigned tasks, fill field checklists, submit photographic resolution proof. |
-| `WARD_OFFICER` | Ward Executive Officer | `WARD_ONLY` (Assigned administrative ward) | Triage ward cases, dispatch officers, verify resolutions, publish ward advisories. |
-| `DEPARTMENT_HEAD` | Department Chief | `DEPT_ONLY` (Assigned civic department) | Allocate departmental caseload, manage fleet & misting cannons, audit compliance. |
-| `CITY_ADMIN` | Municipal Commissioner | `CITY_WIDE` (All 24 Wards & Departments) | City-wide oversight, cross-ward reallocation, export city ledger, executive analytics. |
-| `SUPER_ADMIN` | System Administrator | `SYSTEM_ADMIN` (Security & Core Config) | Platform diagnostics, audit log inspection, schema management. |
+### 7.1 Role Permissions Matrix
 
-### Verified Demo Roster
-Pre-configured authenticated demo accounts matching official municipal records:
-- **Field Officer:** `sanjay.shinde@mcgm.gov.in.demo` *(Ward M/E · Solid Waste Management)*
-- **Ward Executive Officer:** `priya.sharma@mcgm.gov.in.demo` *(Ward M/E · Ward Executive Officer)*
-- **Department Head:** `vikram.deshmukh@mcgm.gov.in.demo` *(City-Wide · Air Pollution Control)*
-- **City Administrator:** `commissioner.ops@mcgm.gov.in.demo` *(Greater Mumbai Operations Command)*
-- **Super Admin:** `root.admin@mcgm.gov.in.demo` *(System Security & Governance)*
+| Role | Scope | Allowed Actions |
+|---|---|---|
+| `CITIZEN` | Own complaints | File reports, track status, endorse public complaints and export personal receipts |
+| `FIELD_OFFICER` | Assigned cases only | View assigned cases, complete checklists and submit photographic resolution proof |
+| `WARD_OFFICER` | Assigned ward | Triage ward cases, dispatch officers, verify resolutions and publish advisories |
+| `DEPARTMENT_HEAD` | Assigned department | Allocate departmental caseload, manage fleet and audit compliance |
+| `CITY_ADMIN` | All 24 wards | City-wide oversight, cross-ward reallocation, ledger exports and executive analytics |
+| `SUPER_ADMIN` | System administration | Diagnostics, audit inspection, schema and security configuration |
+
+### 7.2 Verified Demo Roster
+
+| Persona | Demo Identity | Scope |
+|---|---|---|
+| Field Officer | `sanjay.shinde@mcgm.gov.in.demo` | Ward M/E · Solid Waste Management |
+| Ward Executive Officer | `priya.sharma@mcgm.gov.in.demo` | Ward M/E · Ward Executive Officer |
+| Department Head | `vikram.deshmukh@mcgm.gov.in.demo` | City-wide · Air Pollution Control |
+| City Administrator | `commissioner.ops@mcgm.gov.in.demo` | Greater Mumbai Operations Command |
+| Super Admin | `root.admin@mcgm.gov.in.demo` | System Security & Governance |
+
+> **Security Note:** These personas represent demonstration identities and must not be interpreted as verified real-world municipal accounts. Production authentication requires a secure identity provider and server-side authorization.
 
 ---
 
 ## 8. Separation of Duties & Four-Eyes Verification
 
-To prevent operational collusion and fraudulent case closures, MumbAIR implements the **Four-Eyes Principle (Separation of Duties)**:
+MumbAIR implements the **Four-Eyes Principle** to prevent unilateral approval of field mitigation and fraudulent case closure.
 
-1. **Self-Approval Blocked:** An inspecting officer who executed the field work or submitted the mitigation proof is **mathematically and structurally blocked** from approving the resolution:
+### Verification Controls
 
-   $$\text{actor.id} == \text{complaint.assignedOfficerId} \implies \text{BLOCKED}$$
+| Control | Enforcement |
+|---|---|
+| 🚫 Self-Approval Prevention | The inspecting officer cannot approve their own submitted resolution. |
+| 👁️ Independent Review | Resolutions require review by a Ward Officer, Department Head or City Admin. |
+| 📝 Mandatory Review Notes | Supervisory assessment requires at least 10 characters. |
+| 📸 Evidence Comparison | Citizen evidence and field mitigation evidence are compared side by side. |
+| ↩️ Rejection Workflow | Rejected resolutions return the case to `IN_PROGRESS` with remedial instructions. |
+| 🔒 Super Admin Guard | Super Admin is restricted from routine operational field approvals. |
 
-2. **Supervisory Review Required:** Resolutions must be independently examined and certified by a supervisor (`WARD_OFFICER`, `DEPARTMENT_HEAD`, or `CITY_ADMIN`).
-3. **Dedicated Verification Modal:** Replaces crude browser `prompt()` and `alert()` popups with a formal verification modal requiring:
-   - Side-by-side comparison of Citizen Proof vs. Field Mitigation Proof.
-   - Mandatory detailed supervisory assessment notes ($\ge 10$ characters).
-   - Formal Acceptance or Rejection (reverting case back to `IN_PROGRESS` with remedial instructions).
-4. **Super Admin Guard:** Super Admins are restricted from routine operational field approvals to preserve independent governance.
+### Self-Approval Guard
+
+```javascript
+if (actor.id === complaint.assignedOfficerId) {
+    // Resolution approval must be blocked
+}
+```
+
+### Verification Process
+
+```text
+Field Inspection
+      ↓
+Resolution Submitted
+      ↓
+Independent Supervisor Review
+      ↓
+Compare Evidence + Assessment Notes
+      ↓
+ ┌───────────────┴────────────────┐
+ │                                │
+ ACCEPT                         REJECT
+ │                                │
+ RESOLVED                 IN_PROGRESS
+                                  │
+                       Remedial Instructions
+```
 
 ---
 
 ## 9. SLA Calculation Engine & Deadline Enforcement
 
-MumbAIR's SLA engine accurately distinguishes between on-ground operational states:
+MumbAIR distinguishes operational status from deadline compliance.
 
-| Status Class | Condition | Compliance Status |
-| :--- | :--- | :--- |
-| `ON_TRACK` | Case active and current time $< \text{SLA Deadline}$ | `isCompliant: true` |
-| `DUE_SOON` | Case active and remaining time $< 25\%$ of benchmark | `isCompliant: true` |
-| `BREACHED` | Case active and current time $> \text{SLA Deadline}$ | `isCompliant: false` |
-| `PAUSED` | Case placed on justified `ON_HOLD` status | `isCompliant: true` *(Clock frozen)* |
-| `COMPLETED_ON_TIME` | Case resolved at timestamp $\le \text{SLA Deadline}$ | `isCompliant: true` |
-| `COMPLETED_LATE` | Case resolved at timestamp $> \text{SLA Deadline}$ | `isCompliant: false` *(Strictly recorded as non-compliant)* |
+| Status | Condition | Compliance |
+|---|---|---|
+| `ON_TRACK` | Active case before deadline | Compliant |
+| `DUE_SOON` | Remaining time below 25% of benchmark | Compliant |
+| `BREACHED` | Active case exceeds SLA deadline | Non-compliant |
+| `PAUSED` | Justified `ON_HOLD` state | Clock frozen |
+| `COMPLETED_ON_TIME` | Resolution timestamp ≤ deadline | Compliant |
+| `COMPLETED_LATE` | Resolution timestamp > deadline | Non-compliant |
+
+### SLA Benchmarks
+
+| Priority / Resolution Class | Benchmark |
+|---|---:|
+| Critical | 6 hours |
+| High | 24 hours |
+| Medium | 48 hours |
+| Standard | 72 hours |
+
+The SLA engine records deadlines, paused intervals, completion timestamps and late-resolution outcomes to support accountability.
 
 ---
 
 ## 10. Application Security & Injection Hardening
 
-### Context-Safe HTML Escaping (Stored XSS Defense)
-All dynamic citizen inputs (complaint titles, descriptions, locations, user names) are sanitized through `UTILS.escapeHtml()`. Characters `&`, `<`, `>`, `"`, `'` are mapped to HTML entities before DOM insertion:
+### 10.1 Context-Safe HTML Escaping — Stored XSS Defense
+
+Citizen inputs such as complaint titles, descriptions, locations and user names are escaped before HTML insertion.
 
 ```javascript
 function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    if (str === null || str === undefined) return '';
+
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 ```
 
-### CSV Formula Injection Protection (CWE-1236 Defense)
-Spreadsheet applications (Microsoft Excel, LibreOffice Calc) interpret cells beginning with `=`, `+`, `-`, `@`, `\t`, or `\r` as formulas, posing remote code execution and data exfiltration risks. `UTILS.sanitizeCsvCell` neutralizes these cells by prepending a single quote (`'`):
+### 10.2 CSV Formula Injection Defense — CWE-1236
+
+Spreadsheet applications may interpret cells beginning with formula-triggering characters as executable formulas.
 
 ```javascript
 function sanitizeCsvCell(val) {
-  if (val === null || val === undefined) return '""';
-  var str = String(val).trim();
-  var firstChar = str.charAt(0);
-  if (['=', '+', '-', '@', '\t', '\r'].indexOf(firstChar) >= 0) {
-    str = "'" + str;
-  }
-  return '"' + str.replace(/"/g, '""') + '"';
+    if (val === null || val === undefined) return '""';
+
+    var str = String(val).trim();
+    var firstChar = str.charAt(0);
+
+    if (['=', '+', '-', '@', '\t', '\r'].indexOf(firstChar) >= 0) {
+        str = "'" + str;
+    }
+
+    return '"' + str.replace(/"/g, '""') + '"';
 }
 ```
 
-### Excel Devanagari Preservation (UTF-8 BOM)
-All generated CSV downloads (`UTILS.downloadCsvBlob`) are prefixed with the UTF-8 Byte Order Mark (`\uFEFF`). This guarantees that Marathi and Hindi ward names (e.g., मानखुर्द, वरळी, अंधेरी) display correctly in Microsoft Excel without character encoding corruption.
+### 10.3 UTF-8 BOM — Excel Devanagari Preservation
 
-### Privacy & Scoped Access
-Citizen telephone numbers are masked (`+91 98200 •••••`) in standard municipal views to protect citizen privacy, remaining unmasked only for authorized supervisory officers.
+CSV downloads are prefixed with a UTF-8 Byte Order Mark (`\uFEFF`) to improve Marathi and Hindi text compatibility in Microsoft Excel.
+
+**Example ward names:**
+
+- मानखुर्द
+- वरळी
+- अंधेरी
+
+### 10.4 Privacy & Scoped Access
+
+| Data | Protection |
+|---|---|
+| Citizen phone numbers | Masked in standard municipal views |
+| Supervisory access | Unmasked access restricted to authorized roles |
+| Citizen complaints | Scope-limited according to role |
+| Operational exports | Permission-scoped |
+| Audit records | Append-oriented and attributable |
 
 ---
 
 ## 11. Storage Architecture & Atomic State Transactions
 
-To eliminate lost-write race conditions and data corruption across concurrent events, MumbAIR implements an atomic transaction wrapper:
+MumbAIR uses a centralized atomic transaction wrapper to minimize lost-write race conditions and inconsistent state mutations.
+
+### 11.1 Atomic Mutation
 
 ```javascript
 STORAGE.atomicUpdate(function(state) {
-  // 1. Receives fresh, uncorrupted state
-  // 2. Applies state mutations
-  // 3. Appends immutable audit log and notification
-  return { success: true };
+
+    // 1. Receives fresh state
+    // 2. Applies validated mutations
+    // 3. Appends audit log and notification
+
+    return { success: true };
 });
 ```
 
-- **Versioned Schema (`SCHEMA_VERSION = 4`):** Isolates the upgraded state in `mumbair_state_v4`.
-- **Reseeding Bug Fixed:** Checks the `_initialized` flag so that empty collections (`reports: []`) are never accidentally overwritten by default seeds.
-- **Storage Corruption Recovery:** Traps JSON parse exceptions, backs up corrupted data, and initializes a clean schema.
-- **Multi-Tab Sync:** Listens to `window.storage` events, instantly propagating state updates across open tabs.
+### 11.2 Storage Safeguards
+
+| Safeguard | Description |
+|---|---|
+| Schema Versioning | `SCHEMA_VERSION = 4` |
+| Storage Namespace | `mumbair_state_v4` |
+| Initialization Guard | `_initialized` flag prevents unintended reseeding |
+| Empty Collections | Valid empty arrays remain empty |
+| Corruption Recovery | JSON parse failures trigger backup and clean initialization |
+| Atomic Mutations | Centralized state mutation wrapper |
+| Multi-Tab Sync | `storage` events synchronize updates across browser tabs |
+| Sequence Tracking | Mutation sequence numbers increment consistently |
+| Rollback | Failed transactions prevent partial state persistence |
+
+### 11.3 Local Storage Keys
+
+| Key | Purpose |
+|---|---|
+| `mumbair_state_v4` | Application state |
+| `mumbair_auth_session_v4` | Demo authentication session |
+| `mumbair_theme_preference` | Theme preference |
+
+> **Important:** Browser `localStorage` is used for demonstration persistence. It is not a secure production database or a substitute for server-side transactional storage.
 
 ---
 
 ## 12. Geospatial Map Intelligence & Satellite Layers
 
-The Leaflet-powered geospatial map provides full Greater Mumbai coverage:
+The Leaflet-powered map provides city-wide Greater Mumbai geospatial coverage.
 
-1. **Four Permitted Tile Layers:**
-   - 🗺️ Detailed Streets (Esri World Street Map)
-   - 🛰️ Satellite Imagery (Esri World Imagery)
-   - 🎨 Light Canvas (Esri World Light Gray Base)
-   - 🌍 OpenStreetMap (Humanitarian OSM HOT)
-2. **Accurate Geospatial Markers:**
-   - 🏛️ Official CAAQMS Stations: 24 monitoring nodes color-coded by live CPCB category.
-   - 🚨 Geotagged Civic Complaints: Rendered at authentic GPS coordinates with category icons (🔥 Burning, 🏗️ Construction, 🏭 Industrial).
-   - 🎯 Interactive Location Fly-To: Smooth zoom and pan to any ward or complaint.
-3. **Removal of Unsubstantiated Geometry:** Fake, arbitrary dispersion circles and speculative hotspot polygons have been removed in favor of authentic station locations and verified complaint clusters.
+### 12.1 Basemap Layers
+
+| Layer | Provider | Purpose |
+|---|---|---|
+| 🗺️ Detailed Streets | Esri World Street Map | Road and urban navigation |
+| 🛰️ Satellite Imagery | Esri World Imagery | Satellite and land-use context |
+| 🎨 Light Canvas | Esri World Light Gray | Clean analytical visualization |
+| 🌍 Humanitarian OSM | OpenStreetMap HOT | Community mapping |
+
+### 12.2 Geospatial Markers
+
+| Marker Type | Representation |
+|---|---|
+| 🏛️ CAAQMS Stations | Monitoring locations with AQI-category indicators |
+| 🔥 Burning Complaints | Geotagged fire and burning reports |
+| 🏗️ Construction Complaints | Construction dust and demolition reports |
+| 🏭 Industrial Complaints | Industrial emission reports |
+| 📍 Citizen Reports | Authentic GPS complaint locations |
+
+### 12.3 Map Intelligence Features
+
+- Full Greater Mumbai map coverage.
+- Interactive ward navigation and fly-to behavior.
+- Monitoring station selection.
+- Geotagged complaint markers.
+- Complaint category iconography.
+- Multiple basemap switching.
+- Removal of arbitrary dispersion circles and unverified hotspot polygons.
+
+> **Geospatial Integrity:** Map overlays represent documented station coordinates and submitted complaint locations rather than fabricated environmental dispersion geometry.
 
 ---
 
 ## 13. Desktop Header Responsiveness & Viewport Compatibility
 
-The desktop navigation header has been engineered to eliminate horizontal overflow across all desktop displays:
+The desktop navigation has been optimized to eliminate horizontal overflow and ensure complete visibility of header actions.
 
-- **Root Cause Identified:** `.header-inner` was previously constrained to `max-width: 1360px`, while all child containers had `flex-shrink: 0;`, creating a minimum width of $1386\text{px}$ that pushed the rightmost `"🔒 Authority"` button off-screen at $1280\text{px}$ and $1366\text{px}$.
-- **Structural Solution:**
-  - `.header-inner` updated to `max-width: 100%`.
-  - `.citizen-nav` configured with flexible gaps and responsive link padding.
-  - `.header-actions` locked with `flex-shrink: 0; min-width: max-content;`.
-- **Verified Viewports:** Tested and confirmed in headless Chromium/Edge with zero overflow and 100% button visibility:
-  - $1280\text{px} \times 800\text{px}$
-  - $1366\text{px} \times 768\text{px}$
-  - $1440\text{px} \times 900\text{px}$
-  - $1600\text{px} \times 900\text{px}$
-  - $1920\text{px} \times 1080\text{px}$
+### Root Cause
+
+The previous `.header-inner` was constrained by `max-width: 1360px`, while child containers used `flex-shrink: 0`. This produced a minimum width of approximately 1386px and pushed the Authority button off-screen on smaller desktop displays.
+
+### Structural Improvements
+
+| Component | Optimization |
+|---|---|
+| `.header-inner` | `max-width: 100%` |
+| `.citizen-nav` | Flexible gaps and responsive link padding |
+| `.header-actions` | Controlled shrinking, spacing and minimum width |
+| Navigation | Prevented overflow and preserved visibility of primary actions |
+
+### Verified Desktop Viewports
+
+| Resolution | Result |
+|---|---|
+| 1280 × 800 | Verified |
+| 1366 × 768 | Verified |
+| 1440 × 900 | Verified |
+| 1600 × 900 | Verified |
+| 1920 × 1080 | Verified |
 
 ---
 
 ## 14. Adaptive Mobile Experience
 
-Rather than compressing desktop elements, MumbAIR provides a purpose-built mobile layout ($\le 768\text{px}$):
+MumbAIR uses a purpose-built mobile experience instead of compressing desktop navigation and dashboards.
 
-- **Citizen Mobile:**
-  - Slim top brand header with Ward selector, theme button, and notifications.
-  - Fixed thumb-friendly bottom navigation bar: `📊 Home`, `🗺️ Map`, `📸 Report` (raised floating action button), `📈 Trends`, `👤 Profile`.
-  - Minimum touch targets of $44\text{px} \times 44\text{px}$.
-  - Form inputs use $16\text{px}$ font size to prevent mobile browser auto-zoom.
-- **Authority Mobile:**
-  - Fixed bottom command bar: `⚡ Command`, `📥 Inbox`, `🗺️ Map`, `🔍 Inspect`, `☰ More`.
-  - Off-canvas mobile navigation drawer.
-  - High-contrast field inspection cards for on-ground officers.
+### 14.1 Citizen Mobile
+
+| Feature | Specification |
+|---|---|
+| Header | Slim brand header, ward selector, theme and notification controls |
+| Navigation | Fixed bottom navigation |
+| Navigation Items | Home, Map, Report, Trends, Profile |
+| Report Button | Raised floating action button |
+| Touch Targets | Minimum 44 × 44px |
+| Form Inputs | 16px minimum font to prevent browser auto-zoom |
+| Layout | Mobile-first responsive cards and stacked content |
+
+### 14.2 Authority Mobile
+
+| Feature | Specification |
+|---|---|
+| Command Navigation | Command, Inbox, Map, Inspect, More |
+| Navigation | Fixed bottom command bar |
+| Menu | Off-canvas navigation drawer |
+| Field Workflow | High-contrast mobile inspection cards |
+| Interaction | Thumb-friendly operational controls |
+| Layout | Responsive field task and inspection views |
+
+### Breakpoint
+
+```css
+@media (max-width: 768px) {
+    /* Purpose-built mobile experience */
+}
+```
 
 ---
 
 ## 15. Document & Report Studio
 
-Accessible from both Citizen and Authority portals:
+The Report Studio is accessible across Citizen and Authority portals.
 
-- **Citizen Report Dossier:** Official complaint proof receipt with Reference ID, filing timestamp, GPS location, ward code, timeline, and municipal disclaimer.
-- **24-Ward Performance Audit:** Compliance percentages, open backlogs, and resolution rates.
-- **Department Operations Report:** Workload distribution across SWM, APC, BUILDING, and ROADS.
-- **City State of the Air Report:** City-wide atmospheric summary and meteorological correlations.
-- **Field Inspection Log:** Checklists and spot-fine notices.
-- **Export Options:**
-  - 🖨️ Clean print / PDF view with official BMC header and crest.
-  - 📥 CSV dataset export protected against spreadsheet injection.
+### 15.1 Available Reports
+
+| Report | Contents |
+|---|---|
+| 🧾 Citizen Report Dossier | Complaint ID, filing timestamp, GPS, ward, timeline and disclaimer |
+| 🏙️ 24-Ward Performance Audit | Compliance percentage, backlog and resolution rates |
+| 🏛️ Department Operations Report | Workload across SWM, APC, BUILDING and ROADS |
+| 🌬️ City State of the Air Report | Atmospheric summary and meteorological correlations |
+| 🔍 Field Inspection Log | Inspection checklist, notes, evidence and spot-fine notices |
+
+### 15.2 Export Formats
+
+| Format | Capability |
+|---|---|
+| 🖨️ Print | Structured, print-ready report layouts |
+| 📄 PDF | Browser print-to-PDF |
+| 📥 CSV | Spreadsheet-compatible data export |
+| 🔐 CSV Security | Formula injection sanitization |
+| 🌐 UTF-8 | Marathi/Hindi character preservation |
 
 ---
 
 ## 16. Verified Mumbai News & Environmental Bulletins
 
-Curated, verifiable environmental updates sourced from official bodies:
+Environmental updates are organized around official sources and municipal initiatives.
 
-- **BMC Anti-Smog Gun Mandate:** Deployment of mobile misting cannons under GRAP-II.
-- **MPCB Industrial Telemetry Directive:** Automated flare opacity telemetry for Chembur/Trombay refineries.
-- **Ward Deep Cleaning Drive:** Mechanized street sweeping using treated STP water.
-- **BEST Electric Fleet Milestone:** Addition of zero-emission electric buses on coastal routes.
-- **Miyawaki Afforestation:** Native micro-forests planted across suburban flood zones.
-- **Features:** Search, Category Filters, Bookmark toggles (saved to `localStorage`), and direct links to official municipal circulars.
+| Bulletin | Subject |
+|---|---|
+| 🌫️ Anti-Smog Gun Mandate | Mobile misting cannon deployment and air-quality mitigation |
+| 🏭 MPCB Industrial Telemetry | Industrial emissions monitoring and opacity telemetry |
+| 🧹 Ward Deep Cleaning | Mechanized sweeping and treated STP water usage |
+| 🚌 BEST Electric Fleet | Zero-emission electric bus deployment |
+| 🌳 Miyawaki Afforestation | Native micro-forest development |
+
+### Bulletin Features
+
+- Searchable bulletin feed.
+- Category filters.
+- Bookmark/save functionality.
+- LocalStorage persistence.
+- Official-source links.
+- Circular and directive references.
+
+> Bulletins should be linked to verifiable official publications wherever possible. Unverified claims must not be presented as confirmed government directives.
 
 ---
 
 ## 17. Automated Test Suite & Verification Instructions
 
-MumbAIR includes a comprehensive automated test runner verifying all critical mathematical, security, and workflow algorithms.
+MumbAIR includes an automated test runner for core mathematical, security, storage and workflow algorithms.
 
-### Executing the Test Suite
-Open your terminal in the project directory and run:
+### 17.1 Running the Test Suite
 
-```bash
-cd mumbair-prototype
+```powershell
+cd C:\Users\Nimesh\.gemini\antigravity\scratch\mumbair-prototype
+
 node tests/run-tests.js
 ```
 
-### Verified Test Coverage (38 Tests Across 7 Suites)
+### 17.2 Test Coverage
 
-1. **Suite 1: CPCB NAQI Calculation & Scientific Accuracy (8 Tests)**
-   - Upper boundary mapping ($30\ \mu\text{g/m}^3 \implies \text{AQI } 50$).
-   - Satisfactory range mapping ($31\ \mu\text{g/m}^3 \implies \text{AQI } 51\text{–}53$).
-   - Fractional concentration interpolation without premature rounding errors.
-   - Carbon Monoxide $\mu\text{g/m}^3 \to \text{mg/m}^3$ unit normalization.
-   - CPCB 3-parameter rule enforcement (`isOfficial: false` for $< 3$ pollutants or missing PM).
-   - Valid multi-pollutant dataset yielding official CPCB NAQI.
-   - Null/empty dataset handling without `NaN` errors.
-2. **Suite 2: Security & Input Sanitization (4 Tests)**
-   - Stored XSS defense through context-safe HTML escaping.
-   - CSV formula injection defense for `=` prefix.
-   - CSV formula injection defense for `@` prefix.
-   - RFC 4180 quote and comma escaping.
-3. **Suite 3: Storage Engine & Atomic State Operations (8 Tests)**
-   - Storage initialization with Schema Version 4.
-   - `_initialized` flag persistence.
-   - Empty collections preserved without reseeding.
-   - Atomic mutation persistence.
-   - Sequence number incrementation.
-   - Transaction rollback on rejection.
-4. **Suite 4: Validated Complaint State Machine (4 Tests)**
-   - Legal status transitions (`SUBMITTED` $\to$ `UNDER_REVIEW`).
-   - Illegal transition rejection (`SUBMITTED` $\to$ `RESOLVED` blocked).
-   - Justification enforcement for `ON_HOLD`.
-5. **Suite 5: Role-Based Authorization & Scope Boundaries (5 Tests)**
-   - Assigned field officer authorization.
-   - Unassigned field officer rejection.
-   - Field officer blocked from assigning complaints.
-   - Ward officer assignment within ward.
-   - Cross-ward action blocked.
-6. **Suite 6: Separation of Duties & Four-Eyes Verification (4 Tests)**
-   - Self-approval by inspecting officer strictly blocked.
-   - Independent supervisor verification approved.
-   - Audit trail logging of supervisor assessment.
-   - Super Admin restricted from field closures.
-7. **Suite 7: SLA Calculation & Deadline Accuracy (5 Tests)**
-   - Active case within deadline marked `ON_TRACK` (`isCompliant: true`).
-   - Active case exceeding deadline marked `BREACHED` (`isCompliant: false`).
-   - Case resolved before deadline marked `COMPLETED_ON_TIME`.
-   - Late resolution strictly marked `COMPLETED_LATE` (`isCompliant: false`).
-   - Case on hold pauses SLA clock.
+**38 Tests · 7 Suites**
+
+| Suite | Tests | Coverage |
+|---|---:|---|
+| 1. CPCB NAQI Calculation | 8 | Breakpoints, interpolation, CO normalization, validity and missing data |
+| 2. Security & Sanitization | 4 | XSS escaping, formula injection and CSV escaping |
+| 3. Storage Engine | 8 | Initialization, atomic mutation, rollback, schema and reseeding |
+| 4. Complaint State Machine | 4 | Valid/invalid transitions and prerequisite enforcement |
+| 5. RBAC & Scope Boundaries | 5 | Role permissions, assignment and ward restrictions |
+| 6. Four-Eyes Verification | 4 | Self-approval blocking, independent review and audit records |
+| 7. SLA Calculation | 5 | Deadlines, breaches, paused clocks and late completion |
+| **Total** | **38** | **7 automated suites** |
+
+### 17.3 Test Assertions
+
+<details>
+<summary><b>Suite 1 — CPCB NAQI & Scientific Accuracy (8 tests)</b></summary>
+
+- Upper breakpoint mapping: PM₂.₅ 30 µg/m³ → AQI 50.
+- Satisfactory breakpoint mapping: PM₂.₅ 31 µg/m³ → AQI 51–53.
+- Fractional interpolation without premature rounding.
+- CO normalization: µg/m³ → mg/m³.
+- CPCB minimum three-pollutant rule.
+- At least one PM parameter required for official AQI.
+- Valid multi-pollutant dataset produces official AQI.
+- Null/empty datasets do not produce NaN errors.
+
+</details>
+
+<details>
+<summary><b>Suite 2 — Security & Input Sanitization (4 tests)</b></summary>
+
+- Stored XSS defense through HTML escaping.
+- Formula injection defense for `=`.
+- Formula injection defense for `@`.
+- RFC 4180 quote and comma escaping.
+
+</details>
+
+<details>
+<summary><b>Suite 3 — Storage Engine & Atomic Operations (8 tests)</b></summary>
+
+- Schema Version 4 initialization.
+- `_initialized` flag persistence.
+- Empty collections preserved without reseeding.
+- Atomic mutation persistence.
+- Sequence number incrementation.
+- Transaction rollback on rejection.
+- State integrity validation.
+- Corruption recovery.
+
+</details>
+
+<details>
+<summary><b>Suite 4 — Complaint State Machine (4 tests)</b></summary>
+
+- Legal transition: `SUBMITTED → UNDER_REVIEW`.
+- Illegal transition: `SUBMITTED → RESOLVED` blocked.
+- Mandatory `ON_HOLD` justification.
+- Transition prerequisite validation.
+
+</details>
+
+<details>
+<summary><b>Suite 5 — RBAC & Scope Boundaries (5 tests)</b></summary>
+
+- Assigned field officer authorization.
+- Unassigned field officer rejection.
+- Field officer blocked from assigning complaints.
+- Ward officer assignment within ward.
+- Cross-ward action blocked.
+
+</details>
+
+<details>
+<summary><b>Suite 6 — Four-Eyes Verification (4 tests)</b></summary>
+
+- Self-approval by inspecting officer blocked.
+- Independent supervisor approval accepted.
+- Supervisor assessment recorded in audit trail.
+- Super Admin restricted from field closures.
+
+</details>
+
+<details>
+<summary><b>Suite 7 — SLA Calculation (5 tests)</b></summary>
+
+- Active case within deadline marked `ON_TRACK`.
+- Deadline exceeded marked `BREACHED`.
+- Before-deadline completion marked `COMPLETED_ON_TIME`.
+- Late completion marked `COMPLETED_LATE`.
+- On-hold case pauses the SLA clock.
+
+</details>
 
 ---
 
@@ -460,632 +758,167 @@ node tests/run-tests.js
 
 ```text
 mumbair-prototype/
-├── index.html                   # Master application document (Citizen & Authority shells)
-├── serve.js                     # Zero-dependency local Node.js HTTP server
-├── start.bat                    # One-click Windows launch script
-├── README.md                    # Complete project engineering documentation
+│
+├── index.html
+├── serve.js
+├── start.bat
+├── README.md
+│
 ├── tests/
-│   └── run-tests.js             # Comprehensive 7-suite automated test runner
+│   └── run-tests.js
+│
 ├── css/
-│   ├── base.css                 # Design tokens, typography, CSS resets, CPCB AQI colors
-│   ├── theme.css                # 6-theme appearance engine & dark mode tokens
-│   ├── layout.css               # Header, citizen grid, navigation, and desktop viewport
-│   ├── mobile.css               # Purpose-built adaptive mobile styling & bottom navigation
-│   ├── components.css           # Buttons, modals, form inputs, status badges, and cards
-│   ├── dashboard.css            # AQI hero gauge card, weather tiles, and pollutant grid
-│   ├── map.css                  # Leaflet canvas sizing, custom HTML pins, and popups
-│   ├── reports.css              # Reporting wizard, timelines, and Report Studio print styles
-│   └── operations.css           # Municipal Authority V2 command bar, sidebar, and modals
+│   ├── base.css
+│   ├── theme.css
+│   ├── layout.css
+│   ├── mobile.css
+│   ├── components.css
+│   ├── dashboard.css
+│   ├── map.css
+│   ├── reports.css
+│   └── operations.css
+│
 ├── js/
-│   ├── config.js                # 24 Mumbai administrative wards, CPCB breakpoints, roles, lifecycle
-│   ├── utils.js                 # CPCB NAQI math, Haversine formula, XSS escaping, CSV sanitization
-│   ├── storage.js               # Atomic transaction engine, Schema v4, multi-tab synchronization
-│   ├── api.js                   # Open-Meteo & Copernicus CAMS atmospheric API client
-│   ├── auth.js                  # Citizen session & Municipal role-based authentication manager
-│   ├── workflow.js              # State machine transitions, four-eyes review, SLA calculations
-│   ├── theme.js                 # Citizen appearance customizer & theme switcher
-│   ├── map.js                   # Leaflet map controller, multi-basemap layers, station markers
-│   ├── charts.js                # Chart.js time-series curves and ward comparative bar charts
-│   ├── insights.js              # Deterministic environmental intelligence rules
-│   ├── reports.js               # Citizen complaint wizard, duplicate detection, and upvoting
-│   ├── report-studio.js         # Report Studio document generation, PDF layout, and CSV exports
-│   ├── civic-bulletin.js        # Verified Mumbai news, MPCB directives, and BMC schemes
-│   ├── solutions.js             # Air Quality Action Center & municipal mitigation progress tracker
-│   ├── notifications.js         # Scoped in-app alerts and advisory drawer
-│   ├── ai-assistant.js          # Local environmental health assistant
-│   ├── operations.js            # Operations Command V2 controller (18 operational modules)
-│   └── app.js                   # Application coordinator, hash routing, and tab lifecycles
+│   ├── config.js
+│   ├── utils.js
+│   ├── storage.js
+│   ├── api.js
+│   ├── auth.js
+│   ├── workflow.js
+│   ├── theme.js
+│   ├── map.js
+│   ├── charts.js
+│   ├── insights.js
+│   ├── reports.js
+│   ├── report-studio.js
+│   ├── civic-bulletin.js
+│   ├── solutions.js
+│   ├── notifications.js
+│   ├── ai-assistant.js
+│   ├── operations.js
+│   └── app.js
+│
 ├── data/
-│   └── mumbai-wards.json        # GeoJSON metadata for 24 administrative wards
+│   └── mumbai-wards.json
+│
 ├── supabase/
-│   └── schema.sql               # Production PostgreSQL schema, foreign keys, and RLS policies
+│   └── schema.sql
+│
 └── vendor/
-    ├── leaflet/                 # Leaflet 1.9.4 offline library & marker assets
-    └── chartjs/                 # Chart.js 4.4.1 offline UMD bundle
+    ├── leaflet/
+    └── chartjs/
 ```
+
+### Directory Responsibilities
+
+| Directory / File | Responsibility |
+|---|---|
+| `index.html` | Main application shell and portal structure |
+| `css/` | Design tokens, layouts, themes, responsive styling and components |
+| `js/` | Application logic, AQI calculations, workflows, mapping and operations |
+| `data/` | Ward and geospatial metadata |
+| `tests/` | Automated verification suite |
+| `supabase/` | PostgreSQL schema and RLS policies |
+| `vendor/` | Locally bundled frontend libraries |
 
 ---
 
 ## 19. Local Setup & Startup Guide
 
 ### Prerequisites
-- Any modern web browser (Google Chrome, Microsoft Edge, Mozilla Firefox, Safari).
-- Optional: Node.js (v16+) for running the test suite or built-in HTTP server.
 
-### Option A: Using Built-in Node.js Server (Recommended)
-1. Open your terminal and navigate to the project folder:
-   ```bash
-   cd mumbair-prototype
-   ```
-2. Start the local HTTP server:
-   ```bash
-   node serve.js
-   ```
-3. Open your browser and navigate to:
-   ```text
-   http://localhost:3000
-   ```
+- Modern browser — Chrome, Edge, Firefox or Safari.
+- Node.js v16 or newer — required for running the test suite and optional local server.
 
-### Option B: Direct File Execution
-Double-click `index.html` or open it directly in your browser. All vendor libraries (Leaflet, Chart.js) and Esri tile layers operate with zero CORS and zero referrer restrictions.
+### Option A — Built-in Node.js Server (Recommended)
+
+**Step 1 — Open the project directory**
+
+```powershell
+cd C:\Users\Nimesh\.gemini\antigravity\scratch\mumbair-prototype
+```
+
+**Step 2 — Start the server**
+
+```powershell
+node serve.js
+```
+
+**Step 3 — Open the application**
+
+Navigate to:
+
+```text
+http://localhost:3000
+```
+
+### Option B — Direct File Execution
+
+Open `index.html` directly using Chrome or Edge.
+
+```text
+file:///C:/Users/Nimesh/.gemini/antigravity/scratch/mumbair-prototype/index.html
+```
+
+> The local HTTP server is recommended for a consistent browser environment and reliable application behavior.
 
 ---
 
 ## 20. System Limitations & Operational Transparency
 
-1. **Demonstration Mode:** Municipal authority authentication runs in client-side evaluation mode with authenticated demo personas. For production multi-tenant deployments, connect to Supabase Auth or municipal OAuth identity providers.
-2. **Measurement vs. Model Simulation:** Real-time AQI values are ingested via Open-Meteo's Copernicus CAMS European atmospheric reanalysis grid ($\sim 11\text{ km}$ resolution). They represent calibrated atmospheric simulations and are clearly labeled as such to distinguish them from direct physical CAAQMS station inlets.
-3. **Offline Map Tiles:** Vector coastline geometry renders offline. Detailed satellite and street tiles require internet connectivity to reach the Esri ArcGIS servers.
+### 20.1 Demonstration Mode
+
+Municipal authentication currently operates using client-side demonstration personas.
+
+Production deployment requires:
+
+- Supabase Auth or an equivalent secure identity provider.
+- Server-side authorization enforcement.
+- Secure session management.
+- Production database connectivity.
+- Audit integrity protection.
+- Municipal identity verification.
+
+### 20.2 Measurement vs. Model Simulation
+
+| Data Type | Operational Meaning |
+|---|---|
+| CAMS Grid Estimates | Atmospheric model-derived estimates at approximately 11 km resolution |
+| CAAQMS Station Data | Physical monitoring station measurements, when directly available |
+| Offline Baseline | Simulated fallback data |
+| Citizen Reports | User-submitted observations, not automatically verified measurements |
+
+### 20.3 Offline Limitations
+
+- Cached telemetry may be stale.
+- Detailed basemap tiles require internet connectivity.
+- Satellite imagery requires access to Esri servers.
+- Offline baseline values must not be presented as live measurements.
+
+### 20.4 Production Readiness Considerations
+
+| Component | Demonstration | Production Requirement |
+|---|---|---|
+| Authentication | Demo personas | Verified identity provider |
+| Authorization | Client-side checks | Server-side RBAC and RLS |
+| Storage | LocalStorage | Transactional database |
+| Audit Log | Browser-managed state | Tamper-resistant audit records |
+| AQI Data | API/model estimates | Verified source and timestamp pipeline |
+| Complaints | Local demonstration records | Secure backend, access control and retention policy |
+| Notifications | Local UI | Reliable notification infrastructure |
 
 ---
 
 <div align="center">
-  <p><strong>MumbAIR — Greater Mumbai Environmental Intelligence Platform</strong></p>
-  <p><em>Engineered for data accuracy, operational security, and municipal transparency across Greater Mumbai.</em></p>
-  <p>MIT License &middot; Brihanmumbai Municipal Corporation (BMC / MCGM)</p>
-</div><div align="center">
 
 # 🌬️ MumbAIR
-### *Greater Mumbai Air Quality Intelligence & Municipal Operations Platform*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#)
-[![Architecture](https://img.shields.io/badge/Architecture-Zero--Build%20ES6+-brightgreen.svg)](#3-technology-stack)
-[![AQI Standard](https://img.shields.io/badge/AQI%20Standard-CPCB%20NAQI-orange.svg)](#4-official-cpcb-national-aqi-naqi-calculation-engine)
-[![Tests](https://img.shields.io/badge/Automated%20Tests-38%20Passing-success.svg)](#17-automated-test-suite--verification-instructions)
+### Greater Mumbai Environmental Intelligence Platform
 
-> **"Observe → Understand → Report → Assign → Investigate → Act → Verify → Improve"**  
-> *Unified Environmental Surveillance & Municipal Governance Suite for the 24 Administrative Wards of Greater Mumbai (Brihanmumbai Municipal Corporation — BMC / MCGM)*
+**Engineered for Data Accuracy, Operational Security & Municipal Transparency**
 
-</div>
+*Observe. Understand. Report. Act. Verify. Improve.*
 
----
+**MIT License · BMC / MCGM Urban Environmental Governance Concept**
 
-## 📖 Table of Contents
-
-1. [Executive Summary & Purpose](#1-executive-summary--purpose)
-2. [Ecosystem Architecture (Citizen Portal vs. Authority Operations)](#2-ecosystem-architecture)
-3. [Technology Stack](#3-technology-stack)
-4. [Official CPCB National AQI (NAQI) Calculation Engine](#4-official-cpcb-national-aqi-naqi-calculation-engine)
-5. [Atmospheric Telemetry & Source Transparency](#5-atmospheric-telemetry--source-transparency)
-6. [Validated 16-State Complaint Lifecycle](#6-validated-16-state-complaint-lifecycle)
-7. [Role-Based Access Control (RBAC) & Scope Boundaries](#7-role-based-access-control-rbac--scope-boundaries)
-8. [Separation of Duties & Four-Eyes Verification](#8-separation-of-duties--four-eyes-verification)
-9. [SLA Calculation Engine & Deadline Enforcement](#9-sla-calculation-engine--deadline-enforcement)
-10. [Application Security & Injection Hardening (XSS / CWE-1236)](#10-application-security--injection-hardening)
-11. [Storage Architecture & Atomic State Transactions](#11-storage-architecture--atomic-state-transactions)
-12. [Geospatial Map Intelligence & Satellite Layers](#12-geospatial-map-intelligence--satellite-layers)
-13. [Desktop Header Responsiveness & Viewport Compatibility](#13-desktop-header-responsiveness--viewport-compatibility)
-14. [Adaptive Mobile Experience (360px – 768px)](#14-adaptive-mobile-experience)
-15. [Document & Report Studio (PDF / CSV Exports)](#15-document--report-studio)
-16. [Verified Mumbai News & Environmental Bulletins](#16-verified-mumbai-news--environmental-bulletins)
-17. [Automated Test Suite & Verification Instructions](#17-automated-test-suite--verification-instructions)
-18. [Project File Inventory](#18-project-file-inventory)
-19. [Local Setup & Startup Guide](#19-local-setup--startup-guide)
-20. [System Limitations & Operational Transparency](#20-system-limitations--operational-transparency)
-
----
-
-## 1. Executive Summary & Purpose
-
-**MumbAIR** is a full-featured, scientifically grounded environmental intelligence and municipal operations platform purpose-built for the residents and municipal administration of Greater Mumbai.
-
-Greater Mumbai faces intricate micro-climatic atmospheric challenges:
-- **Nocturnal Coastal Temperature Inversions:** Low-altitude trapping of pollutants during winter months.
-- **Heavy Redevelopment & Demolition:** Coarse dust ($\text{PM}_{10}$) from over 1,500 active infrastructure and high-rise construction sites.
-- **Refinery & Chemical Corridors:** Elevated sulphur dioxide ($\text{SO}_2$) and hydrocarbon flares in Chembur, Mahul, and Trombay (Ward M/E).
-- **Legacy Landfill Smoldering:** Subsurface methane combustion generating particulate smoke at Deonar and Mulund dumping grounds.
-- **Arterial Traffic Congestion:** Nitrogen dioxide ($\text{NO}_2$) and fine particulates ($\text{PM}_{2.5}$) along the Western and Eastern Express Highways.
-
-MumbAIR connects public atmospheric awareness with verifiable municipal accountability. It gives citizens an honest, transparent view of the air they breathe while providing municipal officers with an auditable, four-eyes verified operations management platform.
-
----
-
-## 2. Ecosystem Architecture
-
-MumbAIR is partitioned into two distinct operational portals sharing a single synchronized state engine:
-
-### 🧑‍💼 Public Citizen Portal
-- **Real-Time AQI Hero Dashboard:** Apple Weather-inspired card with dynamic SVG arc gauge, official CPCB categorizations (0–500+ scale), and dominant pollutant detection ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{SO}_2$, $\text{CO}$, $\text{O}_3$).
-- **Surface Weather Telemetry:** Ambient temperature, relative humidity, wind velocity, and onshore Arabian Sea breeze direction ($290^\circ$ Westerly).
-- **6-Parameter Pollutant Breakdown:** Concentrations benchmarked against CPCB 24-hour National Ambient Air Quality Standards (NAAQS) with explicit CAMS model grid attribution.
-- **Interactive Map:** Leaflet-powered multi-basemap (Streets, Satellite, Light Canvas, OSM HOT) with 24 administrative ward pins, real CAAQMS stations, and geotagged community complaints.
-- **Civic Reporting Wizard:** 3-step complaint filing with 1.5 km Haversine duplicate collision prevention, automated ward routing, and photo watermarking.
-- **Complaint Tracking Feed:** Public endorsement upvoting, category filtering, and transparent 16-step lifecycle progression.
-- **Environmental Bulletin & Schemes:** Curated, verifiable updates from MCGM, MPCB, and CPCB with official circular links.
-- **Solutions Center:** Evidence-based citizen health guidance and municipal mitigation progress tracking.
-- **Appearance Customizer:** 6 professionally designed themes preserving immutable CPCB AQI severity colors.
-- **Report Studio:** One-click citizen complaint receipts with printable PDF formatting and CSV download.
-
-### 🏛️ Municipal Operations Portal (`#authority`)
-- **Role-Based Authentication:** Authenticated access restricted to verified municipal demo personas (`FIELD_OFFICER`, `WARD_OFFICER`, `DEPARTMENT_HEAD`, `CITY_ADMIN`, `SUPER_ADMIN`).
-- **Command Center:** Real-time caseload KPIs (Active Caseload, In Field Investigation, SLA Breached, Certified Resolution Rate), Operational Attention triage panel, and Ward Operations Ledger.
-- **Complaint Inbox:** Central registry with multi-column filtering, priority overrides, and role-scoped CSV export.
-- **1-Click Dispatch & Assignment:** Assigns available field officers based on live workload, sets mandatory SLA resolution benchmarks (6h, 24h, 48h, 72h), and attaches supervisor directives.
-- **Field Inspection Engine:** Mobile-optimized checklist execution for on-ground officers, optical opacity checks, spot-fine notice triggers (MMC Act Section 368), and mitigation evidence submission.
-- **Separation of Duties (Four-Eyes Verification):** Dedicated verification modal blocking self-approvals by inspecting officers and requiring independent supervisory review notes.
-- **24 Administrative Wards & Departments Matrix:** Detailed workload and compliance scorecards across SWM, APC, BUILDING, ROADS, DRAINAGE, and HEALTH.
-- **Resource & Fleet Management:** Real-time tracking of anti-smog misting cannons, mobile CAAQMS vans, and mechanized sweepers.
-- **Ops AI Assistant:** Deterministic calculation queries for operational bottlenecks, recidivism clusters, and executive briefings.
-- **Audit Trail Ledger:** Immutable, append-only log of all triage, dispatch, inspection, and verification actions.
-
----
-
-## 3. Technology Stack
-
-- **Frontend Architecture:** Vanilla JavaScript (ES6+), HTML5, CSS3. Zero-build architecture; runs directly in any modern browser without compilers or bundlers.
-- **Mapping Engine:** [Leaflet 1.9.4](https://leafletjs.com/) (bundled locally in `/vendor/leaflet/` for offline resilience).
-- **Basemap Tile Providers:**
-  - Esri World Street Map (`server.arcgisonline.com`)
-  - Esri World Imagery Satellite (`server.arcgisonline.com`)
-  - Esri World Light Gray Canvas (`server.arcgisonline.com`)
-  - OpenStreetMap Humanitarian (`tile.openstreetmap.fr/hot`)
-- **Data Visualization:** [Chart.js 4.4.1](https://www.chartjs.org/) (bundled locally in `/vendor/chartjs/`).
-- **Atmospheric Data Gateway:** [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) & Copernicus Atmosphere Monitoring Service (CAMS).
-- **Weather Telemetry Gateway:** Open-Meteo Weather Forecast API (ECMWF high-resolution model).
-- **State & Persistence:** Browser `localStorage` with reactive multi-dashboard synchronization (`mumbair_state_v4`, `mumbair_auth_session_v4`, `mumbair_theme_preference`).
-- **Database Schema (Production Ready):** PostgreSQL schema with Row-Level Security (RLS) located in `/supabase/schema.sql`.
-
----
-
-## 4. Official CPCB National AQI (NAQI) Calculation Engine
-
-MumbAIR strictly adheres to the official **Central Pollution Control Board (CPCB)** National Air Quality Index calculation methodology:
-
-### Sub-Index Linear Interpolation Formula
-For any pollutant concentration $C_p$ falling within breakpoint range $[B_{\text{LO}}, B_{\text{HI}}]$ with sub-index range $[I_{\text{LO}}, I_{\text{HI}}]$:
-
-$$I_p = \left[ \frac{I_{\text{HI}} - I_{\text{LO}}}{B_{\text{HI}} - B_{\text{LO}}} \right] \cdot (C_p - B_{\text{LO}}) + I_{\text{LO}}$$
-
-### Composite AQI
-
-$$\text{AQI} = \max\left(I_{\text{PM2.5}}, I_{\text{PM10}}, I_{\text{NO2}}, I_{\text{SO2}}, I_{\text{CO}}, I_{\text{O3}}, I_{\text{NH3}}\right)$$
-
-### Official CPCB Breakpoints Matrix
-
-| Pollutant | Good (0–50) | Satisfactory (51–100) | Moderate (101–200) | Poor (201–300) | Very Poor (301–400) | Severe (401–500) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$\text{PM}_{2.5}$** ($\mu\text{g/m}^3$) | 0 – 30 | 31 – 60 | 61 – 90 | 91 – 120 | 121 – 250 | 251 – 500 |
-| **$\text{PM}_{10}$** ($\mu\text{g/m}^3$) | 0 – 50 | 51 – 100 | 101 – 250 | 251 – 350 | 351 – 430 | 431 – 600 |
-| **$\text{NO}_2$** ($\mu\text{g/m}^3$) | 0 – 40 | 41 – 80 | 81 – 180 | 181 – 280 | 281 – 400 | 401 – 500 |
-| **$\text{SO}_2$** ($\mu\text{g/m}^3$) | 0 – 40 | 41 – 80 | 81 – 380 | 381 – 800 | 801 – 1600 | 1601 – 2000 |
-| **$\text{CO}$** ($\text{mg/m}^3$) | 0 – 1.0 | 1.1 – 2.0 | 2.1 – 10.0 | 10.1 – 17.0 | 17.1 – 34.0 | 34.1 – 50.0 |
-| **$\text{O}_3$** ($\mu\text{g/m}^3$) | 0 – 50 | 51 – 100 | 101 – 168 | 169 – 208 | 209 – 748 | 749 – 1000 |
-| **$\text{NH}_3$** ($\mu\text{g/m}^3$) | 0 – 200 | 201 – 400 | 401 – 800 | 801 – 1200 | 1201 – 1800 | 1801 – 2500 |
-
-### Critical Engineering Safeguards
-1. **CO Unit Normalization:** Open-Meteo returns carbon monoxide in $\mu\text{g/m}^3$ (e.g., $1300\ \mu\text{g/m}^3$). CPCB breakpoints strictly evaluate CO in $\text{mg/m}^3$ ($1.3\ \text{mg/m}^3$). `UTILS.calcSubIndex` automatically detects values $> 50$ and divides by $1000$, eliminating massive artificial distortions.
-2. **CPCB 3-Parameter Mandate:** Under CPCB rules, an official AQI requires a minimum of **three measured parameters**, of which **at least one must be a particulate parameter** ($\text{PM}_{2.5}$ or $\text{PM}_{10}$). Datasets failing this test are flagged as `isOfficial: false` and rendered with an *"Indicative Only"* disclaimer.
-3. **No Fabricated Multipliers:** Eliminates arbitrary scaling factors (such as `currPm25 * 2.1`).
-
----
-
-## 5. Atmospheric Telemetry & Source Transparency
-
-MumbAIR ensures honest and transparent data sourcing:
-- **Copernicus CAMS Model Grid:** Real-time pollutant readings are fetched from Open-Meteo's Copernicus Atmosphere Monitoring Service (CAMS) European atmospheric reanalysis grid ($\sim 11\text{ km}$ resolution). The UI clearly labels: `"Values from Copernicus CAMS model grid (~11km)"`.
-- **Station Baseline Distinctions:** Physical CAAQMS station coordinates (e.g., Mahul Petrochemical CAAQMS, Bandra Kurla Complex CAAQMS) are distinguished from model grid estimates.
-- **Offline Calibrated Fallback:** When internet access is disconnected, the system loads calibrated station baseline records and explicitly notifies the user: `"Simulated baseline (offline cache)"`.
-- **Coordinate-Specific Caching:** Telemetry cache keys are tied to exact geographic coordinates (`lat_lng`), preventing cross-ward data contamination when switching between locations.
-
----
-
-## 6. Validated 16-State Complaint Lifecycle
-
-Civic complaints transition through a centralized, strictly validated state machine defined in `CONFIG.STATUS_LIFECYCLE`:
-
-```text
-   ┌─────────────────────────────────────────────────────────────┐
-   │                        SUBMITTED                            │
-   └───────────────┬─────────────────────────────┬───────────────┘
-                   │                             │
-                   ▼                             ▼
-            UNDER_REVIEW                     DUPLICATE
-                   │                             │
-                   ▼                             ▼
-                VERIFIED                      (CLOSED)
-                   │
-                   ▼
-                ASSIGNED ◄────────┐
-                   │              │
-                   ▼              │
-              IN_PROGRESS         │ (REASSIGNED)
-                   │              │
-                   ▼              │
-          INSPECTION_COMPLETED    │
-                   │              │
-                   ▼              │
-         RESOLUTION_SUBMITTED ────┼─────────────┐
-                   │              │             │
-                   ▼              │             ▼
-           RESOLUTION_REVIEW ─────┘          ON_HOLD / ESCALATED
-                   │
-                   ▼
-                RESOLVED ◄──────────────────────┐
-                   │                            │
-                   ▼                            │ (REOPENED)
-                 CLOSED ────────────────────────┘
-```
-
-### Transition & Prerequisite Matrix
-
-| State | Legal Next States | Prerequisites / Mandatory Fields |
-| :--- | :--- | :--- |
-| `SUBMITTED` | `UNDER_REVIEW`, `DUPLICATE`, `REJECTED` | Valid GPS, citizen contact, category |
-| `UNDER_REVIEW` | `VERIFIED`, `REJECTED`, `DUPLICATE` | Preliminary ward officer triage notes |
-| `VERIFIED` | `ASSIGNED`, `REJECTED` | Ward verification sign-off |
-| `ASSIGNED` | `IN_PROGRESS`, `REASSIGNED`, `ON_HOLD` | Valid officer assignment ID and target SLA |
-| `IN_PROGRESS` | `INSPECTION_COMPLETED`, `ESCALATED`, `ON_HOLD` | Field officer checklist execution |
-| `INSPECTION_COMPLETED` | `RESOLUTION_SUBMITTED`, `ESCALATED` | Site inspection notes & optical opacity check |
-| `RESOLUTION_SUBMITTED` | `RESOLUTION_REVIEW`, `REASSIGNED` | Photographic proof of on-ground mitigation |
-| `RESOLUTION_REVIEW` | `RESOLVED`, `REJECTED`, `IN_PROGRESS` | Four-eyes supervisory review |
-| `ON_HOLD` | `IN_PROGRESS`, `ASSIGNED` | **Mandatory documented justification reason** |
-| `ESCALATED` | `ASSIGNED`, `IN_PROGRESS` | **Mandatory escalation reason and priority boost** |
-| `REASSIGNED` | `ASSIGNED`, `IN_PROGRESS` | **Mandatory reassignment transfer reason** |
-| `REOPENED` | `UNDER_REVIEW`, `ASSIGNED` | **Mandatory citizen/supervisor reopening reason** |
-| `RESOLVED` | `CLOSED`, `REOPENED` | Approved resolution verification |
-| `REJECTED` | `REOPENED` | **Mandatory rejection reason** |
-| `DUPLICATE` | `CLOSED` | Target parent complaint ID link |
-| `CLOSED` | `REOPENED` | Final case archival |
-
----
-
-## 7. Role-Based Access Control (RBAC) & Scope Boundaries
-
-MumbAIR enforces strict scope boundaries across all user personas:
-
-| Role Key | Role Name | Geographic & Functional Scope | Allowed Actions |
-| :--- | :--- | :--- | :--- |
-| `CITIZEN` | Public Citizen | `OWN_ONLY` (Own complaints) | File reports, track status, upvote public complaints, export personal receipt. |
-| `FIELD_OFFICER` | On-Ground Inspector | `ASSIGNED_ONLY` (Explicitly assigned cases) | View assigned tasks, fill field checklists, submit photographic resolution proof. |
-| `WARD_OFFICER` | Ward Executive Officer | `WARD_ONLY` (Assigned administrative ward) | Triage ward cases, dispatch officers, verify resolutions, publish ward advisories. |
-| `DEPARTMENT_HEAD` | Department Chief | `DEPT_ONLY` (Assigned civic department) | Allocate departmental caseload, manage fleet & misting cannons, audit compliance. |
-| `CITY_ADMIN` | Municipal Commissioner | `CITY_WIDE` (All 24 Wards & Departments) | City-wide oversight, cross-ward reallocation, export city ledger, executive analytics. |
-| `SUPER_ADMIN` | System Administrator | `SYSTEM_ADMIN` (Security & Core Config) | Platform diagnostics, audit log inspection, schema management. |
-
-### Verified Demo Roster
-Pre-configured authenticated demo accounts matching official municipal records:
-- **Field Officer:** `sanjay.shinde@mcgm.gov.in.demo` *(Ward M/E · Solid Waste Management)*
-- **Ward Executive Officer:** `priya.sharma@mcgm.gov.in.demo` *(Ward M/E · Ward Executive Officer)*
-- **Department Head:** `vikram.deshmukh@mcgm.gov.in.demo` *(City-Wide · Air Pollution Control)*
-- **City Administrator:** `commissioner.ops@mcgm.gov.in.demo` *(Greater Mumbai Operations Command)*
-- **Super Admin:** `root.admin@mcgm.gov.in.demo` *(System Security & Governance)*
-
----
-
-## 8. Separation of Duties & Four-Eyes Verification
-
-To prevent operational collusion and fraudulent case closures, MumbAIR implements the **Four-Eyes Principle (Separation of Duties)**:
-
-1. **Self-Approval Blocked:** An inspecting officer who executed the field work or submitted the mitigation proof is **mathematically and structurally blocked** from approving the resolution:
-
-   $$\text{actor.id} == \text{complaint.assignedOfficerId} \implies \text{BLOCKED}$$
-
-2. **Supervisory Review Required:** Resolutions must be independently examined and certified by a supervisor (`WARD_OFFICER`, `DEPARTMENT_HEAD`, or `CITY_ADMIN`).
-3. **Dedicated Verification Modal:** Replaces crude browser `prompt()` and `alert()` popups with a formal verification modal requiring:
-   - Side-by-side comparison of Citizen Proof vs. Field Mitigation Proof.
-   - Mandatory detailed supervisory assessment notes ($\ge 10$ characters).
-   - Formal Acceptance or Rejection (reverting case back to `IN_PROGRESS` with remedial instructions).
-4. **Super Admin Guard:** Super Admins are restricted from routine operational field approvals to preserve independent governance.
-
----
-
-## 9. SLA Calculation Engine & Deadline Enforcement
-
-MumbAIR's SLA engine accurately distinguishes between on-ground operational states:
-
-| Status Class | Condition | Compliance Status |
-| :--- | :--- | :--- |
-| `ON_TRACK` | Case active and current time $< \text{SLA Deadline}$ | `isCompliant: true` |
-| `DUE_SOON` | Case active and remaining time $< 25\%$ of benchmark | `isCompliant: true` |
-| `BREACHED` | Case active and current time $> \text{SLA Deadline}$ | `isCompliant: false` |
-| `PAUSED` | Case placed on justified `ON_HOLD` status | `isCompliant: true` *(Clock frozen)* |
-| `COMPLETED_ON_TIME` | Case resolved at timestamp $\le \text{SLA Deadline}$ | `isCompliant: true` |
-| `COMPLETED_LATE` | Case resolved at timestamp $> \text{SLA Deadline}$ | `isCompliant: false` *(Strictly recorded as non-compliant)* |
-
----
-
-## 10. Application Security & Injection Hardening
-
-### Context-Safe HTML Escaping (Stored XSS Defense)
-All dynamic citizen inputs (complaint titles, descriptions, locations, user names) are sanitized through `UTILS.escapeHtml()`. Characters `&`, `<`, `>`, `"`, `'` are mapped to HTML entities before DOM insertion:
-
-```javascript
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-```
-
-### CSV Formula Injection Protection (CWE-1236 Defense)
-Spreadsheet applications (Microsoft Excel, LibreOffice Calc) interpret cells beginning with `=`, `+`, `-`, `@`, `\t`, or `\r` as formulas, posing remote code execution and data exfiltration risks. `UTILS.sanitizeCsvCell` neutralizes these cells by prepending a single quote (`'`):
-
-```javascript
-function sanitizeCsvCell(val) {
-  if (val === null || val === undefined) return '""';
-  var str = String(val).trim();
-  var firstChar = str.charAt(0);
-  if (['=', '+', '-', '@', '\t', '\r'].indexOf(firstChar) >= 0) {
-    str = "'" + str;
-  }
-  return '"' + str.replace(/"/g, '""') + '"';
-}
-```
-
-### Excel Devanagari Preservation (UTF-8 BOM)
-All generated CSV downloads (`UTILS.downloadCsvBlob`) are prefixed with the UTF-8 Byte Order Mark (`\uFEFF`). This guarantees that Marathi and Hindi ward names (e.g., मानखुर्द, वरळी, अंधेरी) display correctly in Microsoft Excel without character encoding corruption.
-
-### Privacy & Scoped Access
-Citizen telephone numbers are masked (`+91 98200 •••••`) in standard municipal views to protect citizen privacy, remaining unmasked only for authorized supervisory officers.
-
----
-
-## 11. Storage Architecture & Atomic State Transactions
-
-To eliminate lost-write race conditions and data corruption across concurrent events, MumbAIR implements an atomic transaction wrapper:
-
-```javascript
-STORAGE.atomicUpdate(function(state) {
-  // 1. Receives fresh, uncorrupted state
-  // 2. Applies state mutations
-  // 3. Appends immutable audit log and notification
-  return { success: true };
-});
-```
-
-- **Versioned Schema (`SCHEMA_VERSION = 4`):** Isolates the upgraded state in `mumbair_state_v4`.
-- **Reseeding Bug Fixed:** Checks the `_initialized` flag so that empty collections (`reports: []`) are never accidentally overwritten by default seeds.
-- **Storage Corruption Recovery:** Traps JSON parse exceptions, backs up corrupted data, and initializes a clean schema.
-- **Multi-Tab Sync:** Listens to `window.storage` events, instantly propagating state updates across open tabs.
-
----
-
-## 12. Geospatial Map Intelligence & Satellite Layers
-
-The Leaflet-powered geospatial map provides full Greater Mumbai coverage:
-
-1. **Four Permitted Tile Layers:**
-   - 🗺️ Detailed Streets (Esri World Street Map)
-   - 🛰️ Satellite Imagery (Esri World Imagery)
-   - 🎨 Light Canvas (Esri World Light Gray Base)
-   - 🌍 OpenStreetMap (Humanitarian OSM HOT)
-2. **Accurate Geospatial Markers:**
-   - 🏛️ Official CAAQMS Stations: 24 monitoring nodes color-coded by live CPCB category.
-   - 🚨 Geotagged Civic Complaints: Rendered at authentic GPS coordinates with category icons (🔥 Burning, 🏗️ Construction, 🏭 Industrial).
-   - 🎯 Interactive Location Fly-To: Smooth zoom and pan to any ward or complaint.
-3. **Removal of Unsubstantiated Geometry:** Fake, arbitrary dispersion circles and speculative hotspot polygons have been removed in favor of authentic station locations and verified complaint clusters.
-
----
-
-## 13. Desktop Header Responsiveness & Viewport Compatibility
-
-The desktop navigation header has been engineered to eliminate horizontal overflow across all desktop displays:
-
-- **Root Cause Identified:** `.header-inner` was previously constrained to `max-width: 1360px`, while all child containers had `flex-shrink: 0;`, creating a minimum width of $1386\text{px}$ that pushed the rightmost `"🔒 Authority"` button off-screen at $1280\text{px}$ and $1366\text{px}$.
-- **Structural Solution:**
-  - `.header-inner` updated to `max-width: 100%`.
-  - `.citizen-nav` configured with flexible gaps and responsive link padding.
-  - `.header-actions` locked with `flex-shrink: 0; min-width: max-content;`.
-- **Verified Viewports:** Tested and confirmed in headless Chromium/Edge with zero overflow and 100% button visibility:
-  - $1280\text{px} \times 800\text{px}$
-  - $1366\text{px} \times 768\text{px}$
-  - $1440\text{px} \times 900\text{px}$
-  - $1600\text{px} \times 900\text{px}$
-  - $1920\text{px} \times 1080\text{px}$
-
----
-
-## 14. Adaptive Mobile Experience
-
-Rather than compressing desktop elements, MumbAIR provides a purpose-built mobile layout ($\le 768\text{px}$):
-
-- **Citizen Mobile:**
-  - Slim top brand header with Ward selector, theme button, and notifications.
-  - Fixed thumb-friendly bottom navigation bar: `📊 Home`, `🗺️ Map`, `📸 Report` (raised floating action button), `📈 Trends`, `👤 Profile`.
-  - Minimum touch targets of $44\text{px} \times 44\text{px}$.
-  - Form inputs use $16\text{px}$ font size to prevent mobile browser auto-zoom.
-- **Authority Mobile:**
-  - Fixed bottom command bar: `⚡ Command`, `📥 Inbox`, `🗺️ Map`, `🔍 Inspect`, `☰ More`.
-  - Off-canvas mobile navigation drawer.
-  - High-contrast field inspection cards for on-ground officers.
-
----
-
-## 15. Document & Report Studio
-
-Accessible from both Citizen and Authority portals:
-
-- **Citizen Report Dossier:** Official complaint proof receipt with Reference ID, filing timestamp, GPS location, ward code, timeline, and municipal disclaimer.
-- **24-Ward Performance Audit:** Compliance percentages, open backlogs, and resolution rates.
-- **Department Operations Report:** Workload distribution across SWM, APC, BUILDING, and ROADS.
-- **City State of the Air Report:** City-wide atmospheric summary and meteorological correlations.
-- **Field Inspection Log:** Checklists and spot-fine notices.
-- **Export Options:**
-  - 🖨️ Clean print / PDF view with official BMC header and crest.
-  - 📥 CSV dataset export protected against spreadsheet injection.
-
----
-
-## 16. Verified Mumbai News & Environmental Bulletins
-
-Curated, verifiable environmental updates sourced from official bodies:
-
-- **BMC Anti-Smog Gun Mandate:** Deployment of mobile misting cannons under GRAP-II.
-- **MPCB Industrial Telemetry Directive:** Automated flare opacity telemetry for Chembur/Trombay refineries.
-- **Ward Deep Cleaning Drive:** Mechanized street sweeping using treated STP water.
-- **BEST Electric Fleet Milestone:** Addition of zero-emission electric buses on coastal routes.
-- **Miyawaki Afforestation:** Native micro-forests planted across suburban flood zones.
-- **Features:** Search, Category Filters, Bookmark toggles (saved to `localStorage`), and direct links to official municipal circulars.
-
----
-
-## 17. Automated Test Suite & Verification Instructions
-
-MumbAIR includes a comprehensive automated test runner verifying all critical mathematical, security, and workflow algorithms.
-
-### Executing the Test Suite
-Open your terminal in the project directory and run:
-
-```bash
-cd mumbair-prototype
-node tests/run-tests.js
-```
-
-### Verified Test Coverage (38 Tests Across 7 Suites)
-
-1. **Suite 1: CPCB NAQI Calculation & Scientific Accuracy (8 Tests)**
-   - Upper boundary mapping ($30\ \mu\text{g/m}^3 \implies \text{AQI } 50$).
-   - Satisfactory range mapping ($31\ \mu\text{g/m}^3 \implies \text{AQI } 51\text{–}53$).
-   - Fractional concentration interpolation without premature rounding errors.
-   - Carbon Monoxide $\mu\text{g/m}^3 \to \text{mg/m}^3$ unit normalization.
-   - CPCB 3-parameter rule enforcement (`isOfficial: false` for $< 3$ pollutants or missing PM).
-   - Valid multi-pollutant dataset yielding official CPCB NAQI.
-   - Null/empty dataset handling without `NaN` errors.
-2. **Suite 2: Security & Input Sanitization (4 Tests)**
-   - Stored XSS defense through context-safe HTML escaping.
-   - CSV formula injection defense for `=` prefix.
-   - CSV formula injection defense for `@` prefix.
-   - RFC 4180 quote and comma escaping.
-3. **Suite 3: Storage Engine & Atomic State Operations (8 Tests)**
-   - Storage initialization with Schema Version 4.
-   - `_initialized` flag persistence.
-   - Empty collections preserved without reseeding.
-   - Atomic mutation persistence.
-   - Sequence number incrementation.
-   - Transaction rollback on rejection.
-4. **Suite 4: Validated Complaint State Machine (4 Tests)**
-   - Legal status transitions (`SUBMITTED` $\to$ `UNDER_REVIEW`).
-   - Illegal transition rejection (`SUBMITTED` $\to$ `RESOLVED` blocked).
-   - Justification enforcement for `ON_HOLD`.
-5. **Suite 5: Role-Based Authorization & Scope Boundaries (5 Tests)**
-   - Assigned field officer authorization.
-   - Unassigned field officer rejection.
-   - Field officer blocked from assigning complaints.
-   - Ward officer assignment within ward.
-   - Cross-ward action blocked.
-6. **Suite 6: Separation of Duties & Four-Eyes Verification (4 Tests)**
-   - Self-approval by inspecting officer strictly blocked.
-   - Independent supervisor verification approved.
-   - Audit trail logging of supervisor assessment.
-   - Super Admin restricted from field closures.
-7. **Suite 7: SLA Calculation & Deadline Accuracy (5 Tests)**
-   - Active case within deadline marked `ON_TRACK` (`isCompliant: true`).
-   - Active case exceeding deadline marked `BREACHED` (`isCompliant: false`).
-   - Case resolved before deadline marked `COMPLETED_ON_TIME`.
-   - Late resolution strictly marked `COMPLETED_LATE` (`isCompliant: false`).
-   - Case on hold pauses SLA clock.
-
----
-
-## 18. Project File Inventory
-
-```text
-mumbair-prototype/
-├── index.html                   # Master application document (Citizen & Authority shells)
-├── serve.js                     # Zero-dependency local Node.js HTTP server
-├── start.bat                    # One-click Windows launch script
-├── README.md                    # Complete project engineering documentation
-├── tests/
-│   └── run-tests.js             # Comprehensive 7-suite automated test runner
-├── css/
-│   ├── base.css                 # Design tokens, typography, CSS resets, CPCB AQI colors
-│   ├── theme.css                # 6-theme appearance engine & dark mode tokens
-│   ├── layout.css               # Header, citizen grid, navigation, and desktop viewport
-│   ├── mobile.css               # Purpose-built adaptive mobile styling & bottom navigation
-│   ├── components.css           # Buttons, modals, form inputs, status badges, and cards
-│   ├── dashboard.css            # AQI hero gauge card, weather tiles, and pollutant grid
-│   ├── map.css                  # Leaflet canvas sizing, custom HTML pins, and popups
-│   ├── reports.css              # Reporting wizard, timelines, and Report Studio print styles
-│   └── operations.css           # Municipal Authority V2 command bar, sidebar, and modals
-├── js/
-│   ├── config.js                # 24 Mumbai administrative wards, CPCB breakpoints, roles, lifecycle
-│   ├── utils.js                 # CPCB NAQI math, Haversine formula, XSS escaping, CSV sanitization
-│   ├── storage.js               # Atomic transaction engine, Schema v4, multi-tab synchronization
-│   ├── api.js                   # Open-Meteo & Copernicus CAMS atmospheric API client
-│   ├── auth.js                  # Citizen session & Municipal role-based authentication manager
-│   ├── workflow.js              # State machine transitions, four-eyes review, SLA calculations
-│   ├── theme.js                 # Citizen appearance customizer & theme switcher
-│   ├── map.js                   # Leaflet map controller, multi-basemap layers, station markers
-│   ├── charts.js                # Chart.js time-series curves and ward comparative bar charts
-│   ├── insights.js              # Deterministic environmental intelligence rules
-│   ├── reports.js               # Citizen complaint wizard, duplicate detection, and upvoting
-│   ├── report-studio.js         # Report Studio document generation, PDF layout, and CSV exports
-│   ├── civic-bulletin.js        # Verified Mumbai news, MPCB directives, and BMC schemes
-│   ├── solutions.js             # Air Quality Action Center & municipal mitigation progress tracker
-│   ├── notifications.js         # Scoped in-app alerts and advisory drawer
-│   ├── ai-assistant.js          # Local environmental health assistant
-│   ├── operations.js            # Operations Command V2 controller (18 operational modules)
-│   └── app.js                   # Application coordinator, hash routing, and tab lifecycles
-├── data/
-│   └── mumbai-wards.json        # GeoJSON metadata for 24 administrative wards
-├── supabase/
-│   └── schema.sql               # Production PostgreSQL schema, foreign keys, and RLS policies
-└── vendor/
-    ├── leaflet/                 # Leaflet 1.9.4 offline library & marker assets
-    └── chartjs/                 # Chart.js 4.4.1 offline UMD bundle
-```
-
----
-
-## 19. Local Setup & Startup Guide
-
-### Prerequisites
-- Any modern web browser (Google Chrome, Microsoft Edge, Mozilla Firefox, Safari).
-- Optional: Node.js (v16+) for running the test suite or built-in HTTP server.
-
-### Option A: Using Built-in Node.js Server (Recommended)
-1. Open your terminal and navigate to the project folder:
-   ```bash
-   cd mumbair-prototype
-   ```
-2. Start the local HTTP server:
-   ```bash
-   node serve.js
-   ```
-3. Open your browser and navigate to:
-   ```text
-   http://localhost:3000
-   ```
-
-### Option B: Direct File Execution
-Double-click `index.html` or open it directly in your browser. All vendor libraries (Leaflet, Chart.js) and Esri tile layers operate with zero CORS and zero referrer restrictions.
-
----
-
-## 20. System Limitations & Operational Transparency
-
-1. **Demonstration Mode:** Municipal authority authentication runs in client-side evaluation mode with authenticated demo personas. For production multi-tenant deployments, connect to Supabase Auth or municipal OAuth identity providers.
-2. **Measurement vs. Model Simulation:** Real-time AQI values are ingested via Open-Meteo's Copernicus CAMS European atmospheric reanalysis grid ($\sim 11\text{ km}$ resolution). They represent calibrated atmospheric simulations and are clearly labeled as such to distinguish them from direct physical CAAQMS station inlets.
-3. **Offline Map Tiles:** Vector coastline geometry renders offline. Detailed satellite and street tiles require internet connectivity to reach the Esri ArcGIS servers.
-
----
-
-<div align="center">
-  <p><strong>MumbAIR — Greater Mumbai Environmental Intelligence Platform</strong></p>
-  <p><em>Engineered for data accuracy, operational security, and municipal transparency across Greater Mumbai.</em></p>
-  <p>MIT License &middot; Brihanmumbai Municipal Corporation (BMC / MCGM)</p>
 </div>

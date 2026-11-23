@@ -23,58 +23,225 @@
     overflow-x: hidden !important;
   }
 
-  /* 2. Slim Compact Top Header */
+  /* 2. Sleek 2-Tier Mobile Citizen Top Header (Zero Clashing, Native App Feel) */
   .citizen-header {
-    padding: 6px 12px;
+    padding: 8px 12px 6px 12px !important;
+    background: var(--header-bg, rgba(255, 255, 255, 0.96));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
   }
 
   .header-inner {
-    padding: 0;
-    gap: 8px;
-    flex-wrap: nowrap;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 6px !important;
+    column-gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
   }
 
-  /* Hide the desktop top nav bar on mobile */
-  .citizen-nav {
-    display: none !important;
+  /* Tier 1: Left - Brand Identity */
+  .brand-link {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+    justify-self: start !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-mark {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+    border-radius: var(--radius-sm) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-text {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .brand-title {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
   }
 
   .brand-sub {
     display: none !important;
   }
 
-  .brand-title {
-    font-size: 1.15rem;
-  }
-
-  .brand-mark {
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
-  }
-
-  .location-picker-wrap {
-    flex-shrink: 1;
-    min-width: 0;
-  }
-
-  .location-trigger-btn {
-    max-width: 130px;
-    font-size: 0.72rem;
-    padding: 5px 8px;
-  }
-
+  /* Tier 1: Right - Cohesive Action Cluster (Refresh, Notifications, Themes, Authority) */
   .header-actions {
-    gap: 4px;
-    flex-shrink: 0;
+    grid-column: 2 / 3 !important;
+    grid-row: 1 / 2 !important;
+    justify-self: end !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    min-width: 0 !important;
   }
 
-  .btn-profile-header span:last-child {
-    display: none;
+  .icon-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Profile is permanently accessible via dedicated Bottom Navigation on mobile; hide duplicate */
+  .btn-profile-header {
+    display: none !important;
+  }
+
+  /* Authority Entry Button in Mobile Header */
+  .btn-authority {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 10px !important;
+    border-radius: var(--radius-full) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%) !important;
+    color: #F8FAFC !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    white-space: nowrap !important;
   }
 
   .btn-authority .btn-auth-label {
-    display: none;
+    display: inline-block !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  /* On compact mobile screens (<= 420px), transform Authority into a sleek circular icon button for perfect symmetry */
+  @media (max-width: 420px) {
+    .header-actions {
+      gap: 5px !important;
+    }
+    .btn-authority {
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      padding: 0 !important;
+      justify-content: center !important;
+      border-radius: var(--radius-full) !important;
+    }
+    .btn-authority .btn-auth-label {
+      display: none !important;
+    }
+    .btn-authority .badge-lock {
+      font-size: 14px !important;
+      margin: 0 !important;
+    }
+  }
+
+  /* Tier 2: Full-Width Prominent Location Bar */
+  .location-picker-wrap {
+    grid-column: 1 / 3 !important;
+    grid-row: 2 / 3 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .location-trigger-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 12px !important;
+    background: var(--bg-surface, #FFFFFF) !important;
+    border: 1px solid var(--border-medium, #E2E8F0) !important;
+    border-radius: var(--radius-full) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    transition: all var(--transition-fast) !important;
+  }
+
+  .location-trigger-btn:hover,
+  .location-trigger-btn:active {
+    background: var(--bg-subtle, #F8FAFC) !important;
+    border-color: var(--brand-teal) !important;
+  }
+
+  .location-trigger-btn .loc-pin {
+    font-size: 14px !important;
+    margin-right: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .location-trigger-btn .loc-text {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    font-size: 0.825rem !important;
+    font-weight: 600 !important;
+    color: var(--ink-primary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .location-trigger-btn .loc-arrow {
+    font-size: 11px !important;
+    color: var(--brand-teal) !important;
+    margin-left: 8px !important;
+    padding: 2px 8px !important;
+    background: rgba(13, 148, 136, 0.08) !important;
+    border-radius: var(--radius-full) !important;
+    border: 1px solid rgba(13, 148, 136, 0.2) !important;
+    flex-shrink: 0 !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  /* Desktop Nav completely hidden on mobile */
+  .citizen-nav {
+    display: none !important;
+  }
+
+  /* Notification Popover Mobile Fit */
+  .notif-popover {
+    position: fixed !important;
+    top: 86px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    z-index: 2000 !important;
   }
 
   /* 3. Main Viewport Spacing for Bottom Bar */
@@ -89,6 +256,8 @@
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100% !important;
+    max-width: 100vw !important;
     height: 64px;
     background: var(--header-bg, rgba(255, 255, 255, 0.96));
     backdrop-filter: blur(20px);
@@ -99,6 +268,7 @@
     justify-content: space-around;
     padding: 0 4px;
     box-shadow: 0 -3px 16px rgba(15, 23, 42, 0.08);
+    box-sizing: border-box !important;
   }
 
   .bottom-nav-item {
@@ -109,15 +279,19 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 6px 4px;
+    padding: 6px 2px;
     color: var(--ink-muted);
     font-size: 10px;
     font-weight: 600;
-    flex: 1;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: 20% !important;
     min-height: 48px;
     transition: all var(--transition-fast);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box !important;
+  }
   }
 
   .bottom-nav-item .bottom-icon {
@@ -210,24 +384,106 @@
     font-size: 15px !important;
   }
 
-  /* 6. Mobile Municipal Authority Shell (Phase 6) */
+  /* 6. Mobile Municipal Authority Topbar (Phase 6 - Zero Clashing) */
   .ops-topbar {
+    height: auto !important;
+    min-height: 52px !important;
     padding: 8px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .ops-topbar-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .ops-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+
+  .ops-crest {
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ops-title {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #F8FAFC !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .ops-node-badge {
+    display: none !important; /* Hide long badge on mobile to prevent clashing */
   }
 
   .ops-command-search {
     display: none !important; /* Retained on desktop only */
   }
 
-  .ops-officer-pill .officer-scope {
+  .ops-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding-bottom: 2px !important;
+    flex-wrap: nowrap !important;
+  }
+  .ops-topbar-right::-webkit-scrollbar {
     display: none !important;
+  }
+
+  .ops-verified-role-pill {
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .ops-officer-pill {
+    padding: 2px 6px !important;
+  }
+
+  .ops-officer-pill .officer-scope,
+  .ops-officer-pill .officer-badge {
+    display: none !important;
+  }
+
+  .ops-officer-pill .officer-name {
+    font-size: 0.75rem !important;
+    max-width: 85px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .ops-persona-selector select {
     font-size: 11px !important;
     padding: 4px 6px !important;
+  }
+
+  #btnSwitchBackToCitizen {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+  }
+
+  #btnAuthorityLogout {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
   }
 
   /* Hide Desktop Sidebar on Mobile; Make it an Off-Canvas Drawer */
@@ -342,15 +598,43 @@
 }
 
 /* =============================================================================
-   ULTRA-COMPACT SCREENS (<= 380px: e.g. iPhone SE, Galaxy Z Flip)
+   ULTRA-COMPACT SCREENS (<= 380px: e.g. iPhone SE, Galaxy Z Flip, Fold)
    ============================================================================= */
 @media (max-width: 380px) {
-  .city-title {
-    font-size: 1.35rem !important;
+  .citizen-header {
+    padding: 6px 8px 6px 8px !important;
   }
 
-  .location-trigger-btn {
-    max-width: 100px !important;
+  .header-actions {
+    gap: 4px !important;
+  }
+
+  .icon-action-btn,
+  .btn-profile-header {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    font-size: 12px !important;
+  }
+
+  .btn-authority {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 8px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .btn-authority .btn-auth-label {
+    display: none !important;
+  }
+
+  .brand-title {
+    font-size: 1.05rem !important;
+  }
+
+  .city-title {
+    font-size: 1.35rem !important;
   }
 
   .ops-kpi-grid {

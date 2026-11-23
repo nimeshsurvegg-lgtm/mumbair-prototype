@@ -465,11 +465,12 @@ html, body {
 }
 
 /* =============================================================================
-   3. RESPONSIVE BREAKPOINTS (1280px, 1024px, 768px, 430px, 390px, 360px)
-   Strictly zero horizontal overflow at all screens!
+   3. RESPONSIVE BREAKPOINTS: TABLET ONLY (769px - 1120px)
+   Mobile (< 768px) is comprehensively governed by css/mobile.css.
+   Desktop (> 900px) is strictly preserved without modification.
    ============================================================================= */
 
-@media (max-width: 1120px) {
+@media (max-width: 1120px) and (min-width: 901px) {
   .header-inner {
     padding: 8px 14px;
     gap: 8px;
@@ -483,62 +484,32 @@ html, body {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px) and (min-width: 769px) {
   .header-inner {
     flex-wrap: wrap;
+    row-gap: 8px;
+    padding: 8px 14px;
+  }
+  .brand-link {
+    order: 1;
+    flex-shrink: 0;
+  }
+  .location-picker-wrap {
+    order: 2;
+    flex-shrink: 1;
+  }
+  .header-actions {
+    order: 3;
+    margin-left: auto;
+    flex-shrink: 0;
   }
   .citizen-nav {
-    order: 3;
+    order: 4;
     width: 100%;
     justify-content: center;
     margin-top: 4px;
   }
-  .location-picker-wrap {
-    order: 2;
-  }
-  .header-actions {
-    order: 2;
-  }
   .citizen-main {
     padding: 14px 10px;
-  }
-}
-
-@media (max-width: 600px) {
-  .header-inner {
-    padding: 8px 10px;
-  }
-  .brand-sub {
-    display: none;
-  }
-  .brand-title {
-    font-size: 1.05rem;
-  }
-  .location-trigger-btn {
-    max-width: 120px;
-    font-size: 0.72rem;
-    padding: 4px 8px;
-  }
-  .btn-profile-header span:last-child {
-    display: none;
-  }
-  .btn-authority .btn-auth-label {
-    display: none;
-  }
-  .nav-link {
-    padding: 4px 8px;
-    font-size: 0.72rem;
-  }
-}
-
-@media (max-width: 380px) {
-  .location-trigger-btn {
-    max-width: 95px;
-  }
-  .nav-link span:last-child {
-    display: none;
-  }
-  .nav-link {
-    padding: 5px 8px;
   }
 }

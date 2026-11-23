@@ -61,6 +61,17 @@ window.MumbAIR.MAP = (function(){
       attribution: '&copy; Esri &mdash; Mumbai Street Map'
     });
 
+    var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: '&copy; Esri &mdash; High-Resolution Satellite'
+    });
+
+    var esriLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18
+    });
+
+    var esriSatellite = L.layerGroup([esriSat, esriLabels]);
+
     var esriCanvas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 16,
       attribution: '&copy; Esri &mdash; Light Gray Canvas'
@@ -68,18 +79,11 @@ window.MumbAIR.MAP = (function(){
 
     var osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &middot; HOT'
+      attribution: '&copy; OpenStreetMap contributors &middot; HOT'
     });
 
     // Default to detailed street map
     esriStreet.addTo(mapInstance);
-
-    // Add Basemap switcher control
-    L.control.layers({
-      "🗺️ Detailed Streets (Esri)": esriStreet,
-      "🎨 Light Canvas (Esri)": esriCanvas,
-      "🌍 Humanitarian (OSM HOT)": osmHot
-    }, null, { position: 'topright', collapsed: true }).addTo(mapInstance);
 
     // Vector Coastline Boundary polygon (provides geographic context even if offline)
     L.polygon(MUMBAI_COASTLINE_COORDS, {
@@ -95,6 +99,23 @@ window.MumbAIR.MAP = (function(){
     wardMarkersLayer = L.layerGroup().addTo(mapInstance);
     reportMarkersLayer = L.layerGroup().addTo(mapInstance);
     userLocationLayer = L.layerGroup().addTo(mapInstance);
+    var hotspotLayer = L.layerGroup().addTo(mapInstance);
+
+    // Seed Environmental Inversion & Industrial Hotspot Risk Zones
+    renderHotspotZones(hotspotLayer);
+
+    // Add Basemap switcher control
+    L.control.layers({
+      "🗺️ Detailed Streets": esriStreet,
+      "🛰️ Satellite Imagery": esriSatellite,
+      "🎨 Light Canvas": esriCanvas,
+      "🌍 OpenStreetMap": osmHot
+    }, {
+      "🏛️ CAAQMS Monitoring Nodes": wardMarkersLayer,
+      "🚨 Citizen Violation Reports": reportMarkersLayer,
+      "🔥 Inversion & Industrial Hotspots": hotspotLayer,
+      "🌐 Dispersion Footprints": footprintLayer
+    }, { position: 'topright', collapsed: true }).addTo(mapInstance);
 
     invalidateSize();
 
@@ -362,6 +383,83 @@ window.MumbAIR.MAP = (function(){
     mapInstance.setView([CONFIG.DEFAULT_COORDS.lat, CONFIG.DEFAULT_COORDS.lng], 11, { animate: true });
   }
 
+  function renderHotspotZones(layer){
+    if(!layer) return;
+    var HOTSPOTS = [
+      {
+        name: 'Mahul / Chembur Refinery Flare Corridor',
+        bounds: [[19.005, 72.885], [19.045, 72.915]],
+        color: '#DC2626',
+        vector: 'High Mercaptan, VOC & SO2 Nocturnal Inversion',
+        risk: 'CRITICAL'
+      },
+      {
+        name: 'Deonar Solid Waste Landfill Perimeter',
+        bounds: [[19.055, 72.918], [19.080, 72.942]],
+        color: '#EA580C',
+        vector: 'Deep Subsurface Methane Smoldering & PM2.5 Flaring',
+        risk: 'HIGH'
+      },
+      {
+        name: 'Bandra-Kurla Complex (BKC) Commercial Transit Basin',
+        bounds: [[19.058, 72.858], [19.076, 72.875]],
+        color: '#D97706',
+        vector: 'Arterial Fleet Congestion & Metro Demolition Particulate',
+        risk: 'ELEVATED'
+      },
+      {
+        name: 'Kurla West / Mithi River Scrap Salvage Cluster',
+        bounds: [[19.068, 72.870], [19.088, 72.890]],
+        color: '#DC2626',
+        vector: 'Unregulated Wire Burning & Plastic Reclamation Emissions',
+        risk: 'CRITICAL'
+      },
+      {
+        name: 'Andheri-Goregaon SV Road Construction Strip',
+        bounds: [[19.125, 72.835], [19.155, 72.852]],
+        color: '#D97706',
+        vector: 'High-Density Redevelopment Demolition & Road Transit Dust',
+        risk: 'ELEVATED'
+      }
+    ];
+
+    HOTSPOTS.forEach(function(h){
+      var rect = L.rectangle(h.bounds, {
+        color: h.color,
+        weight: 1.5,
+        fillColor: h.color,
+        fillOpacity: 0.16,
+        dashArray: '5, 5'
+      });
+      rect.bindPopup(
+        '<div style="min-width:210px;">' +
+          '<div style="font-weight:800; font-size:13px; color:' + h.color + '">⚠️ ' + h.name + '</div>' +
+          '<div style="font-size:11px; font-weight:700; color:#475569; margin-top:2px;">Environmental Risk: <span class="ops-badge" style="background:' + (h.risk === 'CRITICAL' ? '#FEE2E2; color:#991B1B;' : '#FEF3C7; color:#92400E;') + '">' + h.risk + '</span></div>' +
+          '<div style="font-size:11.5px; color:#334155; margin-top:6px; line-height:1.4;">' + h.vector + '</div>' +
+          '<div style="font-size:10.5px; color:#64748B; margin-top:6px;">Synced with BMC Environmental Operations & MPCB Continuous Air Monitoring.</div>' +
+        '</div>'
+      );
+      layer.addLayer(rect);
+    });
+  }
+
+  function toggleFullscreen(wrapperId){
+    var wrapper = document.getElementById(wrapperId || 'mapCanvasWrapper');
+    if(!wrapper) return;
+    if(!document.fullscreenElement){
+      if(wrapper.requestFullscreen){
+        wrapper.requestFullscreen();
+      } else if(wrapper.webkitRequestFullscreen){
+        wrapper.webkitRequestFullscreen();
+      }
+    } else {
+      if(document.exitFullscreen){
+        document.exitFullscreen();
+      }
+    }
+    setTimeout(invalidateSize, 200);
+  }
+
   return {
     initMap: initMap,
     initMiniMap: initMiniMap,
@@ -371,6 +469,7 @@ window.MumbAIR.MAP = (function(){
     searchAndZoom: searchAndZoom,
     locateUser: locateUser,
     toggleLayer: toggleLayer,
+    toggleFullscreen: toggleFullscreen,
     resetView: resetView
   };
 })();

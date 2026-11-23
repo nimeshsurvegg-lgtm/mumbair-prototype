@@ -249,6 +249,29 @@ window.MumbAIR.OPERATIONS = (function(){
     var user = getCurrentUser();
     renderSidebarNav(user);
     renderModule(moduleId);
+
+    // Update authority mobile bottom nav
+    document.querySelectorAll('.ops-bottom-nav .bottom-nav-item').forEach(function(item){
+      item.classList.toggle('active', item.getAttribute('data-ops-module') === moduleId);
+    });
+    toggleMobileSidebar(false);
+  }
+
+  /**
+   * Toggle Mobile Off-Canvas Sidebar
+   */
+  function toggleMobileSidebar(force){
+    var sidebar = document.getElementById('opsSidebar');
+    var backdrop = document.getElementById('opsMobileBackdrop');
+    if(!sidebar) return;
+    var isOpen = force !== undefined ? force : !sidebar.classList.contains('mobile-open');
+    if(isOpen){
+      sidebar.classList.add('mobile-open');
+      if(backdrop) backdrop.classList.remove('hidden');
+    } else {
+      sidebar.classList.remove('mobile-open');
+      if(backdrop) backdrop.classList.add('hidden');
+    }
   }
 
   /**
@@ -1425,10 +1448,14 @@ window.MumbAIR.OPERATIONS = (function(){
         '</div>' +
         '<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">' +
           reportTypes.map(function(rep){
+            var studioType = rep.id === 'ward_performance' ? 'WARD_PERFORMANCE' : (rep.id === 'dept_sla' ? 'DEPT_OPERATIONS' : 'CITY_ENVIRONMENTAL');
             return '<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:18px;">' +
               '<div style="font-weight:800; font-size:14px; color:#0F172A;">' + rep.title + '</div>' +
               '<div style="font-size:12px; color:#64748B; margin:6px 0 14px;">' + rep.desc + '</div>' +
-              '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.OPERATIONS.exportCityCsv()">📥 Download Dataset (CSV)</button>' +
+              '<div style="display:flex; gap:8px;">' +
+                '<button class="btn btn-sm btn-primary" onclick="window.MumbAIR.REPORT_STUDIO.openStudio({ type: \'' + studioType + '\' })">📑 Open in Report Studio &amp; PDF</button>' +
+                '<button class="btn btn-sm btn-outline" onclick="window.MumbAIR.REPORT_STUDIO.exportCsv()">📥 Export CSV</button>' +
+              '</div>' +
             '</div>';
           }).join('') +
         '</div>' +
@@ -2115,6 +2142,7 @@ window.MumbAIR.OPERATIONS = (function(){
     executeBulkDept: executeBulkDept,
     exportCityCsv: exportCityCsv,
     exportFilteredInboxCsv: exportFilteredInboxCsv,
+    toggleMobileSidebar: toggleMobileSidebar,
     runAssistantQuery: runAssistantQuery,
     // Backward compatibility hooks
     renderFieldOps: function(){ initAuthorityShell(); },

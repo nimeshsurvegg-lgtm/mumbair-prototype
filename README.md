@@ -1,251 +1,389 @@
-<div align="center">
-  <h1>🌬️ MumbAIR</h1>
-  <h3><em>Smart City Environmental Intelligence &amp; Municipal Operations Platform for Greater Mumbai</em></h3>
-  <p><strong>"Observe → Understand → Report → Assign → Investigate → Act → Verify → Improve"</strong></p>
-  <p><em>Official Civic Technology &amp; Municipal Operations Suite for the 24 Administrative Wards of Greater Mumbai</em></p>
-</div>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5">
-  <img src="https://img.shields.io/badge/CSS3-Modular-1572B6?logo=css3&logoColor=white" alt="CSS3">
-  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/Open--Meteo-Live%20Atmospheric%20API-0D9488?logo=air-purifier&logoColor=white" alt="Open-Meteo">
-  <img src="https://img.shields.io/badge/Leaflet-1.9.4-16A34A?logo=leaflet&logoColor=white" alt="Leaflet">
-  <img src="https://img.shields.io/badge/Chart.js-4.4.1-FF6384?logo=chartdotjs&logoColor=white" alt="Chart.js">
-  <img src="https://img.shields.io/badge/Supabase-Enterprise%20Postgres-3ECF8E?logo=supabase&logoColor=white" alt="Supabase">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT">
-</p>
+# 🌬️ MumbAIR
+### *Greater Mumbai Air Quality Intelligence & Civic Action Platform*
+> **"Observe → Understand → Report → Assign → Investigate → Act → Verify → Improve"**
+> *Unified Environmental Surveillance & Municipal Operations Suite for the 24 Administrative Wards of Greater Mumbai (Brihanmumbai Municipal Corporation — BMC / MCGM)*
 
 ---
 
 ## 📖 Table of Contents
-- [Executive Overview](#-executive-overview)
-- [Clean Information Architecture](#-clean-information-architecture)
-- [Public Citizen Portal (Primary Product)](#-public-citizen-portal-primary-product)
-- [Protected Municipal Authority Workspace](#-protected-municipal-authority-workspace)
-- [The Geospatial Intelligence Map](#-the-geospatial-intelligence-map)
-- [Environmental Methodology & CPCB NAQI Calculation](#-environmental-methodology--cpcb-naqi-calculation)
-- [Complaint Lifecycle & SLA Engine](#-complaint-lifecycle--sla-engine)
-- [Smart Duplicate Report Detection](#-smart-duplicate-report-detection)
-- [System Architecture & File Organization](#-system-architecture--file-organization)
-- [Enterprise Supabase PostgreSQL Schema](#-enterprise-supabase-postgresql-schema)
-- [Installation & How to Run](#-installation--how-to-run)
-- [Evaluator & Demo Persona Quick Testing](#-evaluator--demo-persona-quick-testing)
-- [Attribution & License](#-attribution--license)
+1. [Project Overview](#1-project-overview)
+2. [Ecosystem Capabilities (Citizen vs. Authority)](#2-ecosystem-capabilities)
+3. [Technology Stack](#3-technology-stack)
+4. [Application Architecture & Data Flow](#4-application-architecture--data-flow)
+5. [Project Structure & File Inventory](#5-project-structure--file-inventory)
+6. [Local Setup & Startup Instructions](#6-local-setup--startup-instructions)
+7. [API Configuration & Data Ingestion](#7-api-configuration--data-ingestion)
+8. [Authentication & Session Governance](#8-authentication--session-governance)
+9. [Municipal Operations & SLA Workflow Engine](#9-municipal-operations--sla-workflow-engine)
+10. [Geospatial Map Intelligence & Satellite Layers](#10-geospatial-map-intelligence--satellite-layers)
+11. [Appearance & Theme Customization System](#11-appearance--theme-customization-system)
+12. [Adaptive Mobile Experience (360px – 768px)](#12-adaptive-mobile-experience)
+13. [Document & Report Studio (PDF / CSV Exports)](#13-document--report-studio)
+14. [Verified Mumbai News & Environmental Bulletins](#14-verified-mumbai-news--environmental-bulletins)
+15. [BMC Schemes & Municipal Initiatives](#15-bmc-schemes--municipal-initiatives)
+16. [Air Quality Actions & Solutions Center](#16-air-quality-actions--solutions-center)
+17. [Indian National AQI (CPCB) Methodology](#17-indian-national-aqi-cpcb-methodology)
+18. [Security & Role-Based Access Control (RBAC)](#18-security--role-based-access-control-rbac)
+19. [Deployment Guide](#19-deployment-guide)
+20. [System Limitations & Operational Transparency](#20-system-limitations--operational-transparency)
 
 ---
 
-## 🌟 Executive Overview
+## 1. Project Overview
 
-**MumbAIR** is a dedicated environmental intelligence and municipal operations platform purpose-built for the residents and municipal administration of Greater Mumbai (Brihanmumbai Municipal Corporation — BMC / MCGM).
+**MumbAIR** is a dedicated environmental intelligence and municipal operations platform purpose-built for the citizens and municipal authorities of Greater Mumbai. 
 
-The application bridges two distinct worlds with purpose-crafted interfaces:
-1. **The Public Citizen Portal:** An Apple Weather-inspired, light-mode consumer environmental application prioritizing real-time AQI clarity, geospatial discovery, 24-ward monitoring, and frictionless civic reporting.
-2. **The Municipal Operations Command Center:** A strictly separated, role-protected municipal operations workspace where field officers, ward executive officers, department heads, and city administrators investigate, triage, and resolve citizen complaints with verifiable proof.
+Greater Mumbai faces unique micro-climatic atmospheric dynamics: nocturnal coastal temperature inversions, intense arterial traffic congestion, heavy redevelopment demolition dust, refinery flare corridors (Chembur/Mahul), and legacy landfill smoldering (Deonar). 
 
----
-
-## 🧭 Clean Information Architecture
-
-The application strictly avoids overwhelming users with cluttered dashboards. The public citizen experience features a compact top navigation bar with **6 core tabs**:
-
-1. **📊 Home:**
-   - Apple Weather-style Hero AQI card with animated semi-circular SVG arc gauge.
-   - Dynamic CPCB National Air Quality Index calculation with calibrated needle cursor.
-   - Dominant pollutant indicator (`PM2.5` / `PM10`) and Graded Response Action Plan (`GRAP Stage II`) status.
-   - Plain-language health interpretation and sensitive group advisories.
-   - Compact 6-parameter pollutant strip ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{SO}_2$, $\text{CO}$, $\text{O}_3$) benchmarked against CPCB 24-hour limits.
-   - Coastal marine dispersion weather corridor analyzing Arabian Sea onshore breeze vectors.
-   - Quick action shortcuts to the interactive map, violation reporting, and 24h trends.
-
-2. **🧪 Air Quality:**
-   - 24 Greater Mumbai Administrative Wards Directory (Island City, Western Suburbs, Eastern Suburbs).
-   - Real-time station benchmarks, local emission vectors, and instant text filtering.
-   - Interactive side-by-side ward comparator with dynamic Chart.js comparative bars.
-
-3. **🗺️ Explore Map:**
-   - Full-height (620px) Leaflet interactive map centered on Greater Mumbai (`19.0760° N, 72.8777° E`).
-   - Open-source OpenStreetMap standard tiles with Esri World Light Gray fallback (100% free, zero API key required).
-   - Automatic container resize invalidation (`MAP.invalidateSize()`) on tab display.
-   - High-contrast custom HTML pins displaying Ward Code and live AQI value.
-   - Layer toggles: `24 Wards / Stations`, `Dispersion Footprints`, and `Civic Reports`.
-   - Real-time search to zoom and inspect any ward or CAAQMS station.
-   - "Locate Me" button with browser GPS and automatic closest ward detection.
-   - Floating CPCB air quality scale legend.
-
-4. **📈 Trends:**
-   - 24-hour and 48-hour particulate curves ($\text{PM}_{2.5}$ and $\text{PM}_{10}$) powered by live Copernicus CAMS and ECMWF model ingestion.
-   - Deterministic environmental intelligence cards analyzing atmospheric trends and temperature inversion hazards.
-
-5. **📸 Pollution Reports:**
-   - **File a Report Wizard:** 4-step mobile-first reporting flow with category selection, automated administrative ward routing, 1.5 km Haversine duplicate warning, and cryptographic photo watermarking (GPS coordinates, Ward Code, and IST timestamp).
-   - **Track Civic Complaints:** Filterable community stream with citizen upvoting / endorsement and an interactive 9-step resolution timeline.
-
-6. **🔔 Alerts:**
-   - Active Graded Response Action Plan (GRAP Stage II) protocol directives.
-   - Coastal nocturnal inversion warnings.
-   - Deterministic localized AI Environmental Assistant for health and outdoor activity queries.
+MumbAIR bridges the gap between public atmospheric awareness and municipal enforcement by connecting:
+* **Citizens:** Real-time CPCB National AQI, weather context, interactive geospatial map, verified BMC bulletins, practical actions, theme customization, and rapid photo-verified civic reporting.
+* **Municipal Administration (MCGM):** A role-scoped Operations Command workspace where field officers, ward executive officers, department heads, and city administrators triage, dispatch, inspect, mitigate, and certify environmental complaints under mandatory SLA timeframes.
 
 ---
 
-## 🔒 Protected Municipal Authority Workspace
+## 2. Ecosystem Capabilities
 
-Municipal operations are **strictly separated** from the citizen portal and accessed via the protected entry point:
-* **Authority Login:** `#authority` (or clicking the "Municipal Authority" button in the top header).
-* **Authority Command Workspace:** Accessible only upon successful authentication.
+### 🧑‍💼 Public Citizen Portal
+* **Real-Time AQI Hero Dashboard:** Apple Weather-inspired card with dynamic SVG arc gauge, CPCB categorization (0–500+ scale), and dominant pollutant detection ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$).
+* **Surface Weather Context:** Ambient temperature, relative humidity, wind velocity, and onshore Arabian Sea breeze direction ($290^\circ$ Westerly).
+* **6-Parameter Pollutant Breakdown:** Real-time concentrations of $\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{SO}_2$, $\text{CO}$, and $\text{O}_3$ benchmarked against CPCB 24-hour National Ambient Air Quality Standards (NAAQS).
+* **Interactive Map:** Esri World Street, Esri Satellite, Light Canvas, and OSM HOT basemaps with 24 ward pins, citizen complaint pins, and industrial inversion hazard zones.
+* **Civic Reporting Wizard:** 3-step complaint filing with 1.5 km Haversine duplicate detection, automated ward routing, and photo watermarking (GPS + timestamp).
+* **Complaint Tracking Feed:** Public endorsement upvoting, category filtering, and 9-step lifecycle progression timeline.
+* **Environmental Bulletin & Schemes:** Curated, verifiable updates from MCGM, MPCB, and CPCB; bookmarking and official circular links.
+* **Solutions Center:** Actionable citizen health recommendations (N95 mask standards) and municipal progress tracking.
+* **Appearance Customizer:** 6 professionally designed themes with immutable CPCB AQI severity colors.
+* **Report Studio:** One-click citizen complaint receipts with printable PDF formatting and CSV download.
 
-### Role-Based Access Hierarchy:
-* **⚡ Field Operations Officer (`FIELD_OFFICER`):**
-  - Mobile-first inspection queue with SLA clocks (`On Track`, `Due Soon`, `SLA Breached`).
-  - Automated field protocol checklist generated by category.
-  - Action taken submission with before/after mitigation verification.
-* **🏛️ Ward Executive Officer (`WARD_OFFICER`):**
-  - Ward desk overview for the assigned ward (e.g., Ward M/E Chembur).
-  - Unassigned complaints triage with officer dispatch workflow.
-  - Workload balancing and public ward advisory broadcasting.
-* **🏢 Department Head (`DEPARTMENT_HEAD`):**
-  - Multi-ward departmental queue (Solid Waste Management, Air Pollution Control, Roads, Building Regulation).
-  - Inter-ward SLA compliance analytics and overdue escalation monitor.
-* **🌆 City Operations Administrator (`CITY_ADMIN`):**
-  - Greater Mumbai 24-ward compliance matrix.
-  - City-wide pollution hotspots and public transparency benchmarks.
-* **🔒 Super Administrator (`SUPER_ADMIN`):**
-  - Immutable security and operational audit trail ledger.
-  - Role management and system configuration.
-
----
-
-## 🗺️ The Geospatial Intelligence Map
-
-The Leaflet map engine is designed with zero display glitches:
-* **Explicit Container Dimensions:** Guaranteed 620px height with responsive resizing for mobile viewports.
-* **Automatic Layout Invalidation:** Explicitly calls `map.invalidateSize()` whenever the Map tab becomes visible or the browser window is resized.
-* **Smart Marker Popups:** Rich cards displaying station metadata, live AQI, category color, primary emission sources, and quick action links.
-* **Real Geolocation:** Browser GPS integration with Haversine distance calculations to pinpoint the user's nearest administrative ward.
+### 🏛️ Municipal Operations Portal (`#authority`)
+* **Role-Based Authentication:** Protected login with pre-configured Evaluator Quick Switcher for instant testing across 5 personas.
+* **Command Center:** Real-time caseload KPIs (Active Caseload, In Field, SLA Breached, Resolution Rate), Operational Attention triage panel, and 24-Ward Operations Ledger.
+* **Complaint Inbox:** Central registry with multi-column filtering, bulk assignment, priority overrides, and CSV export.
+* **1-Click Dispatch & Assignment:** Assigns available field officers based on live workload, sets mandatory SLA resolution benchmarks (6h, 24h, 48h, 72h), and attaches supervisor directives.
+* **Field Inspection Engine:** Mobile-optimized checklist execution for on-ground officers, optical opacity checks, spot-fine notice triggers (MMC Act Section 368), and mitigation evidence submission.
+* **Supervisor Resolution Verification:** Side-by-side photographic evidence comparison (Citizen Proof vs. Field Mitigation Proof) with 1-click certification or rejection.
+* **24 Administrative Wards & Departments Matrix:** Detailed workload and compliance scorecards across SWM, APC, BUILDING, ROADS, DRAINAGE, and HEALTH.
+* **Resource & Fleet Management:** Real-time tracking of anti-smog misting cannons, mobile CAAQMS vans, and mechanized sweepers.
+* **Ops AI Assistant:** Deterministic calculation queries for operational bottlenecks, recidivism clusters, and executive briefings.
+* **Audit Trail Ledger:** Immutable, append-only log of all triage, dispatch, inspection, and verification actions.
 
 ---
 
-## 🧪 Environmental Methodology & CPCB NAQI Calculation
+## 3. Technology Stack
 
-MumbAIR strictly adheres to the official **Central Pollution Control Board (CPCB)** National Air Quality Index linear interpolation formula:
-
-$$I_p = \frac{I_{HI} - I_{LO}}{B_{HI} - B_{LO}} \times (C_p - B_{LO}) + I_{LO}$$
-
-Where:
-* $C_p$ is the pollutant concentration.
-* $B_{HI}$ and $B_{LO}$ are the breakpoint concentrations greater and smaller than $C_p$.
-* $I_{HI}$ and $I_{LO}$ are the corresponding sub-index values.
-* The overall $\text{AQI} = \max(I_{\text{PM2.5}}, I_{\text{PM10}}, I_{\text{NO2}}, \dots)$ with the dominant pollutant explicitly surfaced.
-
-### Indian National AQI Breakpoints:
-| Category | AQI Range | Color Token | Health Statement |
-| :--- | :---: | :---: | :--- |
-| **Good** | 0 – 50 | `#16A34A` | Minimal health impact. |
-| **Satisfactory** | 51 – 100 | `#65A30D` | Minor breathing discomfort to sensitive people. |
-| **Moderate** | 101 – 200 | `#CA8A04` | Breathing discomfort to people with lung disease/asthma. |
-| **Poor** | 201 – 300 | `#EA580C` | Breathing discomfort to most people on prolonged exposure. |
-| **Very Poor** | 301 – 400 | `#DC2626` | Respiratory illness on prolonged exposure. |
-| **Severe** | 401 – 500+ | `#7F1D1D` | Affects healthy people and seriously impacts sensitive groups. |
+* **Frontend Framework:** Vanilla Modern JavaScript (ES6+), HTML5, CSS3. Modular, zero-build architecture; runs directly in modern browsers or local HTTP servers.
+* **Mapping Engine:** [Leaflet 1.9.4](https://leafletjs.com/) (bundled locally in `/vendor/leaflet/` for offline resilience).
+* **Basemap Tile Providers:**
+  * Esri World Street Map (`https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}`)
+  * Esri World Imagery Satellite (`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`)
+  * Esri World Gray Canvas (`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`)
+  * OpenStreetMap Humanitarian (`https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png`)
+* **Data Visualization:** [Chart.js 4.4.1](https://www.chartjs.org/) (bundled locally in `/vendor/chartjs/`).
+* **Atmospheric Data Gateway:** [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) & Copernicus Atmosphere Monitoring Service (CAMS).
+* **Weather Telemetry Gateway:** Open-Meteo Weather Forecast API (ECMWF high-resolution model).
+* **State & Persistence:** Browser `localStorage` with reactive multi-dashboard synchronization (`mumbair_state_v3`, `mumbair_auth_session_v3`, `mumbair_theme_preference`).
+* **Database Schema (Production Ready):** PostgreSQL schema with Row-Level Security (RLS) located in `/supabase/schema.sql`.
 
 ---
 
-## 🔍 Smart Duplicate Report Detection
+## 4. Application Architecture & Data Flow
 
-Before a citizen submits a complaint, MumbAIR performs a spatial proximity query using the **Haversine formula**:
-
-$$d = 2R \arcsin\left( \sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)} \right)$$
-
-If an active complaint exists within **1.5 kilometers** under the same category, MumbAIR triggers an alert banner prompting the citizen to **Endorse Existing Report (+1 Upvote)** to escalate municipal priority, or proceed with a separate specific ticket.
+```
+[ Citizen Report Filed ] ───► [ Haversine Duplicate Check ] ───► [ Storage State (mumbair_state_v3) ]
+                                                                        │
+    ┌───────────────────────────────────────────────────────────────────┼───────────────────────────┐
+    ▼                                                                   ▼                           ▼
+[ Citizen Tracker Feed ]                                    [ Ward Officer Triage ]     [ City Admin Ledger ]
+    │                                                                   │                           │
+    │                                                       [ 1-Click Dispatch ]                    │
+    │                                                                   │                           │
+    │                                                       [ Assigned to Field Officer ]           │
+    │                                                                   │                           │
+    │                                                       [ Field Checklist & Photo ]             │
+    │                                                                   │                           │
+    │                                                       [ Resolution Submitted ]                │
+    │                                                                   │                           │
+    │                                                       [ Supervisor Sign-Off ]                 │
+    │                                                                   │                           │
+[ Status: RESOLVED ] ◄──────────────────────────────────────────────────┴───────────────────────────┘
+```
 
 ---
 
-## 🏗️ System Architecture & File Organization
+## 5. Project Structure & File Inventory
 
 ```
 mumbair-prototype/
-├── index.html                 # Single Page Application host with clean citizen & authority portals
+├── index.html                   # Master application document (Citizen & Municipal Authority shells)
+├── serve.js                     # Zero-dependency local Node.js HTTP server
+├── start.bat                    # One-click Windows launch script
+├── README.md                    # Complete project documentation
 ├── css/
-│   ├── base.css               # Design tokens, typography, CPCB color palette & reset
-│   ├── layout.css             # Topbar navigation, citizen layout, authority layout, breakpoints
-│   ├── components.css         # Buttons, modals, badges, location selector drawer, toasts
-│   ├── dashboard.css          # Apple Weather AQI hero, circular arc gauge, pollutant strip
-│   ├── map.css                # Leaflet sizing, custom ward pins, legend, search bar
-│   ├── reports.css            # Reporting wizard, canvas photo watermarking, complaint timeline
-│   └── operations.css         # Municipal authority command centers, SLA tags, tables
+│   ├── base.css                 # Design tokens, typography, CSS resets, AQI semantic colors
+│   ├── theme.css                # 6-theme appearance engine & dark mode tokens
+│   ├── layout.css               # Header, citizen grid, sticky navigation, and desktop viewport
+│   ├── mobile.css               # Purpose-built adaptive mobile styling & bottom navigation
+│   ├── components.css           # Buttons, modals, form inputs, status badges, and cards
+│   ├── dashboard.css            # AQI hero gauge card, weather tiles, and pollutant grid
+│   ├── map.css                  # Leaflet canvas sizing, custom HTML pins, popups, and layer toggles
+│   ├── reports.css              # Reporting wizard, timelines, and Report Studio print stylesheet
+│   └── operations.css           # Municipal Authority V2 command bar, sidebar, KPI cards, and modals
 ├── js/
-│   ├── config.js              # Roles, demo accounts, departments, SLA policies, 24 wards
-│   ├── utils.js               # Haversine distance, CPCB sub-index math, time formatters
-│   ├── storage.js             # LocalStorage abstraction, state persistence, voter fingerprinting
-│   ├── api.js                 # Open-Meteo client, 15m TTL caching, offline fallback
-│   ├── auth.js                # Citizen guest vs registered mode & protected authority session
-│   ├── workflow.js            # 9-state complaint state machine, SLA clocks, audit logger
-│   ├── notifications.js       # In-app notification dispatcher with unread counters
-│   ├── ai-assistant.js        # Deterministic local AI intelligence (Citizen & Municipal)
-│   ├── map.js                 # Leaflet interactive map, custom HTML markers, popups, search
-│   ├── charts.js              # Chart.js time-series curves, ward comparisons
-│   ├── insights.js            # Environmental intelligence & health advisories
-│   ├── reports.js             # Civic reporting wizard, duplicate detection, watermarking
-│   ├── operations.js          # Municipal authority command centers & officer workflows
-│   └── app.js                 # Master controller, tab router, portal switcher, event bus
+│   ├── config.js                # 24 Mumbai administrative wards, CPCB breakpoints, and role metadata
+│   ├── utils.js                 # Haversine distance, CPCB sub-index formulas, date/time formatters
+│   ├── storage.js               # Seed database: 14 interconnected complaints, 13 officers, 8 fleet units
+│   ├── api.js                   # Open-Meteo & Copernicus CAMS atmospheric API client
+│   ├── auth.js                  # Citizen session & Municipal role-based authentication manager
+│   ├── workflow.js              # State-machine transition methods, SLA calculations, audit trail
+│   ├── theme.js                 # Citizen appearance customizer & theme switcher
+│   ├── map.js                   # Leaflet map controller, multi-basemap layers, and hotspot polygons
+│   ├── charts.js                # Chart.js time-series curves and ward comparative bar charts
+│   ├── insights.js              # Deterministic environmental intelligence rules
+│   ├── reports.js               # Citizen complaint wizard, duplicate detection, and upvoting
+│   ├── report-studio.js         # Report Studio document generation, PDF print layout, and CSV exports
+│   ├── civic-bulletin.js        # Verified Mumbai news, MPCB directives, and BMC schemes
+│   ├── solutions.js             # Air Quality Action Center & municipal mitigation progress tracker
+│   ├── notifications.js         # Unified in-app alerts and advisory drawer
+│   ├── ai-assistant.js          # Local environmental health assistant
+│   ├── operations.js            # Operations Command V2 controller (18 operational modules)
+│   └── app.js                   # Application coordinator, hash routing, and tab lifecycles
 ├── data/
-│   └── mumbai-wards.json      # Structured municipal ward geospatial metadata (24 wards)
+│   └── mumbai-wards.json        # GeoJSON metadata for 24 administrative wards
 ├── supabase/
-│   └── schema.sql             # Enterprise PostgreSQL schema, 18 tables, RLS policies & triggers
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── LICENSE
-└── README.md
+│   └── schema.sql               # Production PostgreSQL schema, tables, foreign keys, and RLS policies
+└── vendor/
+    ├── leaflet/                 # Leaflet 1.9.4 offline library & marker assets
+    └── chartjs/                 # Chart.js 4.4.1 offline UMD bundle
 ```
 
 ---
 
-## 🗄️ Enterprise Supabase PostgreSQL Schema
+## 6. Local Setup & Startup Instructions
 
-The [`supabase/schema.sql`](file:///C:/Users/Nimesh/.gemini/antigravity/scratch/mumbair-prototype/supabase/schema.sql) file provides a production-grade PostgreSQL relational backend:
-- **18 Tables:** `profiles`, `roles`, `zones`, `wards`, `departments`, `complaints`, `complaint_evidence`, `complaint_votes`, `complaint_status_history`, `field_inspections`, `resolution_verifications`, `notifications`, `announcements`, `audit_logs`.
-- **Row Level Security (RLS):** Strict public read vs authenticated officer write rules.
-- **Audit Trigger:** Automated status progression tracking, upvote increments, and tamper-evident audit logging.
+### Prerequisites
+* Any modern web browser (Google Chrome, Microsoft Edge, Mozilla Firefox, Safari).
+* Optional: Node.js (v16+) for the built-in zero-dependency local server.
 
----
+### Option A: Using Built-in Node.js Server (Recommended)
+1. Open your terminal in the project directory:
+   ```powershell
+   cd C:\Users\Nimesh\.gemini\antigravity\scratch\mumbair-prototype
+   ```
+2. Start the lightweight HTTP server:
+   ```powershell
+   node serve.js
+   ```
+3. Open your browser and navigate to:
+   ```
+   http://localhost:3000
+   ```
 
-## 💻 Installation & How to Run
-
-### Zero Build Dependencies — Double-Click to Launch
-No Node.js, npm, Webpack, or build step is required. The application executes directly in modern web browsers:
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/nimeshsurvegg-lgtm/mumbair-prototype.git
-cd mumbair-prototype
-
-# 2. Open index.html directly in your web browser
-# On Windows:
-start index.html
-
-# On macOS:
-open index.html
-
-# On Linux:
-xdg-open index.html
-```
+### Option B: Direct File Execution
+Double-click `index.html` or open `file:///C:/Users/Nimesh/.../index.html` in any browser. All vendor libraries (Leaflet, Chart.js) and Esri tile layers are designed with zero referer blocks and zero CORS restrictions.
 
 ---
 
-## 🎯 Evaluator & Demo Persona Quick Testing
+## 7. API Configuration & Data Ingestion
 
-For presentations, hackathon evaluations, and reviewer grading, the **Municipal Authority Login** screen (`#authority` or clicking `"Municipal Authority"` in the header) includes a **One-Click Evaluator Persona Switcher**:
+MumbAIR uses free, public, and open atmospheric APIs requiring **zero API keys** and **no environment secrets**:
 
-* ⚡ **Field Officer:** Logs in as Inspector *Sanjay Shinde* (SWM, Ward M/E). Test the field queue, AI checklist, and resolution evidence submission.
-* 🏛️ **Ward Officer:** Logs in as *Dr. Priya Kamble* (Ward M/E Executive). Test unassigned complaint triage and officer dispatching.
-* 🏢 **Dept Head:** Logs in as *Vikram Deshmukh* (Air Pollution Control). Test inter-ward SLA compliance and escalation monitoring.
-* 🌆 **City Admin:** Logs in as *Municipal Commissioner Operations*. Test city-wide 24-ward matrix and CSV export.
-* 🔒 **Super Admin:** Logs in as *Root System Administrator*. Test immutable audit logs and security permissions.
+| Endpoint | Provider | Parameters | Refresh Rate |
+| :--- | :--- | :--- | :--- |
+| `https://air-quality-api.open-meteo.com/v1/air-quality` | Open-Meteo / Copernicus CAMS | `pm10, pm2_5, carbon_monoxide, nitrogen_dioxide, sulphur_dioxide, ozone` | Every 10 mins |
+| `https://api.open-meteo.com/v1/forecast` | Open-Meteo / ECMWF | `temperature_2m, relative_humidity_2m, wind_speed_10m, wind_direction_10m` | Every 10 mins |
+
+### Fallback Architecture
+If the client machine is offline or internet connectivity is disrupted, MumbAIR automatically falls back to calibrated station baseline records seeded in `js/config.js` to ensure the application remains functional.
 
 ---
 
-## 📜 Attribution & License
+## 8. Authentication & Session Governance
 
-* **Atmospheric Data:** [Open-Meteo](https://open-meteo.com/) (Licensed under CC BY 4.0 / Copernicus CAMS & ECMWF).
-* **Map Data:** &copy; [OpenStreetMap](https://www.openstreetmap.org/) contributors, &copy; Esri. Zero API key required.
-* **Typography:** Archivo, IBM Plex Sans, IBM Plex Mono (SIL Open Font License).
-* **Software License:** Distributed under the **MIT License**. See [LICENSE](file:///C:/Users/Nimesh/.gemini/antigravity/scratch/mumbair-prototype/LICENSE) for details.
+### 1. Citizen Portal
+* **Guest Mode:** Enabled by default. Citizens can browse real-time AQI, explore the map, read news, review solutions, and customize themes without logging in.
+* **Citizen Profile:** Citizens can save their name, contact details, and pinned home ward for complaint tracking.
+
+### 2. Municipal Authority Portal (`#authority`)
+Protected access with 5 pre-configured personas for demonstration and evaluation:
+
+| Persona | Name | Role Key | Scope |
+| :--- | :--- | :--- | :--- |
+| **Field Officer** | Sanjay Shinde | `FIELD_OFFICER` | Ward M/E, Solid Waste Management |
+| **Ward Officer** | Dr. Priya Kamble | `WARD_OFFICER` | Ward M/E, All Departments |
+| **Department Head** | Vikram Deshmukh | `DEPARTMENT_HEAD` | City-wide, Air Pollution Control |
+| **City Administrator** | Commissioner Ops | `CITY_ADMIN` | All 24 Wards, All Departments |
+| **Super Admin** | Root System Admin | `SUPER_ADMIN` | System-wide Security & Governance |
+
+---
+
+## 9. Municipal Operations & SLA Workflow Engine
+
+Complaints transition through a strict, auditable state machine:
+
+$$\text{SUBMITTED} \longrightarrow \text{UNDER\_REVIEW} \longrightarrow \text{ASSIGNED} \longrightarrow \text{IN\_PROGRESS} \longrightarrow \text{RESOLUTION\_SUBMITTED} \longrightarrow \text{RESOLVED} \longrightarrow \text{CLOSED}$$
+
+### SLA Benchmark Timelines
+* **URGENT (Refinery Sulfur / Open Garbage Burning):** 6-Hour Resolution Target.
+* **HIGH (Active Construction Dust / Landfill Smoldering):** 24-Hour Resolution Target.
+* **MEDIUM (Idling Heavy Vehicles / Road Silt):** 48-Hour Resolution Target.
+* **LOW (General Environmental Inquiries):** 72-Hour Resolution Target.
+
+---
+
+## 10. Geospatial Map Intelligence & Satellite Layers
+
+The central interactive map features:
+1. **Four Permitted Basemap Styles:**
+   * 🗺️ Detailed Streets (Esri World Street Map)
+   * 🛰️ Satellite Imagery (Esri World Imagery + Labels)
+   * 🎨 Light Canvas (Esri Light Gray Base)
+   * 🌍 OpenStreetMap (Humanitarian OSM HOT)
+2. **Layer Overlays:**
+   * 🏛️ 24 Official CAAQMS Monitoring Nodes (Color-coded by live CPCB category).
+   * 🚨 Citizen Violation Reports (Categorized icons: 🔥 Burning, 🏗️ Construction, 🏭 Industrial).
+   * 🔥 Industrial Inversion Risk Hotspots (Chembur, Mahul, Deonar, BKC, Kurla).
+   * 🌐 Atmospheric Dispersion Footprint Rings.
+3. **Controls:**
+   * Instant Search & Fly-To animation.
+   * ⛶ Native HTML5 Fullscreen mode.
+   * 🎯 GPS User Geolocation with nearest ward calculation.
+   * 🔄 Greater Mumbai view reset.
+
+---
+
+## 11. Appearance & Theme Customization System
+
+Citizens can customize their visual experience via the **🎨 Appearance** button. The current Antigravity design remains the **DEFAULT**:
+
+1. **Mumbai Original (Default):** Antigravity palette (Brand teal `#0D9488`, off-white canvas `#F8FAFC`, slate typography `#0F172A`).
+2. **Coastal Breeze:** Marine azure (`#0284C7`), sky cyan, fresh ocean mist surfaces.
+3. **Forest & Earth:** Botanical foliage green (`#15803D`), eco sage, warm earthy cards.
+4. **Sunset Mumbai:** Warm coral (`#EA580C`), golden amber, Marine Drive twilight tones.
+5. **Midnight Air:** OLED high-contrast dark mode (`#090D16`), low-glare card surfaces, neon cyan telemetry.
+6. **Minimal Monochrome:** Editorial zinc and charcoal grayscale palette with stark high-contrast typography.
+
+> **Life-Safety Mandate:** CPCB AQI severity colors (`Good #10B981`, `Satisfactory #84CC16`, `Moderate #F59E0B`, `Poor #F97316`, `Very Poor #EF4444`, `Severe #991B1B`) remain **identical across all themes** to preserve universal environmental health meaning.
+
+---
+
+## 12. Adaptive Mobile Experience
+
+Rather than shrinking the desktop layout, MumbAIR provides a purpose-built mobile interface:
+* **Citizen Mobile Layout ($\le 768\text{px}$):**
+  * Slim top header (Brand + Ward selector + Theme button + Bell + Lock).
+  * Fixed bottom navigation bar with 5 thumb-friendly items: `📊 Home`, `🗺️ Map`, `📸 Report` (raised circular action button), `📈 Trends`, and `👤 Profile`.
+  * Touch targets are a minimum of $44\text{px} \times 44\text{px}$.
+  * Minimum input font size of $15\text{px}$ prevents mobile auto-zoom.
+* **Municipal Authority Mobile Layout ($\le 768\text{px}$):**
+  * Fixed bottom bar: `⚡ Command`, `📥 Inbox`, `🗺️ Map`, `🔍 Inspect`, `☰ More`.
+  * Mobile off-canvas drawer replaces the desktop sidebar.
+  * Field inspection view optimized for on-ground officers with one-tap protocol checklists.
+
+---
+
+## 13. Document & Report Studio
+
+Accessible from both the Citizen portal and Municipal Authority portal:
+* **Citizen Report Dossier:** Official complaint proof receipt with Ref ID, filing timestamp, GPS location, ward code, timeline, and municipal disclaimer.
+* **24-Ward Performance Audit:** Compliance percentages, open backlogs, and resolution rates.
+* **Department Operations Report:** Workload distribution across SWM, APC, BDR, and RTI.
+* **City State of the Air Report:** City-wide atmospheric summary and meteorological correlations.
+* **Field Inspection Log:** Checklists and spot-fine notices.
+* **Export Options:**
+  * 🖨️ Clean print / PDF view with official BMC header, crest, and metadata tables.
+  * 📥 CSV dataset export for spreadsheet analysis.
+
+---
+
+## 14. Verified Mumbai News & Environmental Bulletins
+
+Curated, verifiable environmental updates sourced from official bodies:
+* **BMC Anti-Smog Gun Mandate:** Deployment of mobile misting cannons under GRAP-II.
+* **MPCB Industrial Telemetry Directive:** Automated flare opacity telemetry for Chembur/Trombay refineries.
+* **Ward Deep Cleaning Drive:** Mechanized street sweeping using treated STP water.
+* **BEST Electric Fleet Milestone:** Addition of zero-emission electric buses on coastal routes.
+* **Miyawaki Afforestation:** Native micro-forests planted across suburban flood zones.
+* **Features:** Search, Category Filters, Bookmark toggles (saved to `localStorage`), and direct links to official municipal portals.
+
+---
+
+## 15. BMC Schemes & Municipal Initiatives
+
+Dedicated section explaining active environmental programs:
+1. **BMC Deep Cleaning Drive:** Mechanical washing of 1,200 km of road corridors with recycled water.
+2. **GRAP-II 35-Point Guidelines:** 35-foot perimeter barricades and misting cannons for construction sites $> 5,000\text{ m}^2$.
+3. **Mumbai Climate Action Plan (MCAP 2050):** Decarbonization roadmap across mobility, energy, and waste.
+4. **Hyper-Local IoT CAAQMS Sensor Densification:** 300+ calibrated sensors deployed across civic schools and dispensaries.
+
+---
+
+## 16. Air Quality Actions & Solutions Center
+
+* **Citizen Health Guidance:** Evidence-based personal mitigation measures (N95 mask recommendations during Poor/Very Poor AQI, transit choices).
+* **Municipal Progress Tracker:** Real-time completion progress across key municipal mitigation initiatives.
+
+---
+
+## 17. Indian National AQI (CPCB) Methodology
+
+MumbAIR implements the official **Central Pollution Control Board (CPCB)** sub-index formula:
+
+$$I_p = \left[ \frac{I_{\text{HI}} - I_{\text{LO}}}{B_{\text{HI}} - B_{\text{LO}}} \right] \cdot (C_p - B_{\text{LO}}) + I_{\text{LO}}$$
+
+The overall AQI is governed by the **maximum sub-index** among measured pollutants:
+
+$$\text{AQI} = \max(I_{\text{PM2.5}}, I_{\text{PM10}}, I_{\text{NO2}}, I_{\text{SO2}}, I_{\text{CO}}, I_{\text{O3}})$$
+
+| AQI Range | Category | Color Code | Health Impact Descriptor |
+| :--- | :--- | :--- | :--- |
+| **0 – 50** | Good | `#10B981` | Minimal impact; clean air. |
+| **51 – 100** | Satisfactory | `#84CC16` | Minor breathing discomfort to sensitive people. |
+| **101 – 200** | Moderate | `#F59E0B` | Breathing discomfort to people with lungs/asthma/heart disease. |
+| **201 – 300** | Poor | `#F97316` | Breathing discomfort to most people on prolonged outdoor exposure. |
+| **301 – 400** | Very Poor | `#EF4444` | Respiratory illness on prolonged exposure; outdoor activity discouraged. |
+| **401 – 500+** | Severe | `#991B1B` | Severe respiratory impact on healthy people; serious risk to sensitive groups. |
+
+---
+
+## 18. Security & Role-Based Access Control (RBAC)
+
+* **Role Permissions Matrix:**
+  * `FIELD_OFFICER`: View assigned queue, execute field checklists, submit photographic mitigation proof.
+  * `WARD_OFFICER`: Triage ward complaints, dispatch inspectors, certify/reject resolutions, publish ward advisories.
+  * `DEPARTMENT_HEAD`: Departmental caseload allocation, inter-ward routing, fleet management.
+  * `CITY_ADMIN`: City-wide command, 24-ward compliance matrix, decision intelligence.
+  * `SUPER_ADMIN`: Security governance, RBAC matrix inspection, node diagnostics.
+* **Input Sanitization:** All citizen inputs are HTML-escaped using `UTILS.escapeHtml()` to protect against cross-site scripting (XSS).
+* **Audit Trail:** Every status transition logs an immutable audit entry with actor, role, and timestamp.
+
+---
+
+## 19. Deployment Guide
+
+### Static Hosting (GitHub Pages / Netlify / Vercel)
+MumbAIR requires no compile step:
+1. Push the repository to GitHub.
+2. In your repository settings, enable **GitHub Pages** from the `main` branch root.
+3. Your platform will be accessible immediately with full offline caching and Leaflet tile support.
+
+### Backend PostgreSQL Integration (Supabase)
+To connect a live PostgreSQL database:
+1. Create a Supabase project.
+2. Run the SQL statements in [`supabase/schema.sql`](file:///C:/Users/Nimesh/.gemini/antigravity/scratch/mumbair-prototype/supabase/schema.sql).
+3. The schema includes all necessary tables (`profiles`, `complaints`, `inspections`, `audit_logs`, `advisories`, `resources`) with Row-Level Security (RLS) policies enabled.
+
+---
+
+## 20. System Limitations & Operational Transparency
+
+1. **Demonstration Mode:** Municipal authority authentication currently runs in evaluation mode using client-side session state for evaluation and presentation. Connect to Supabase Auth for production deployment.
+2. **Measurement vs. Model Simulation:** Real-time AQI values are ingested via Open-Meteo's Copernicus CAMS European atmospheric reanalysis grid ($\sim 11\text{ km}$ resolution). They represent calibrated atmospheric simulations and are clearly labeled as such to distinguish them from direct physical CAAQMS station inlets.
+3. **Offline Map Tiles:** Vector coastline geometry renders offline. Detailed satellite and street tiles require internet connectivity to reach the Esri ArcGIS servers.
+
+---
+
+<div align="center">
+  <p><strong>MumbAIR — Greater Mumbai Environmental Intelligence Platform</strong></p>
+  <p><em>Built with dedication to open environmental transparency across Maharashtra.</em></p>
+  <p>MIT License &middot; Brihanmumbai Municipal Corporation (BMC / MCGM)</p>
+</div>

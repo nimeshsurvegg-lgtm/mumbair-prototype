@@ -10,12 +10,14 @@
 
   <!-- Design System CSS -->
   <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/map.css">
   <link rel="stylesheet" href="css/reports.css">
   <link rel="stylesheet" href="css/operations.css">
+  <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body class="theme-light">
 
@@ -67,6 +69,14 @@
             <span class="nav-icon">📸</span>
             <span>Reports</span>
           </button>
+          <button class="nav-link" data-tab="tab-bulletin">
+            <span class="nav-icon">📰</span>
+            <span>Bulletin</span>
+          </button>
+          <button class="nav-link" data-tab="tab-solutions">
+            <span class="nav-icon">🌿</span>
+            <span>Solutions</span>
+          </button>
         </nav>
 
         <!-- Right Header Action Controls -->
@@ -78,6 +88,11 @@
           <button class="icon-action-btn notif-btn" id="btnNotificationCenter" title="Advisories &amp; Alerts">
             <span class="btn-icon">🔔</span>
             <span class="notif-count-pill" id="headerNotifBadge">0</span>
+          </button>
+
+          <!-- Citizen Theme / Appearance Customizer Button -->
+          <button class="icon-action-btn" id="btnOpenThemeModal" title="Appearance &amp; Themes">
+            <span class="btn-icon">🎨</span>
           </button>
 
           <!-- Citizen Profile / Login -->
@@ -480,13 +495,14 @@
             </div>
             <div class="map-action-btns">
               <button class="btn btn-sm btn-outline" id="btnMapLocateMe" title="Locate my position">🎯 Locate</button>
+              <button class="btn btn-sm btn-outline" id="btnMapFullscreen" title="Toggle Fullscreen" onclick="window.MumbAIR.MAP.toggleFullscreen()">⛶ Fullscreen</button>
               <button class="btn btn-sm btn-outline" id="btnMapReset" title="Reset Mumbai view">🔄 Reset</button>
             </div>
           </div>
         </div>
 
         <!-- The Map Canvas Container with Explicit Sizing -->
-        <div class="map-canvas-wrapper">
+        <div class="map-canvas-wrapper" id="mapCanvasWrapper">
           <div id="leafletMap"></div>
 
           <!-- Floating Map Legend -->
@@ -667,6 +683,7 @@
               </div>
 
               <div style="display:flex; align-items:center; gap:8px;">
+                <button class="btn btn-sm btn-outline" id="btnOpenCitizenReportStudio" onclick="window.MumbAIR.REPORT_STUDIO.openStudio({ type: 'CITIZEN_RECEIPT' })">📑 Report Studio &amp; PDF</button>
                 <span class="form-label" style="margin-bottom:0;">Sort by:</span>
                 <select class="form-select" id="sortReports" style="width:160px; padding:6px 10px; font-size:12.5px;">
                   <option value="SUPPORTED">Most Supported</option>
@@ -678,6 +695,26 @@
 
           <div id="reportsFeedContainer"></div>
         </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 6: CIVIC BULLETIN & BMC INITIATIVES                  -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-bulletin">
+        <div class="section-title-row" style="margin-bottom:16px;">
+          <div>
+            <h2 class="city-title" style="font-size:1.5rem;">📰 Mumbai Environmental Bulletin &amp; BMC Schemes</h2>
+            <p class="view-subtext">Verified civic air quality directives, MPCB circulars, and municipal sustainability initiatives</p>
+          </div>
+        </div>
+        <div id="bulletinFeedContainer"></div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 7: AIR QUALITY ACTIONS & SOLUTIONS                   -->
+      <!-- ======================================================== -->
+      <section class="tab-view" id="tab-solutions">
+        <div id="solutionsContainer"></div>
       </section>
 
     </main>
@@ -698,6 +735,30 @@
         </div>
       </div>
     </footer>
+
+    <!-- Citizen Mobile Bottom Navigation Bar (Visible <= 768px) -->
+    <nav class="citizen-bottom-nav" id="citizenBottomNav">
+      <button class="bottom-nav-item active" data-tab="tab-home" onclick="window.MumbAIR.APP.switchTab('tab-home')">
+        <span class="bottom-icon">📊</span>
+        <span>Home</span>
+      </button>
+      <button class="bottom-nav-item" data-tab="tab-map" onclick="window.MumbAIR.APP.switchTab('tab-map')">
+        <span class="bottom-icon">🗺️</span>
+        <span>Map</span>
+      </button>
+      <button class="bottom-nav-item report-action-item" data-tab="tab-reports" onclick="window.MumbAIR.APP.switchTab('tab-reports'); window.MumbAIR.APP.showReportForm();">
+        <div class="report-action-fab">📸</div>
+        <span class="report-action-label">Report</span>
+      </button>
+      <button class="bottom-nav-item" data-tab="tab-trends" onclick="window.MumbAIR.APP.switchTab('tab-trends')">
+        <span class="bottom-icon">📈</span>
+        <span>Trends</span>
+      </button>
+      <button class="bottom-nav-item" id="btnMobileMoreMenu" onclick="window.MumbAIR.APP.openMobileCitizenMenu()">
+        <span class="bottom-icon">👤</span>
+        <span>Profile</span>
+      </button>
+    </nav>
 
   </div>
 
@@ -849,6 +910,33 @@
 
       <!-- Legacy compatibility hook container for existing references -->
       <div id="authorityWorkspaceContent" style="display:none;"></div>
+
+      <!-- Mobile Off-Canvas Drawer Backdrop -->
+      <div class="mobile-drawer-backdrop hidden" id="opsMobileBackdrop" onclick="window.MumbAIR.OPERATIONS.toggleMobileSidebar(false)"></div>
+
+      <!-- Authority Mobile Bottom Navigation Bar (Visible <= 768px) -->
+      <nav class="ops-bottom-nav" id="opsBottomNav">
+        <button class="bottom-nav-item active" data-ops-module="command" onclick="window.MumbAIR.OPERATIONS.switchModule('command')">
+          <span class="bottom-icon">⚡</span>
+          <span>Command</span>
+        </button>
+        <button class="bottom-nav-item" data-ops-module="inbox" onclick="window.MumbAIR.OPERATIONS.switchModule('inbox')">
+          <span class="bottom-icon">📥</span>
+          <span>Inbox</span>
+        </button>
+        <button class="bottom-nav-item" data-ops-module="ops-map" onclick="window.MumbAIR.OPERATIONS.switchModule('ops-map')">
+          <span class="bottom-icon">🗺️</span>
+          <span>Map</span>
+        </button>
+        <button class="bottom-nav-item" data-ops-module="inspections" onclick="window.MumbAIR.OPERATIONS.switchModule('inspections')">
+          <span class="bottom-icon">🔍</span>
+          <span>Inspect</span>
+        </button>
+        <button class="bottom-nav-item" id="btnMobileOpsMore" onclick="window.MumbAIR.OPERATIONS.toggleMobileSidebar()">
+          <span class="bottom-icon">☰</span>
+          <span>More</span>
+        </button>
+      </nav>
     </div>
 
   </div>
@@ -903,6 +991,42 @@
         <div style="text-align:center; margin-top:14px;">
           <button class="btn-text-sm" id="btnContinueGuest">Continue in Guest Mode</button>
         </div>
+        <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border-subtle);">
+          <div style="font-size:11px; font-weight:700; color:var(--ink-muted); text-transform:uppercase; margin-bottom:8px;">Quick Navigation</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.switchTab('tab-bulletin'); document.getElementById('modalCitizenAuth').classList.add('hidden');">📰 News Bulletin</button>
+            <button class="btn btn-sm btn-outline" onclick="window.MumbAIR.APP.switchTab('tab-solutions'); document.getElementById('modalCitizenAuth').classList.add('hidden');">🌿 Action Center</button>
+            <button class="btn btn-sm btn-outline" onclick="window.MumbAIR.REPORT_STUDIO.openStudio({ type: 'CITIZEN_RECEIPT' }); document.getElementById('modalCitizenAuth').classList.add('hidden');">📑 Report Studio</button>
+            <button class="btn btn-sm btn-outline" onclick="window.MumbAIR.THEME.openThemeModal(); document.getElementById('modalCitizenAuth').classList.add('hidden');">🎨 Appearance</button>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-sm btn-authority" style="width:100%;" onclick="window.MumbAIR.APP.switchToAuthorityPortal(); document.getElementById('modalCitizenAuth').classList.add('hidden');">
+              🔒 Municipal Operations Portal ➔
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Citizen Appearance & Theme Customizer                              -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop hidden" id="modalThemeSelector">
+    <div class="modal-dialog" style="max-width:580px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">🎨 Appearance &amp; Color Theme</h3>
+          <p style="font-size:12px; color:var(--ink-muted); margin-top:2px;">Customize your MumbAIR visual experience. CPCB AQI severity colors remain constant.</p>
+        </div>
+        <button class="modal-close-btn" id="btnCloseThemeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="themeGridContainer"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:1px solid var(--border-subtle);">
+          <button class="btn btn-sm btn-ghost" id="btnResetDefaultTheme">↺ Reset to Mumbai Original</button>
+          <button class="btn btn-sm btn-primary" onclick="window.MumbAIR.THEME.closeThemeModal()">Done</button>
+        </div>
       </div>
     </div>
   </div>
@@ -943,6 +1067,43 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: Comprehensive Report Studio & PDF/CSV Export Engine                -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop hidden" id="modalReportStudio">
+    <div class="modal-dialog report-studio-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">📑 MumbAIR Document &amp; Report Studio</h3>
+          <p style="font-size:12px; color:var(--ink-muted); margin-top:2px;">Generate certified citizen receipts, municipal SLA audits, and city environmental dossiers.</p>
+        </div>
+        <button class="modal-close-btn" onclick="window.MumbAIR.REPORT_STUDIO.closeStudio()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-studio-controls-bar">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label class="form-label" style="margin-bottom:0; font-size:12px;">Report Type:</label>
+            <select class="form-select" id="reportStudioTypeSelect" style="width:250px; font-size:12px; padding:6px 10px;" onchange="window.MumbAIR.REPORT_STUDIO.handleTypeChange(this.value)">
+              <option value="CITY_ENVIRONMENTAL">🌿 City State of the Air Summary</option>
+              <option value="CITIZEN_RECEIPT">🏛️ Citizen Complaint Proof Receipt</option>
+              <option value="WARD_PERFORMANCE">📊 24-Ward Performance &amp; SLA Audit</option>
+              <option value="DEPT_OPERATIONS">🏢 Department Operations Matrix</option>
+              <option value="INSPECTION_AUDIT">🔍 On-Ground Field Inspection Log</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn btn-sm btn-outline" onclick="window.MumbAIR.REPORT_STUDIO.exportCsv()">📥 Download CSV</button>
+            <button class="btn btn-sm btn-primary" onclick="window.MumbAIR.REPORT_STUDIO.printReport()">🖨️ Print / Save as PDF</button>
+          </div>
+        </div>
+
+        <div class="report-preview-scroll-pane">
+          <div id="reportStudioPreview" class="report-studio-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -963,6 +1124,10 @@
   <script src="js/charts.js"></script>
   <script src="js/insights.js"></script>
   <script src="js/reports.js"></script>
+  <script src="js/report-studio.js"></script>
+  <script src="js/civic-bulletin.js"></script>
+  <script src="js/solutions.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/operations.js"></script>
   <script src="js/app.js"></script>
 </body>

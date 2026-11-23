@@ -163,13 +163,20 @@ window.MumbAIR.APP = (function(){
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
     });
 
+    // Update mobile bottom nav
+    document.querySelectorAll('.citizen-bottom-nav .bottom-nav-item').forEach(function(item){
+      item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+    });
+
     // Update active tab panel
     document.querySelectorAll('.citizen-main .tab-view').forEach(function(panel){
       panel.classList.toggle('active', panel.id === tabId);
     });
 
     // Window scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(typeof window.scrollTo === 'function'){
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     // Handle tab-specific lifecycles
     if(tabId === 'tab-map'){
@@ -186,6 +193,14 @@ window.MumbAIR.APP = (function(){
       renderAirQualityTab();
     } else if(tabId === 'tab-reports'){
       renderCivicReportsList();
+    } else if(tabId === 'tab-bulletin'){
+      if(window.MumbAIR.BULLETIN && window.MumbAIR.BULLETIN.render){
+        window.MumbAIR.BULLETIN.render();
+      }
+    } else if(tabId === 'tab-solutions'){
+      if(window.MumbAIR.SOLUTIONS && window.MumbAIR.SOLUTIONS.render){
+        window.MumbAIR.SOLUTIONS.render();
+      }
     }
   }
 
@@ -1288,6 +1303,9 @@ window.MumbAIR.APP = (function(){
      =========================================================================== */
 
   function init(){
+    if(window.MumbAIR.THEME && window.MumbAIR.THEME.init){
+      window.MumbAIR.THEME.init();
+    }
     initEventBindings();
 
     var user = AUTH.getCitizenUser();
@@ -1310,6 +1328,16 @@ window.MumbAIR.APP = (function(){
     var hash = window.location.hash.replace('#', '');
     if(hash === 'authority' || hash.indexOf('authority') === 0){
       switchToAuthorityPortal();
+    } else if(hash === 'report-studio'){
+      switchTab('tab-home');
+      setTimeout(function(){
+        if(window.MumbAIR.REPORT_STUDIO) window.MumbAIR.REPORT_STUDIO.openStudio();
+      }, 300);
+    } else if(hash === 'theme'){
+      switchTab('tab-home');
+      setTimeout(function(){
+        if(window.MumbAIR.THEME) window.MumbAIR.THEME.openThemeModal();
+      }, 300);
     } else if(hash && document.getElementById('tab-' + hash)){
       switchTab('tab-' + hash);
     } else {
@@ -1322,9 +1350,27 @@ window.MumbAIR.APP = (function(){
     }, 10 * 60 * 1000);
   }
 
+  function showReportForm(){
+    var subviewForm = document.getElementById('subviewReportForm');
+    var subviewTracker = document.getElementById('subviewReportTracker');
+    var btnToggle = document.getElementById('btnToggleReportView');
+    if(subviewForm && subviewTracker){
+      subviewForm.classList.remove('hidden');
+      subviewTracker.classList.add('hidden');
+      if(btnToggle) btnToggle.textContent = 'View Incident Feed \u2192';
+    }
+  }
+
+  function openMobileCitizenMenu(){
+    var modal = document.getElementById('modalCitizenAuth');
+    if(modal) modal.classList.remove('hidden');
+  }
+
   return {
     init: init,
     switchTab: switchTab,
+    showReportForm: showReportForm,
+    openMobileCitizenMenu: openMobileCitizenMenu,
     switchToCitizenPortal: switchToCitizenPortal,
     switchToAuthorityPortal: switchToAuthorityPortal,
     selectWard: selectWard,

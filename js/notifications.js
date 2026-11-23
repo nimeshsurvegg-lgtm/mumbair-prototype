@@ -64,7 +64,7 @@ window.MumbAIR.NOTIFICATIONS = (function(){
   function renderBadge(){
     var list = getNotifications();
     var unreadCount = list.filter(function(n){ return !n.read; }).length;
-    var badge = document.getElementById('notifBadgeCount');
+    var badge = document.getElementById('notifBadgeCount') || document.getElementById('headerNotifBadge');
     if(badge){
       badge.textContent = unreadCount;
       badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';

@@ -89,7 +89,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: radial-gradient(circle at 50% -80px, #E0F2FE 0%, #F0FDFA 220px, #F8FAFC 480px, #F1F5F9 100%);
+  background: var(--body-gradient, radial-gradient(circle at 50% -80px, #E0F2FE 0%, #F0FDFA 220px, #F8FAFC 480px, #F1F5F9 100%));
   background-attachment: fixed;
   color: var(--ink-primary);
   line-height: 1.5;
